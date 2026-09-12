@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useProduct, useRelatedProducts, useReviews } from "@/hooks/use-catalog"
+import { useWishlist } from "@/hooks/use-wishlist"
 import { artForCategory, tintForCategory } from "@/lib/category-art"
 import { formatBDT } from "@/lib/utils"
 import { useCartStore } from "@/store/cart-store"
@@ -19,6 +20,7 @@ export default function ProductDetailPage() {
   const { data: related = [] } = useRelatedProducts(product?.category_id, product?.id)
   const { data: reviews = [] } = useReviews(product?.id)
   const addItem = useCartStore((s) => s.addItem)
+  const { ids: wishlistIds, toggle: toggleWishlist } = useWishlist()
 
   const [qty, setQty] = useState(1)
   const [activeImage, setActiveImage] = useState(0)
@@ -239,9 +241,10 @@ export default function ProductDetailPage() {
             </Button>
             <button
               aria-label="Wishlist"
+              onClick={() => toggleWishlist(product.id)}
               className="flex size-[52px] shrink-0 items-center justify-center rounded-2xl border border-border bg-surface text-red-500 hover:bg-surface-2"
             >
-              <Heart className="size-5" />
+              <Heart className="size-5" fill={wishlistIds.has(product.id) ? "currentColor" : "none"} />
             </button>
           </div>
           <Button

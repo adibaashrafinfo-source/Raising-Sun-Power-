@@ -86,6 +86,7 @@ export type OrderItemInsert = {
 
 export type OrderInsert = {
   order_number: string
+  user_id?: string | null
   guest_name: string
   guest_phone: string
   status: OrderStatus
@@ -144,6 +145,42 @@ export type Lead = LeadInsert & {
   admin_notes: string | null
   created_at: string
   updated_at: string
+}
+
+export type ProfileRole = "customer" | "admin"
+
+export type Profile = {
+  id: string
+  full_name: string | null
+  phone: string | null
+  role: ProfileRole
+  created_at: string
+}
+
+export type AddressInsert = {
+  user_id: string
+  label: string | null
+  full_name: string
+  phone: string
+  division: string
+  district: string
+  upazila: string | null
+  address_line: string
+  landmark: string | null
+  is_default: boolean
+}
+
+export type Address = AddressInsert & {
+  id: string
+  created_at: string
+}
+
+export type WishlistItem = {
+  id: string
+  user_id: string
+  product_id: string
+  created_at: string
+  product?: Product
 }
 
 export type ProductSort = "popular" | "price-asc" | "price-desc" | "newest" | "rating"

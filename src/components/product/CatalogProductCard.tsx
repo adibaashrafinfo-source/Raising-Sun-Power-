@@ -5,10 +5,13 @@ import { ProductArt } from "@/components/product/ProductArt"
 import { artForCategory, tintForCategory } from "@/lib/category-art"
 import { cn, formatBDT } from "@/lib/utils"
 import { useCartStore } from "@/store/cart-store"
+import { useWishlist } from "@/hooks/use-wishlist"
 import type { Product } from "@/types/database"
 
 export function CatalogProductCard({ product, view = "grid" }: { product: Product; view?: "grid" | "list" }) {
   const addItem = useCartStore((s) => s.addItem)
+  const { ids: wishlistIds, toggle: toggleWishlist } = useWishlist()
+  const isWishlisted = wishlistIds.has(product.id)
   const image = product.images[0]
   const tint = tintForCategory(product.category?.slug)
   const isOnSale = product.sale_price != null && product.sale_price < product.price
@@ -107,10 +110,18 @@ export function CatalogProductCard({ product, view = "grid" }: { product: Produc
         </span>
         <button
           aria-label="Add to wishlist"
-          onClick={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.preventDefault()
+            toggleWishlist(product.id)
+          }}
           className="absolute right-2.5 top-2.5 flex size-[34px] items-center justify-center rounded-full bg-white/70 backdrop-blur-md transition-transform hover:scale-110 dark:bg-black/30"
         >
-          <Heart className="size-[17px]" stroke="#E23B3B" strokeWidth={1.75} />
+          <Heart
+            className="size-[17px]"
+            stroke="#E23B3B"
+            fill={isWishlisted ? "#E23B3B" : "none"}
+            strokeWidth={1.75}
+          />
         </button>
         {image ? (
           <img src={image} alt={product.name} className="size-full object-cover" />

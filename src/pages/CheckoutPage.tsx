@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { bdDivisions, districtsFor, isInsideDhaka, upazilasFor } from "@/data/bd-geo"
 import { useCreateOrder, useSettings } from "@/hooks/use-checkout"
+import { useAuth } from "@/lib/auth-provider"
 import { generateOrderNumber } from "@/lib/queries/checkout"
 import { type CheckoutFormValues, checkoutSchema } from "@/lib/schemas/checkout"
 import { cn, formatBDT } from "@/lib/utils"
@@ -25,6 +26,7 @@ const PAYMENT_OPTIONS: { value: PaymentMethod; label: string; note: string; badg
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const items = useCartStore((s) => s.items)
   const subtotal = useCartStore((s) => s.subtotal())
   const { data: settings } = useSettings()
@@ -81,6 +83,7 @@ export default function CheckoutPage() {
     const addressLine = [values.area, values.address].filter(Boolean).join(", ")
     const order: OrderInsert = {
       order_number: generateOrderNumber(),
+      user_id: user?.id ?? null,
       guest_name: values.name,
       guest_phone: values.phone,
       status: "pending",

@@ -1,17 +1,53 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
-import { ChevronDown, Heart, Menu, Moon, Search, ShoppingCart, Sun, User } from "lucide-react"
+import { Link, useNavigate } from "react-router-dom"
+import {
+  ChevronDown,
+  Heart,
+  LayoutDashboard,
+  LogOut,
+  MapPin,
+  Menu,
+  Moon,
+  Package,
+  Search,
+  Settings,
+  ShoppingCart,
+  Sun,
+  User,
+} from "lucide-react"
+import { toast } from "sonner"
 
 import { MegaMenu } from "@/components/layout/MegaMenu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useAuth } from "@/lib/auth-provider"
+import { useWishlist } from "@/hooks/use-wishlist"
+import { signOut } from "@/lib/queries/auth"
 import { useTheme } from "@/lib/theme-provider"
 import { useCartStore } from "@/store/cart-store"
 
 export function Header() {
   const { theme, toggleTheme } = useTheme()
+  const { session, profile, isAdmin } = useAuth()
+  const navigate = useNavigate()
   const [megaOpen, setMegaOpen] = useState(false)
   const openCart = useCartStore((s) => s.openCart)
   const openMobileMenu = useCartStore((s) => s.openMobileMenu)
   const cartCount = useCartStore((s) => s.cartCount())
+  const { items: wishlistItems } = useWishlist()
+  const wishlistCount = wishlistItems.length
+
+  const handleSignOut = async () => {
+    await signOut()
+    toast.success("Signed out")
+    navigate("/")
+  }
 
   return (
     <header className="sticky top-0 z-[60] border-b border-border bg-[var(--surface)]/85 backdrop-blur-xl transition-colors">
@@ -104,15 +140,18 @@ export function Header() {
               <Moon className="size-[19px]" stroke="#0B3F94" />
             )}
           </button>
-          <button
+          <Link
+            to="/account/wishlist"
             aria-label="Wishlist"
-            className="relative hidden size-[42px] items-center justify-center rounded-xl border border-border bg-surface-2 text-text transition-colors hover:bg-surface-3 lg:flex"
+            className="relative hidden size-[42px] items-center justify-center rounded-xl border border-border bg-surface-2 text-text no-underline transition-colors hover:bg-surface-3 lg:flex"
           >
             <Heart className="size-[19px]" />
-            <span className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10.5px] font-bold text-white">
-              3
-            </span>
-          </button>
+            {wishlistCount > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10.5px] font-bold text-white">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
           <button
             onClick={openCart}
             aria-label="Cart"
@@ -125,10 +164,57 @@ export function Header() {
               </span>
             )}
           </button>
-          <button className="hidden h-[42px] items-center gap-2 rounded-xl border border-border bg-surface-2 px-4 text-[13.5px] font-semibold text-text transition-colors hover:bg-surface-3 lg:inline-flex">
-            <User className="size-[17px]" />
-            Login
-          </button>
+          {session ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="hidden h-[42px] items-center gap-2 rounded-xl border border-border bg-surface-2 px-4 text-[13.5px] font-semibold text-text outline-none transition-colors hover:bg-surface-3 lg:inline-flex">
+                <User className="size-[17px]" />
+                {profile?.full_name?.split(" ")[0] ?? "Account"}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{profile?.full_name ?? "My Account"}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/account">
+                    <LayoutDashboard className="size-4" /> Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/account/orders">
+                    <Package className="size-4" /> Orders
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/account/wishlist">
+                    <Heart className="size-4" /> Wishlist
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/account/addresses">
+                    <MapPin className="size-4" /> Addresses
+                  </Link>
+                </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin">
+                      <Settings className="size-4" /> Admin Panel
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleSignOut} className="text-red-500 focus:bg-red-500/10">
+                  <LogOut className="size-4" /> Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link
+              to="/login"
+              className="hidden h-[42px] items-center gap-2 rounded-xl border border-border bg-surface-2 px-4 text-[13.5px] font-semibold text-text no-underline transition-colors hover:bg-surface-3 lg:inline-flex"
+            >
+              <User className="size-[17px]" />
+              Login
+            </Link>
+          )}
         </div>
       </div>
     </header>
