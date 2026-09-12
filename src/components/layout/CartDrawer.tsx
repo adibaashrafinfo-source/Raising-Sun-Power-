@@ -76,10 +76,14 @@ export function CartDrawer() {
                   className="flex gap-3 rounded-[14px] border border-border bg-surface p-3"
                 >
                   <span
-                    className="flex size-[60px] shrink-0 items-center justify-center rounded-[11px]"
-                    style={{ background: item.tint }}
+                    className="flex size-[60px] shrink-0 items-center justify-center overflow-hidden rounded-[11px]"
+                    style={item.thumbnail.kind === "art" ? { background: item.thumbnail.tint } : undefined}
                   >
-                    <ProductArt art={item.art} className="size-[38px]" />
+                    {item.thumbnail.kind === "art" ? (
+                      <ProductArt art={item.thumbnail.art} className="size-[38px]" />
+                    ) : (
+                      <img src={item.thumbnail.src} alt={item.name} className="size-full object-cover" />
+                    )}
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="line-clamp-2 text-[13.5px] font-semibold leading-tight text-text">

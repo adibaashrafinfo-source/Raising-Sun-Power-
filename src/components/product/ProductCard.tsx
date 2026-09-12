@@ -71,7 +71,14 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           )}
         </div>
         <button
-          onClick={() => addItem(product)}
+          onClick={() =>
+            addItem({
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              thumbnail: { kind: "art", art: product.art, tint: product.tint },
+            })
+          }
           className={cn(
             "mt-1.5 flex h-11 items-center justify-center gap-2 rounded-[13px] bg-gradient-to-r from-orange-500 to-orange-400 text-sm font-bold text-white shadow-[0_6px_18px_rgba(244,158,9,.32),inset_0_1px_0_rgba(255,255,255,.45)] transition-all",
             "hover:-translate-y-0.5 hover:shadow-[0_12px_26px_rgba(244,158,9,.42),inset_0_1px_0_rgba(255,255,255,.55)] active:translate-y-0 active:scale-[.98]",

@@ -3,13 +3,23 @@ import { persist } from "zustand/middleware"
 
 import type { ProductCardData } from "@/types/product"
 
+export type CartThumbnail =
+  | { kind: "art"; art: ProductCardData["art"]; tint: string }
+  | { kind: "image"; src: string }
+
 export type CartItem = {
   id: string
   name: string
   price: number
   qty: number
-  tint: string
-  art: ProductCardData["art"]
+  thumbnail: CartThumbnail
+}
+
+export type AddToCartInput = {
+  id: string
+  name: string
+  price: number
+  thumbnail: CartThumbnail
 }
 
 type CartState = {
@@ -20,7 +30,7 @@ type CartState = {
   closeCart: () => void
   openMobileMenu: () => void
   closeMobileMenu: () => void
-  addItem: (product: ProductCardData, qty?: number) => void
+  addItem: (product: AddToCartInput, qty?: number) => void
   incrementItem: (id: string) => void
   decrementItem: (id: string) => void
   removeItem: (id: string) => void
@@ -57,8 +67,7 @@ export const useCartStore = create<CartState>()(
                 name: product.name,
                 price: product.price,
                 qty,
-                tint: product.tint,
-                art: product.art,
+                thumbnail: product.thumbnail,
               },
             ],
             isCartOpen: true,

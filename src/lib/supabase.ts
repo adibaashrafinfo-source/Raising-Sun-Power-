@@ -9,4 +9,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
-export const supabase = createClient(supabaseUrl ?? "", supabaseAnonKey ?? "")
+const FETCH_TIMEOUT_MS = 10_000
+
+function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  return fetch(input, { ...init, signal: controller.signal }).finally(() => clearTimeout(timeout))
+}
+
+export const supabase = createClient(supabaseUrl ?? "", supabaseAnonKey ?? "", {
+  global: { fetch: fetchWithTimeout },
+})
