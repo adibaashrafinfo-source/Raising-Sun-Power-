@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div data-card onMouseEnter="{{ onEnter }}" onMouseLeave="{{ onLeave }}" style="position:relative;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s;font-family:Inter,system-ui,sans-serif;" style-hover="transform:translateY(-5px);box-shadow:var(--shadow);">
+  <div data-img onClick="{{ open }}" style="position:relative;aspect-ratio:1/1;background:{{ tint }};display:flex;align-items:center;justify-content:center;cursor:pointer;">
+    <span style="position:absolute;top:12px;left:12px;display:flex;gap:6px;">
+      <sc-if value="{{ hasOff }}" hint-placeholder-val="{{ true }}"><span style="padding:5px 10px;border-radius:999px;background:linear-gradient(100deg,#F49E09,#FFB43D);color:#fff;font-size:11px;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,255,255,.4);">{{ off }}</span></sc-if>
+      <sc-if value="{{ hasBadge }}" hint-placeholder-val="{{ true }}"><span style="padding:5px 10px;border-radius:999px;background:{{ badgeBg }};color:{{ badgeColor }};font-size:11px;font-weight:800;">{{ badge }}</span></sc-if>
+    </span>
+    <button aria-label="Wishlist" onClick="{{ stop }}" style="position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:0;background:var(--glass);backdrop-filter:blur(6px);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;" style-hover="transform:scale(1.1);" style-active="transform:scale(.9);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E23B3B" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9.3A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7 2.7C19 15.7 12 20 12 20Z"/></svg></button>
+    <svg width="118" height="94" viewBox="0 0 120 96" fill="none" style="opacity:.92;">{{ artEl }}</svg>
+    <div data-quick style="position:absolute;inset:auto 0 0 0;padding:12px;background:linear-gradient(0deg,rgba(6,12,24,.55),transparent);opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;pointer-events:none;"><span style="display:block;text-align:center;background:var(--surface);color:var(--blue);font-weight:700;font-size:13px;padding:9px;border-radius:11px;box-shadow:var(--shadow-sm);">Quick view</span></div>
+  </div>
+  <div style="padding:15px 15px 17px;display:flex;flex-direction:column;gap:9px;flex:1;">
+    <div style="display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:#67A70E;"></span><span style="font-size:11.5px;font-weight:600;color:#67A70E;">In Stock</span><span style="font-size:11.5px;color:var(--muted);margin-left:auto;">{{ cat }}</span></div>
+    <div onClick="{{ open }}" style="font-weight:700;font-size:14.5px;line-height:1.3;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px;cursor:pointer;">{{ name }}</div>
+    <div style="display:flex;align-items:center;gap:5px;"><span style="color:#F4D560;font-size:13px;letter-spacing:1px;">★★★★★</span><span style="font-size:12px;color:var(--muted);">{{ rating }} ({{ count }})</span></div>
+    <div style="display:flex;align-items:baseline;gap:8px;margin-top:2px;"><span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;color:#F49E09;font-variant-numeric:tabular-nums;">{{ priceStr }}</span><sc-if value="{{ hasOld }}" hint-placeholder-val="{{ true }}"><span style="font-size:13px;color:var(--muted);text-decoration:line-through;font-variant-numeric:tabular-nums;">{{ old }}</span></sc-if></div>
+    <button onClick="{{ add }}" style="margin-top:6px;height:44px;border:0;border-radius:13px;background:linear-gradient(100deg,#F49E09,#FFB43D);color:#fff;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 18px rgba(244,158,9,.32),inset 0 1px 0 rgba(255,255,255,.45);transition:transform .18s,box-shadow .2s;" style-hover="transform:translateY(-2px);box-shadow:0 12px 26px rgba(244,158,9,.42),inset 0 1px 0 rgba(255,255,255,.55);" style-active="transform:translateY(0) scale(.98);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h2l1.5 11h9.5l1.6-8H6.2"/><circle cx="9" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg> Add to Cart</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:240,&quot;height&quot;:360},&quot;p&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;onAdd&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(e:any,p:any)=&gt;void&quot;},&quot;onOpen&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(e:any)=&gt;void&quot;}}">
+class Component extends DCLogic {
+  renderVals(){
+    const p=this.props.p||{};
+    return {
+      tint:p.tint||"linear-gradient(135deg,#EAF1FB,#C9DCF3)",
+      artEl:p.artEl||null,
+      name:p.name||"", cat:p.cat||"", rating:p.rating||"", count:p.count||"",
+      priceStr:p.priceStr||"", old:p.old||"", off:p.off||"",
+      badge:p.badge||"", badgeBg:p.badgeBg||"linear-gradient(135deg,#217CCA,#0B3F94)", badgeColor:p.badgeColor||"#fff",
+      hasOld:!!p.old, hasOff:!!p.off, hasBadge:!!p.badge,
+      add:(e)=>{ e&&e.stopPropagation&&e.stopPropagation(); this.props.onAdd&&this.props.onAdd(e,p); },
+      open:(e)=>{ this.props.onOpen&&this.props.onOpen(e,p); },
+      stop:(e)=>{ e&&e.stopPropagation&&e.stopPropagation(); },
+      onEnter:(e)=>{ const q=e.currentTarget.querySelector("[data-quick]"); if(q){q.style.opacity="1";q.style.transform="translateY(0)";} },
+      onLeave:(e)=>{ const q=e.currentTarget.querySelector("[data-quick]"); if(q){q.style.opacity="0";q.style.transform="translateY(8px)";} },
+    };
+  }
+}
+</script>
+</body>
+</html>
