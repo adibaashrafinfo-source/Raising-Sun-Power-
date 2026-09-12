@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { bdDivisions, districtsFor, isInsideDhaka, upazilasFor } from "@/data/bd-geo"
 import { useCreateOrder, useSettings } from "@/hooks/use-checkout"
+import { useSeo } from "@/hooks/use-seo"
 import { useAuth } from "@/lib/auth-provider"
 import { generateOrderNumber } from "@/lib/queries/checkout"
 import { type CheckoutFormValues, checkoutSchema } from "@/lib/schemas/checkout"
@@ -25,6 +26,7 @@ const PAYMENT_OPTIONS: { value: PaymentMethod; label: string; note: string; badg
 ]
 
 export default function CheckoutPage() {
+  useSeo({ title: "Checkout", noIndex: true })
   const navigate = useNavigate()
   const { user } = useAuth()
   const items = useCartStore((s) => s.items)
@@ -114,6 +116,7 @@ export default function CheckoutPage() {
     try {
       const created = await createOrder.mutateAsync({ order, items: orderItems })
       sendSms(values.phone, `Thanks ${values.name}! Your RSP order ${created.order_number} is confirmed.`)
+      toast.success(`Order ${created.order_number} placed!`)
       useCartStore.setState({ items: [] })
       navigate(`/order-confirmation/${created.id}`, {
         state: {

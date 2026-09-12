@@ -1,4 +1,5 @@
 import { bestSellers, newArrivals } from "@/data/home-content"
+import { useSeo } from "@/hooks/use-seo"
 import { BrandsStrip } from "@/pages/home/BrandsStrip"
 import { CategoryGrid } from "@/pages/home/CategoryGrid"
 import { CtaBand } from "@/pages/home/CtaBand"
@@ -12,6 +13,12 @@ import { TrustChips } from "@/pages/home/TrustChips"
 import { WhyChooseUs } from "@/pages/home/WhyChooseUs"
 
 export default function Home() {
+  useSeo({
+    title: "Solar & Electrical Products in Bangladesh",
+    description:
+      "Genuine solar panels, inverters, batteries, MCB & MCCB and complete power solutions — delivered nationwide with COD, bKash & Nagad.",
+  })
+
   return (
     <main>
       <Hero />

@@ -7,10 +7,12 @@ import { AuthCard } from "@/components/auth/AuthCard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useSeo } from "@/hooks/use-seo"
 import { signIn } from "@/lib/queries/auth"
 import { type LoginFormValues, loginSchema } from "@/lib/schemas/auth"
 
 export default function LoginPage() {
+  useSeo({ title: "Sign In" })
   const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: string } | null)?.from ?? "/account"

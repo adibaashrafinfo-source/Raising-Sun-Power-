@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useProduct, useRelatedProducts, useReviews } from "@/hooks/use-catalog"
+import { useSeo } from "@/hooks/use-seo"
 import { useWishlist } from "@/hooks/use-wishlist"
 import { artForCategory, tintForCategory } from "@/lib/category-art"
 import { formatBDT } from "@/lib/utils"
@@ -21,6 +22,11 @@ export default function ProductDetailPage() {
   const { data: reviews = [] } = useReviews(product?.id)
   const addItem = useCartStore((s) => s.addItem)
   const { ids: wishlistIds, toggle: toggleWishlist } = useWishlist()
+
+  useSeo({
+    title: product?.name ?? "Product",
+    description: product?.description ?? `Buy ${product?.name ?? "genuine solar & electrical products"} in Bangladesh with nationwide delivery, COD, bKash & Nagad.`,
+  })
 
   const [qty, setQty] = useState(1)
   const [activeImage, setActiveImage] = useState(0)
@@ -94,6 +100,31 @@ export default function ProductDetailPage() {
     ? { kind: "image" as const, src: images[0] }
     : { kind: "art" as const, art, tint }
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description ?? undefined,
+    sku: product.sku ?? undefined,
+    brand: product.brand ? { "@type": "Brand", name: product.brand.name } : undefined,
+    image: images.length ? images : undefined,
+    aggregateRating:
+      product.rating_count > 0
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: product.rating_avg,
+            reviewCount: product.rating_count,
+          }
+        : undefined,
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "BDT",
+      price: displayPrice,
+      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+    },
+  }
+
   const handleAdd = () => {
     addItem({ id: product.id, name: product.name, price: displayPrice, thumbnail }, qty)
   }
@@ -107,6 +138,7 @@ export default function ProductDetailPage() {
 
   return (
     <main className="mx-auto max-w-[1280px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <div className="mb-3.5 flex items-center gap-2 text-[13px] text-muted">
         <Link to="/" className="text-muted no-underline hover:text-blue">
           Home

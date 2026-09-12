@@ -4,10 +4,12 @@ import { Link, useLocation, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useOrder, useOrderItems } from "@/hooks/use-checkout"
+import { useSeo } from "@/hooks/use-seo"
 import { formatBDT } from "@/lib/utils"
 import type { Order, OrderItem } from "@/types/database"
 
 export default function OrderConfirmationPage() {
+  useSeo({ title: "Order Confirmed", noIndex: true })
   const { orderId } = useParams<{ orderId: string }>()
   const location = useLocation()
   const navState = location.state as { order?: Order; items?: OrderItem[] } | null

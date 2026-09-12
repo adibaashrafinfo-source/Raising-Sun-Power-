@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
 
+import { useSeo } from "@/hooks/use-seo"
 import { useAuth } from "@/lib/auth-provider"
 import { signOut } from "@/lib/queries/auth"
 import { cn } from "@/lib/utils"
@@ -32,6 +33,7 @@ const links = [
 ]
 
 export function AdminLayout() {
+  useSeo({ title: "Admin", noIndex: true })
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const { profile } = useAuth()

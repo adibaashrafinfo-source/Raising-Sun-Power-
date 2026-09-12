@@ -2,9 +2,11 @@ import { Check, MessageCircle } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
+import { useSeo } from "@/hooks/use-seo"
 import type { Lead } from "@/types/database"
 
 export default function QuotationReceivedPage() {
+  useSeo({ title: "Quotation Request Received", noIndex: true })
   const location = useLocation()
   const lead = (location.state as { lead?: Lead } | null)?.lead
 

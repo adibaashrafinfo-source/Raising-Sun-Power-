@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { defaultAppliances } from "@/data/calculator-appliances"
+import { useSeo } from "@/hooks/use-seo"
 import { calculateSolarSystem, sumApplianceLoad } from "@/lib/solar-calculator"
 import { cn } from "@/lib/utils"
 
@@ -18,6 +19,11 @@ const BATTERY_TYPES: { value: BatteryType; label: string }[] = [
 ]
 
 export default function SolarCalculatorPage() {
+  useSeo({
+    title: "Solar Calculator",
+    description:
+      "Free solar sizing calculator — get an instant estimate of the panel, inverter and battery you need for your home or business in Bangladesh.",
+  })
   const navigate = useNavigate()
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [mode, setMode] = useState<Mode>("appliances")

@@ -11,12 +11,17 @@ import { Label } from "@/components/ui/label"
 import { budgetOptions, roofOptions, timelineOptions } from "@/data/calculator-appliances"
 import { bdDivisions, districtsFor } from "@/data/bd-geo"
 import { useCreateLead } from "@/hooks/use-leads"
+import { useSeo } from "@/hooks/use-seo"
 import { generateRefId } from "@/lib/queries/leads"
 import { type QuotationFormValues, quotationSchema } from "@/lib/schemas/quotation"
 import { cn } from "@/lib/utils"
 import type { LeadInsert } from "@/types/database"
 
 export default function GetQuotationPage() {
+  useSeo({
+    title: "Get a Free Solar Quotation",
+    description: "Tell us about your home or business and our team will prepare a custom solar quote — free, no obligation.",
+  })
   const navigate = useNavigate()
   const location = useLocation()
   const fromCalc = location.state as { load?: number; backupHours?: number; fromCalculator?: boolean } | null
@@ -62,6 +67,7 @@ export default function GetQuotationPage() {
 
     try {
       const created = await createLead.mutateAsync(lead)
+      toast.success("Quotation request submitted!")
       navigate(`/quotation-received/${created.ref_id}`, { state: { lead: created } })
     } catch {
       toast.error("Couldn't submit your request. Please check your connection and try again.")

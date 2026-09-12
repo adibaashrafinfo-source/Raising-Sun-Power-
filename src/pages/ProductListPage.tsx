@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useBrands, useCategories, useProducts } from "@/hooks/use-catalog"
+import { useSeo } from "@/hooks/use-seo"
 import { cn } from "@/lib/utils"
 import type { ProductSort } from "@/types/database"
 
@@ -55,6 +56,13 @@ export default function ProductListPage() {
   const activeCategoryName = categorySlugParam
     ? categories.find((c) => c.slug === categorySlugParam)?.name
     : undefined
+
+  useSeo({
+    title: activeCategoryName ?? "All Products",
+    description: activeCategoryName
+      ? `Shop genuine ${activeCategoryName} in Bangladesh with nationwide delivery, COD, bKash & Nagad.`
+      : "Browse solar panels, inverters, batteries, MCB/MCCB, cables and accessories — genuine brands, nationwide delivery.",
+  })
 
   const chips = useMemo(() => {
     const catChips = categorySlugs.map((slug) => ({

@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
+import { toast } from "sonner"
 
 import type { ProductCardData } from "@/types/product"
 
@@ -48,7 +49,7 @@ export const useCartStore = create<CartState>()(
       closeCart: () => set({ isCartOpen: false }),
       openMobileMenu: () => set({ isMobileMenuOpen: true }),
       closeMobileMenu: () => set({ isMobileMenuOpen: false }),
-      addItem: (product, qty = 1) =>
+      addItem: (product, qty = 1) => {
         set((state) => {
           const existing = state.items.find((i) => i.id === product.id)
           if (existing) {
@@ -72,7 +73,9 @@ export const useCartStore = create<CartState>()(
             ],
             isCartOpen: true,
           }
-        }),
+        })
+        toast.success(`${product.name} added to cart`)
+      },
       incrementItem: (id) =>
         set((state) => ({
           items: state.items.map((i) => (i.id === id ? { ...i, qty: i.qty + 1 } : i)),
@@ -88,6 +91,9 @@ export const useCartStore = create<CartState>()(
       cartCount: () => get().items.reduce((a, i) => a + i.qty, 0),
       subtotal: () => get().items.reduce((a, i) => a + i.qty * i.price, 0),
     }),
-    { name: "rsp-cart" },
+    {
+      name: "rsp-cart",
+      partialize: (state) => ({ items: state.items }),
+    },
   ),
 )

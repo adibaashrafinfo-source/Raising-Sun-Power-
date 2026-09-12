@@ -64,7 +64,7 @@ export function Header() {
           <span className="flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)]">
             <img src="/logo.jpg" alt="RSP" className="size-full object-cover" />
           </span>
-          <span className="flex flex-col leading-tight">
+          <span className="hidden flex-col leading-tight sm:flex">
             <span className="font-heading text-base font-extrabold tracking-tight text-text">
               Rising Sun Power
             </span>

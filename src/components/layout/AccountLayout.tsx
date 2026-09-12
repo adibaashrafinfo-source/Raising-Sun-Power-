@@ -1,6 +1,7 @@
 import { Heart, LayoutDashboard, MapPin, Package, User } from "lucide-react"
 import { NavLink, Outlet } from "react-router-dom"
 
+import { useSeo } from "@/hooks/use-seo"
 import { cn } from "@/lib/utils"
 
 const links = [
@@ -12,6 +13,8 @@ const links = [
 ]
 
 export function AccountLayout() {
+  useSeo({ title: "My Account", noIndex: true })
+
   return (
     <main className="mx-auto max-w-[1100px] px-4 pb-16 pt-6 sm:px-6">
       <h1 className="mb-6 font-heading text-2xl font-extrabold tracking-tight text-text">My Account</h1>

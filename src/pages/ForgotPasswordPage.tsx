@@ -9,10 +9,12 @@ import { AuthCard } from "@/components/auth/AuthCard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useSeo } from "@/hooks/use-seo"
 import { requestPasswordReset } from "@/lib/queries/auth"
 import { type ForgotPasswordFormValues, forgotPasswordSchema } from "@/lib/schemas/auth"
 
 export default function ForgotPasswordPage() {
+  useSeo({ title: "Reset Password", noIndex: true })
   const [sent, setSent] = useState(false)
   const {
     register,

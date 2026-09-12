@@ -6,12 +6,14 @@ import { ProductArt } from "@/components/product/ProductArt"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSettings } from "@/hooks/use-checkout"
+import { useSeo } from "@/hooks/use-seo"
 import { fetchCouponByCode } from "@/lib/queries/checkout"
 import { formatBDT } from "@/lib/utils"
 import { useCartStore } from "@/store/cart-store"
 import type { Coupon } from "@/types/database"
 
 export default function CartPage() {
+  useSeo({ title: "Shopping Cart", noIndex: true })
   const navigate = useNavigate()
   const items = useCartStore((s) => s.items)
   const increment = useCartStore((s) => s.incrementItem)
