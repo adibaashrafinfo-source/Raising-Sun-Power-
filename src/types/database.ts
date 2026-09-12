@@ -50,6 +50,75 @@ export type Review = {
   created_at: string
 }
 
+export type Settings = {
+  id: number
+  delivery_charge_inside_dhaka: number
+  delivery_charge_outside_dhaka: number
+  free_delivery_threshold: number
+  cod_enabled: boolean
+  bkash_enabled: boolean
+  nagad_enabled: boolean
+  support_phone: string
+}
+
+export type Coupon = {
+  id: string
+  code: string
+  discount_type: "percent" | "flat"
+  discount_value: number
+  usage_limit: number | null
+  used_count: number
+  expires_at: string | null
+  active: boolean
+}
+
+export type PaymentMethod = "cod" | "bkash" | "nagad"
+export type DeliveryMethod = "courier" | "pickup"
+export type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled"
+
+export type OrderItemInsert = {
+  product_id: string | null
+  product_name: string
+  unit_price: number
+  qty: number
+  line_total: number
+}
+
+export type OrderInsert = {
+  order_number: string
+  guest_name: string
+  guest_phone: string
+  status: OrderStatus
+  payment_method: PaymentMethod
+  payment_reference: string | null
+  payment_sender_number: string | null
+  division: string
+  district: string
+  upazila: string | null
+  address_line: string
+  landmark: string | null
+  delivery_method: DeliveryMethod
+  subtotal: number
+  delivery_charge: number
+  discount: number
+  coupon_id: string | null
+  total: number
+  notes: string | null
+}
+
+export type Order = OrderInsert & {
+  id: string
+  user_id: string | null
+  courier_status: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type OrderItem = OrderItemInsert & {
+  id: string
+  order_id: string
+}
+
 export type ProductSort = "popular" | "price-asc" | "price-desc" | "newest" | "rating"
 
 export type ProductFilters = {
