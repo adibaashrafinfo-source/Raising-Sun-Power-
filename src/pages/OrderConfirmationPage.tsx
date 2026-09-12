@@ -1,17 +1,29 @@
 import { Check, MapPin, MessageCircle, Package, RefreshCw } from "lucide-react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useLocation, useParams } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useOrder, useOrderItems } from "@/hooks/use-checkout"
 import { formatBDT } from "@/lib/utils"
+import type { Order, OrderItem } from "@/types/database"
 
 export default function OrderConfirmationPage() {
   const { orderId } = useParams<{ orderId: string }>()
-  const { data: order, isLoading, isError, refetch } = useOrder(orderId)
-  const { data: items = [] } = useOrderItems(orderId)
+  const location = useLocation()
+  const navState = location.state as { order?: Order; items?: OrderItem[] } | null
 
-  if (isLoading) {
+  // Guest orders have no user_id, so RLS only lets an admin session read them
+  // back — the state passed at checkout is the only reliable source right
+  // after placing an order. Only fall back to a fetch (e.g. a page refresh)
+  // when that state isn't there; for a guest it will simply come back empty.
+  const shouldFetch = !navState?.order
+  const { data: fetchedOrder, isLoading, isError, refetch } = useOrder(shouldFetch ? orderId : undefined)
+  const { data: fetchedItems = [] } = useOrderItems(shouldFetch ? orderId : undefined)
+
+  const order = navState?.order ?? fetchedOrder
+  const items = navState?.items ?? fetchedItems
+
+  if (shouldFetch && isLoading) {
     return (
       <main className="mx-auto max-w-[760px] px-4 py-10 sm:px-6">
         <Skeleton className="mx-auto h-[200px] w-full max-w-md rounded-3xl" />

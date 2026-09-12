@@ -119,6 +119,33 @@ export type OrderItem = OrderItemInsert & {
   order_id: string
 }
 
+export type LeadSource = "calculator" | "direct"
+export type LeadStatus = "new" | "contacted" | "quoted" | "converted" | "lost"
+
+export type LeadInsert = {
+  ref_id: string
+  name: string
+  phone: string
+  email: string | null
+  division: string
+  district: string
+  load_watt: number | null
+  backup_hours: number | null
+  budget_range: string | null
+  roof_type: string | null
+  timeline: string | null
+  notes: string | null
+  source: LeadSource
+  status: LeadStatus
+}
+
+export type Lead = LeadInsert & {
+  id: string
+  admin_notes: string | null
+  created_at: string
+  updated_at: string
+}
+
 export type ProductSort = "popular" | "price-asc" | "price-desc" | "newest" | "rating"
 
 export type ProductFilters = {

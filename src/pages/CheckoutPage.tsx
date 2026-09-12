@@ -112,7 +112,12 @@ export default function CheckoutPage() {
       const created = await createOrder.mutateAsync({ order, items: orderItems })
       sendSms(values.phone, `Thanks ${values.name}! Your RSP order ${created.order_number} is confirmed.`)
       useCartStore.setState({ items: [] })
-      navigate(`/order-confirmation/${created.id}`)
+      navigate(`/order-confirmation/${created.id}`, {
+        state: {
+          order: created,
+          items: orderItems.map((item, i) => ({ ...item, id: `${created.id}-${i}`, order_id: created.id })),
+        },
+      })
     } catch {
       toast.error("Couldn't place your order. Please check your connection and try again.")
     }

@@ -8,6 +8,9 @@ import ProductDetailPage from "@/pages/ProductDetailPage"
 import CartPage from "@/pages/CartPage"
 import CheckoutPage from "@/pages/CheckoutPage"
 import OrderConfirmationPage from "@/pages/OrderConfirmationPage"
+import SolarCalculatorPage from "@/pages/SolarCalculatorPage"
+import GetQuotationPage from "@/pages/GetQuotationPage"
+import QuotationReceivedPage from "@/pages/QuotationReceivedPage"
 
 export default function App() {
   return (
@@ -20,8 +23,9 @@ export default function App() {
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="order-confirmation/:orderId" element={<OrderConfirmationPage />} />
-        <Route path="solar-calculator" element={<ComingSoon title="Solar Calculator" />} />
-        <Route path="get-quotation" element={<ComingSoon title="Get Quotation" />} />
+        <Route path="solar-calculator" element={<SolarCalculatorPage />} />
+        <Route path="get-quotation" element={<GetQuotationPage />} />
+        <Route path="quotation-received/:refId" element={<QuotationReceivedPage />} />
         <Route path="account" element={<ComingSoon title="My Account" />} />
         <Route path="login" element={<ComingSoon title="Login" />} />
         <Route path="register" element={<ComingSoon title="Register" />} />

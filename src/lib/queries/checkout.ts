@@ -33,19 +33,25 @@ export async function createOrder(
   order: OrderInsert,
   items: OrderItemInsert[],
 ): Promise<Order> {
-  const { data: created, error: orderError } = await supabase
+  // Guest orders have no user_id, so the `orders_owner_select` RLS policy can't
+  // match them — Postgres applies SELECT policies to INSERT...RETURNING too, so
+  // chaining .select().single() here would silently return zero rows even
+  // though the insert succeeded. Generate the id client-side and insert
+  // "fire and forget" instead; the caller already has everything it needs to
+  // render the confirmation without reading the row back.
+  const id = crypto.randomUUID()
+  const now = new Date().toISOString()
+  const { error: orderError } = await supabase
     .from("orders")
-    .insert(order)
-    .select("*")
-    .single()
+    .insert({ ...order, id })
   if (orderError) throw orderError
 
   const { error: itemsError } = await supabase
     .from("order_items")
-    .insert(items.map((item) => ({ ...item, order_id: created.id })))
+    .insert(items.map((item) => ({ ...item, order_id: id })))
   if (itemsError) throw itemsError
 
-  return created
+  return { ...order, id, user_id: null, courier_status: null, created_at: now, updated_at: now }
 }
 
 export async function fetchOrder(orderId: string): Promise<Order | null> {
