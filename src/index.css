@@ -1,0 +1,137 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/700.css";
+@import "@fontsource/plus-jakarta-sans/800.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+
+/* Dark mode is opt-in via [data-theme="dark"] on <html>, toggled + persisted by ThemeProvider. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  /* ---- Rising Sun Power BD brand tokens (from design reference) ---- */
+  --rsp-navy-900: #052c6e;
+  --rsp-blue-700: #0b3f94;
+  --rsp-blue-500: #217cca;
+  --rsp-blue-100: #e3effb;
+  --rsp-orange-500: #f49e09;
+  --rsp-orange-400: #ffb43d;
+  --rsp-gold-400: #f4d560;
+  --rsp-green-600: #2a6b08;
+  --rsp-green-500: #4c9412;
+  --rsp-green-400: #67a70e;
+
+  /* ---- Light mode surfaces ---- */
+  --bg: #f5f8fd;
+  --surface: #ffffff;
+  --surface-2: #eef3fa;
+  --surface-3: #e3effb;
+  --text: #0a1b33;
+  --muted: #566379;
+  --border: #e1e8f2;
+  --blue: #217cca;
+  --blue-strong: #0b3f94;
+  --blue-deep: #052c6e;
+  --shadow-sm: 0 1px 2px rgba(10, 27, 51, 0.06);
+  --shadow: 0 8px 24px rgba(10, 27, 51, 0.1);
+
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1rem;
+  --radius-pill: 999px;
+}
+
+[data-theme="dark"] {
+  --bg: #060c18;
+  --surface: #0e1626;
+  --surface-2: #16203a;
+  --surface-3: #1c2a47;
+  --text: #eaf1fb;
+  --muted: #93a2bc;
+  --border: #233150;
+  --blue: #4b9be6;
+  --blue-strong: #217cca;
+  --blue-deep: #0b3f94;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+@theme inline {
+  --font-heading: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --color-navy-900: var(--rsp-navy-900);
+  --color-blue-700: var(--rsp-blue-700);
+  --color-blue-500: var(--rsp-blue-500);
+  --color-blue-100: var(--rsp-blue-100);
+  --color-orange-500: var(--rsp-orange-500);
+  --color-orange-400: var(--rsp-orange-400);
+  --color-gold-400: var(--rsp-gold-400);
+  --color-green-600: var(--rsp-green-600);
+  --color-green-500: var(--rsp-green-500);
+  --color-green-400: var(--rsp-green-400);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-blue: var(--blue);
+  --color-blue-strong: var(--blue-strong);
+  --color-blue-deep: var(--blue-deep);
+
+  --color-primary: var(--rsp-orange-500);
+  --color-primary-foreground: #1a0f00;
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
+}
+
+@keyframes rsp-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    color-scheme: light;
+  }
+  html[data-theme="dark"] {
+    color-scheme: dark;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
