@@ -1,6 +1,7 @@
+import { lazy, Suspense } from "react"
 import { Route, Routes } from "react-router-dom"
 
-import { RequireAuth } from "@/components/auth/RequireAuth"
+import { RequireAdmin, RequireAuth } from "@/components/auth/RequireAuth"
 import { AccountLayout } from "@/components/layout/AccountLayout"
 import { AppLayout } from "@/components/layout/AppLayout"
 import Home from "@/pages/Home"
@@ -22,6 +23,19 @@ import AccountOrderDetailPage from "@/pages/account/AccountOrderDetailPage"
 import AccountWishlistPage from "@/pages/account/AccountWishlistPage"
 import AccountAddressesPage from "@/pages/account/AccountAddressesPage"
 import AccountProfilePage from "@/pages/account/AccountProfilePage"
+
+const AdminLayout = lazy(() =>
+  import("@/components/layout/AdminLayout").then((m) => ({ default: m.AdminLayout })),
+)
+const AdminDashboardPage = lazy(() => import("@/pages/admin/AdminDashboardPage"))
+const AdminOrdersPage = lazy(() => import("@/pages/admin/AdminOrdersPage"))
+const AdminProductsPage = lazy(() => import("@/pages/admin/AdminProductsPage"))
+const AdminCategoriesPage = lazy(() => import("@/pages/admin/AdminCategoriesPage"))
+const AdminBrandsPage = lazy(() => import("@/pages/admin/AdminBrandsPage"))
+const AdminCustomersPage = lazy(() => import("@/pages/admin/AdminCustomersPage"))
+const AdminCouponsPage = lazy(() => import("@/pages/admin/AdminCouponsPage"))
+const AdminLeadsPage = lazy(() => import("@/pages/admin/AdminLeadsPage"))
+const AdminSettingsPage = lazy(() => import("@/pages/admin/AdminSettingsPage"))
 
 export default function App() {
   return (
@@ -54,6 +68,94 @@ export default function App() {
 
         <Route path="*" element={<ComingSoon title="Page not found" />} />
       </Route>
+
+      <Route element={<RequireAdmin />}>
+        <Route
+          path="admin"
+          element={
+            <Suspense fallback={<AdminFallback />}>
+              <AdminLayout />
+            </Suspense>
+          }
+        >
+          <Route
+            index
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminDashboardPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="orders"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminOrdersPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="products"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminProductsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="categories"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminCategoriesPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="brands"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminBrandsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="customers"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminCustomersPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="coupons"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminCouponsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="leads"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminLeadsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminSettingsPage />
+              </Suspense>
+            }
+          />
+        </Route>
+      </Route>
     </Routes>
   )
+}
+
+function AdminFallback() {
+  return <div className="flex min-h-screen items-center justify-center text-sm text-muted">Loading…</div>
 }
