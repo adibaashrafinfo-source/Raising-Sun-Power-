@@ -674,16 +674,26 @@ begin
 end $$;
 
 -- Tighten the two most sensitive financial tables: only admin can DELETE.
+-- Each create is preceded by its own drop-if-exists so this whole file
+-- stays safe to re-run (e.g. after a partial run was interrupted).
 drop policy if exists "inventory_staff_all" on purchases;
+drop policy if exists "staff_select_purchases" on purchases;
 create policy "staff_select_purchases" on purchases for select using (fn_is_inventory_staff());
+drop policy if exists "staff_insert_purchases" on purchases;
 create policy "staff_insert_purchases" on purchases for insert with check (fn_is_inventory_staff());
+drop policy if exists "staff_update_purchases" on purchases;
 create policy "staff_update_purchases" on purchases for update using (fn_is_inventory_staff());
+drop policy if exists "admin_delete_purchases" on purchases;
 create policy "admin_delete_purchases" on purchases for delete using (fn_is_admin());
 
 drop policy if exists "inventory_staff_all" on expenses;
+drop policy if exists "staff_select_expenses" on expenses;
 create policy "staff_select_expenses" on expenses for select using (fn_is_inventory_staff());
+drop policy if exists "staff_insert_expenses" on expenses;
 create policy "staff_insert_expenses" on expenses for insert with check (fn_is_inventory_staff());
+drop policy if exists "staff_update_expenses" on expenses;
 create policy "staff_update_expenses" on expenses for update using (fn_is_inventory_staff());
+drop policy if exists "admin_delete_expenses" on expenses;
 create policy "admin_delete_expenses" on expenses for delete using (fn_is_admin());
 
 -- ============================================================================
