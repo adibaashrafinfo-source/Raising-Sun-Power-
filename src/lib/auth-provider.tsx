@@ -11,6 +11,7 @@ type AuthState = {
   profile: Profile | null
   isLoading: boolean
   isAdmin: boolean
+  isInventoryStaff: boolean
   refreshProfile: () => Promise<void>
 }
 
@@ -61,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile,
     isLoading,
     isAdmin: profile?.role === "admin",
+    isInventoryStaff: profile?.role === "admin" || profile?.role === "manager" || profile?.role === "staff",
     refreshProfile: async () => {
       if (session?.user) await loadProfile(session.user.id)
     },

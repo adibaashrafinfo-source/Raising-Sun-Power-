@@ -15,6 +15,7 @@ import type {
   Product,
   ProductStock,
   Profile,
+  ProfileRole,
   Purchase,
   PurchaseReturn,
   SalesReturn,
@@ -168,6 +169,7 @@ export async function upsertProduct(product: ProductUpsert): Promise<void> {
 export async function deleteProduct(id: string): Promise<void> {
   const { error } = await supabase.from("products").delete().eq("id", id)
   if (error) throw error
+  await logActivity({ action: "delete", table_name: "products", record_id: id })
 }
 
 export async function uploadProductImage(file: File): Promise<string> {
@@ -342,6 +344,13 @@ export async function adjustStock(input: {
     reason: input.reason,
   })
   if (movementError) throw movementError
+
+  await logActivity({
+    action: "update",
+    table_name: "product_stock",
+    record_id: input.productId,
+    new_data: { location_id: input.locationId, delta: input.delta, reason: input.reason },
+  })
 }
 
 export async function transferStock(input: {
@@ -462,6 +471,73 @@ export async function fetchPurchases(): Promise<Purchase[]> {
   return (data as unknown as Purchase[]) ?? []
 }
 
+// Deleting a purchase has no DB trigger to reverse its stock-IN /
+// supplier-due effects (only creation is automated), so this manually
+// undoes both before removing the row — otherwise stock and supplier dues
+// would silently drift from reality. purchase_items cascade-deletes with
+// the parent row.
+export async function deletePurchase(id: string): Promise<void> {
+  const { data: purchase, error: purchaseFetchError } = await supabase
+    .from("purchases")
+    .select("supplier_id, due_amount, location_id")
+    .eq("id", id)
+    .single()
+  if (purchaseFetchError) throw purchaseFetchError
+
+  const { data: items, error: itemsError } = await supabase
+    .from("purchase_items")
+    .select("product_id, quantity")
+    .eq("purchase_id", id)
+  if (itemsError) throw itemsError
+
+  for (const item of items ?? []) {
+    const { data: stockRow, error: stockFetchError } = await supabase
+      .from("product_stock")
+      .select("quantity")
+      .eq("product_id", item.product_id)
+      .eq("location_id", purchase.location_id)
+      .maybeSingle()
+    if (stockFetchError) throw stockFetchError
+
+    const { error: stockUpdateError } = await supabase
+      .from("product_stock")
+      .update({ quantity: Math.max((stockRow?.quantity ?? 0) - item.quantity, 0) })
+      .eq("product_id", item.product_id)
+      .eq("location_id", purchase.location_id)
+    if (stockUpdateError) throw stockUpdateError
+
+    const { error: movementError } = await supabase.from("stock_movements").insert({
+      product_id: item.product_id,
+      location_id: purchase.location_id,
+      movement_type: "out",
+      quantity: item.quantity,
+      reference_type: "purchase_deleted",
+      reference_id: id,
+    })
+    if (movementError) throw movementError
+  }
+
+  if (purchase.due_amount > 0) {
+    const { data: supplier, error: supplierFetchError } = await supabase
+      .from("suppliers")
+      .select("current_due")
+      .eq("id", purchase.supplier_id)
+      .single()
+    if (supplierFetchError) throw supplierFetchError
+
+    const { error: supplierUpdateError } = await supabase
+      .from("suppliers")
+      .update({ current_due: Math.max(supplier.current_due - purchase.due_amount, 0) })
+      .eq("id", purchase.supplier_id)
+    if (supplierUpdateError) throw supplierUpdateError
+  }
+
+  const { error: deleteError } = await supabase.from("purchases").delete().eq("id", id)
+  if (deleteError) throw deleteError
+
+  await logActivity({ action: "delete", table_name: "purchases", record_id: id, old_data: purchase })
+}
+
 export async function fetchPurchaseItems(purchaseId: string) {
   const { data, error } = await supabase
     .from("purchase_items")
@@ -516,6 +592,8 @@ export async function createPurchase(input: NewPurchaseInput): Promise<Purchase>
     })
     if (itemError) throw itemError
   }
+
+  await logActivity({ action: "insert", table_name: "purchases", record_id: purchase.id, new_data: purchase })
 
   return purchase as unknown as Purchase
 }
@@ -761,6 +839,24 @@ export async function createExpense(input: {
 }) {
   const { error } = await supabase.from("expenses").insert(input)
   if (error) throw error
+  await logActivity({ action: "insert", table_name: "expenses", new_data: input })
+}
+
+// ledger_entries.source_id isn't a foreign key (no cascade), so the matching
+// ledger row is removed explicitly — otherwise a deleted expense would keep
+// showing up in view_ledger_summary / view_monthly_expense_summary forever.
+export async function deleteExpense(id: string): Promise<void> {
+  const { error: ledgerError } = await supabase
+    .from("ledger_entries")
+    .delete()
+    .eq("source_type", "expense")
+    .eq("source_id", id)
+  if (ledgerError) throw ledgerError
+
+  const { error } = await supabase.from("expenses").delete().eq("id", id)
+  if (error) throw error
+
+  await logActivity({ action: "delete", table_name: "expenses", record_id: id })
 }
 
 // ---------- Cash & Bank Accounts ----------
@@ -893,4 +989,41 @@ export async function fetchPurchaseHistoryReport(filters: {
   const { data, error } = await query
   if (error) throw error
   return (data as unknown as Purchase[]) ?? []
+}
+
+// ---------- Staff Management & Activity Log ----------
+export async function updateProfileRole(userId: string, role: ProfileRole): Promise<void> {
+  const { error } = await supabase.from("profiles").update({ role }).eq("id", userId)
+  if (error) throw error
+}
+
+export async function logActivity(input: {
+  action: "insert" | "update" | "delete"
+  table_name: string
+  record_id?: string
+  old_data?: Record<string, unknown>
+  new_data?: Record<string, unknown>
+}): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  // Best-effort — never block the user's actual action on logging failing.
+  await supabase.from("activity_logs").insert({
+    user_id: user?.id ?? null,
+    action: input.action,
+    table_name: input.table_name,
+    record_id: input.record_id ?? null,
+    old_data: input.old_data ?? null,
+    new_data: input.new_data ?? null,
+  })
+}
+
+export async function fetchActivityLogs(limit = 50) {
+  const { data, error } = await supabase
+    .from("activity_logs")
+    .select("*, user:profiles(id,full_name)")
+    .order("created_at", { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return data ?? []
 }

@@ -17,11 +17,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {
   useAllProductsAdmin,
   useCreatePurchase,
+  useDeletePurchase,
   useLocations,
   usePurchases,
   useRecordSupplierPayment,
   useSuppliers,
 } from "@/hooks/use-admin"
+import { useAuth } from "@/lib/auth-provider"
 import { formatBDT } from "@/lib/utils"
 import type { FinancePaymentMethod, Purchase } from "@/types/database"
 
@@ -31,6 +33,23 @@ export default function AdminPurchasesPage() {
   const { data: purchases = [], isLoading } = usePurchases()
   const [newOpen, setNewOpen] = useState(false)
   const [payingPurchase, setPayingPurchase] = useState<Purchase | null>(null)
+  const { isAdmin } = useAuth()
+  const deletePurchase = useDeletePurchase()
+
+  const handleDelete = async (purchase: Purchase) => {
+    if (
+      !confirm(
+        `Delete purchase "${purchase.invoice_number}"? This reverses its stock and supplier due — can't be undone.`,
+      )
+    )
+      return
+    try {
+      await deletePurchase.mutateAsync(purchase.id)
+      toast.success("Purchase deleted")
+    } catch {
+      toast.error("Couldn't delete this purchase")
+    }
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -74,7 +93,7 @@ export default function AdminPurchasesPage() {
                     <Badge variant={STATUS_VARIANT[p.payment_status]}>{p.payment_status}</Badge>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex justify-end">
+                    <div className="flex justify-end gap-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -84,6 +103,11 @@ export default function AdminPurchasesPage() {
                         <Wallet className="size-3.5" />
                         Record Payment
                       </Button>
+                      {isAdmin && (
+                        <Button variant="outline" size="sm" onClick={() => handleDelete(p)}>
+                          <Trash2 className="size-3.5" />
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>

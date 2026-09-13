@@ -15,6 +15,7 @@ import {
   Receipt,
   RotateCcw,
   Settings,
+  ShieldCheck,
   ShoppingBag,
   Tags,
   Ticket,
@@ -29,32 +30,34 @@ import { signOut } from "@/lib/queries/auth"
 import { cn } from "@/lib/utils"
 
 const links = [
-  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
-  { to: "/admin/products", label: "Products", icon: Package },
-  { to: "/admin/inventory/stock", label: "Stock", icon: Boxes },
-  { to: "/admin/inventory/suppliers", label: "Suppliers", icon: Truck },
-  { to: "/admin/inventory/purchases", label: "Purchases", icon: ClipboardList },
-  { to: "/admin/inventory/purchase-returns", label: "Purchase Returns", icon: RotateCcw },
-  { to: "/admin/inventory/sales-returns", label: "Sales Returns", icon: RotateCcw },
-  { to: "/admin/inventory/reports", label: "Inventory Reports", icon: BarChart3 },
-  { to: "/admin/finance/dashboard", label: "Finance Dashboard", icon: PieChart },
-  { to: "/admin/finance/expenses", label: "Expenses", icon: Receipt },
-  { to: "/admin/finance/accounts", label: "Cash & Bank", icon: Landmark },
-  { to: "/admin/categories", label: "Categories", icon: ListTree },
-  { to: "/admin/brands", label: "Brands", icon: Tags },
-  { to: "/admin/customers", label: "Customers", icon: Users },
-  { to: "/admin/coupons", label: "Coupons", icon: Ticket },
-  { to: "/admin/leads", label: "Leads", icon: Users },
-  { to: "/admin/settings", label: "Settings", icon: Settings },
+  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true, adminOnly: true },
+  { to: "/admin/orders", label: "Orders", icon: ShoppingBag, adminOnly: true },
+  { to: "/admin/products", label: "Products", icon: Package, adminOnly: true },
+  { to: "/admin/inventory/stock", label: "Stock", icon: Boxes, adminOnly: false },
+  { to: "/admin/inventory/suppliers", label: "Suppliers", icon: Truck, adminOnly: false },
+  { to: "/admin/inventory/purchases", label: "Purchases", icon: ClipboardList, adminOnly: false },
+  { to: "/admin/inventory/purchase-returns", label: "Purchase Returns", icon: RotateCcw, adminOnly: false },
+  { to: "/admin/inventory/sales-returns", label: "Sales Returns", icon: RotateCcw, adminOnly: false },
+  { to: "/admin/inventory/reports", label: "Inventory Reports", icon: BarChart3, adminOnly: false },
+  { to: "/admin/finance/dashboard", label: "Finance Dashboard", icon: PieChart, adminOnly: false },
+  { to: "/admin/finance/expenses", label: "Expenses", icon: Receipt, adminOnly: false },
+  { to: "/admin/finance/accounts", label: "Cash & Bank", icon: Landmark, adminOnly: false },
+  { to: "/admin/categories", label: "Categories", icon: ListTree, adminOnly: true },
+  { to: "/admin/brands", label: "Brands", icon: Tags, adminOnly: true },
+  { to: "/admin/customers", label: "Customers", icon: Users, adminOnly: true },
+  { to: "/admin/coupons", label: "Coupons", icon: Ticket, adminOnly: true },
+  { to: "/admin/leads", label: "Leads", icon: Users, adminOnly: true },
+  { to: "/admin/settings", label: "Settings", icon: Settings, adminOnly: true },
+  { to: "/admin/staff", label: "Staff Management", icon: ShieldCheck, adminOnly: true },
 ]
 
 export function AdminLayout() {
   useSeo({ title: "Admin", noIndex: true })
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { profile } = useAuth()
+  const { profile, isAdmin } = useAuth()
   const navigate = useNavigate()
+  const visibleLinks = links.filter((link) => isAdmin || !link.adminOnly)
 
   const handleSignOut = async () => {
     await signOut()
@@ -95,7 +98,7 @@ export function AdminLayout() {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3">
-          {links.map((link) => (
+          {visibleLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}

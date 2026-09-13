@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Plus } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -13,9 +13,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useCreateExpense, useExpenseCategories, useExpenses } from "@/hooks/use-admin"
+import { useCreateExpense, useDeleteExpense, useExpenseCategories, useExpenses } from "@/hooks/use-admin"
+import { useAuth } from "@/lib/auth-provider"
 import { formatBDT } from "@/lib/utils"
-import type { FinancePaymentMethod } from "@/types/database"
+import type { Expense, FinancePaymentMethod } from "@/types/database"
 
 export default function AdminExpensesPage() {
   const { data: categories = [] } = useExpenseCategories()
@@ -28,6 +29,18 @@ export default function AdminExpensesPage() {
     toDate: toDate || undefined,
   })
   const [dialogOpen, setDialogOpen] = useState(false)
+  const { isAdmin } = useAuth()
+  const deleteExpense = useDeleteExpense()
+
+  const handleDelete = async (expense: Expense) => {
+    if (!confirm("Delete this expense? This can't be undone.")) return
+    try {
+      await deleteExpense.mutateAsync(expense.id)
+      toast.success("Expense deleted")
+    } catch {
+      toast.error("Couldn't delete this expense")
+    }
+  }
 
   const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
 
@@ -74,6 +87,7 @@ export default function AdminExpensesPage() {
                 <th className="px-4 py-3 font-semibold">Method</th>
                 <th className="px-4 py-3 font-semibold">Date</th>
                 <th className="px-4 py-3 font-semibold">Amount</th>
+                <th className="px-4 py-3 font-semibold" />
               </tr>
             </thead>
             <tbody>
@@ -84,6 +98,15 @@ export default function AdminExpensesPage() {
                   <td className="px-4 py-3 uppercase text-muted">{e.payment_method}</td>
                   <td className="px-4 py-3 text-muted">{e.expense_date}</td>
                   <td className="px-4 py-3 font-bold tabular-nums text-red-500">{formatBDT(e.amount)}</td>
+                  <td className="px-4 py-3">
+                    {isAdmin && (
+                      <div className="flex justify-end">
+                        <Button variant="outline" size="sm" onClick={() => handleDelete(e)}>
+                          <Trash2 className="size-3.5" />
+                        </Button>
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -92,7 +115,9 @@ export default function AdminExpensesPage() {
                 <td className="px-4 py-3 text-text" colSpan={4}>
                   Total
                 </td>
-                <td className="px-4 py-3 tabular-nums text-red-500">{formatBDT(total)}</td>
+                <td className="px-4 py-3 tabular-nums text-red-500" colSpan={2}>
+                  {formatBDT(total)}
+                </td>
               </tr>
             </tfoot>
           </table>
