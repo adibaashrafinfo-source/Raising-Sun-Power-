@@ -26,7 +26,7 @@ import {
 } from "@/hooks/use-admin"
 import { uploadProductImage } from "@/lib/queries/admin"
 import { type ProductFormValues, productSchema, slugify } from "@/lib/schemas/product"
-import { formatBDT } from "@/lib/utils"
+import { formatBDT, getErrorMessage } from "@/lib/utils"
 import type { Product } from "@/types/database"
 
 export default function AdminProductsPage() {
@@ -220,8 +220,8 @@ function ProductDialog({
     try {
       const url = await uploadProductImage(file)
       setImages((prev) => [...prev, url])
-    } catch {
-      toast.error("Couldn't upload image")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't upload image"))
     } finally {
       setUploading(false)
       e.target.value = ""
