@@ -558,40 +558,31 @@ export type NewPurchaseInput = {
 }
 
 export async function createPurchase(input: NewPurchaseInput): Promise<Purchase> {
-  const subtotal = input.items.reduce((sum, i) => sum + i.quantity * i.unit_cost, 0)
-  const total_amount = subtotal + input.tax_amount
-  const due_amount = Math.max(total_amount - input.paid_amount, 0)
-  const payment_status = due_amount <= 0 ? "paid" : input.paid_amount > 0 ? "partial" : "due"
-
-  const { data: purchase, error: purchaseError } = await supabase
-    .from("purchases")
-    .insert({
-      invoice_number: input.invoice_number,
-      supplier_id: input.supplier_id,
-      location_id: input.location_id,
-      purchase_date: input.purchase_date,
-      subtotal,
-      tax_amount: input.tax_amount,
-      total_amount,
-      paid_amount: input.paid_amount,
-      due_amount,
-      payment_status,
-    })
-    .select(PURCHASE_SELECT)
-    .single()
-  if (purchaseError) throw purchaseError
-
-  // Insert items one at a time (not a single batch insert) so each row's
-  // AFTER INSERT trigger fires per-row and increments stock correctly.
-  for (const item of input.items) {
-    const { error: itemError } = await supabase.from("purchase_items").insert({
-      purchase_id: purchase.id,
+  // fn_create_purchase inserts the purchase and all of its items in a single
+  // implicit transaction — if any item insert fails, everything (including
+  // the purchase row) is rolled back, instead of leaving a half-created
+  // purchase behind like the old sequential-insert approach did.
+  const { data: purchaseId, error: rpcError } = await supabase.rpc("fn_create_purchase", {
+    p_invoice_number: input.invoice_number,
+    p_supplier_id: input.supplier_id,
+    p_location_id: input.location_id,
+    p_purchase_date: input.purchase_date,
+    p_tax_amount: input.tax_amount,
+    p_paid_amount: input.paid_amount,
+    p_items: input.items.map((item) => ({
       product_id: item.product_id,
       quantity: item.quantity,
       unit_cost: item.unit_cost,
-    })
-    if (itemError) throw itemError
-  }
+    })),
+  })
+  if (rpcError) throw rpcError
+
+  const { data: purchase, error: fetchError } = await supabase
+    .from("purchases")
+    .select(PURCHASE_SELECT)
+    .eq("id", purchaseId)
+    .single()
+  if (fetchError) throw fetchError
 
   await logActivity({ action: "insert", table_name: "purchases", record_id: purchase.id, new_data: purchase })
 

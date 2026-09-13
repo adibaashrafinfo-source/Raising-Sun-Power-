@@ -38,6 +38,35 @@
 --      immediately. Phase 5 later replaces this function's body (same
 --      trigger, `create or replace function`) to also write a ledger_entries
 --      row once that table exists — it does not add a second trigger.
+--   8. Full-site review fix: added fn_sync_product_stock_qty /
+--      trg_sync_product_stock_qty (AFTER INSERT/UPDATE/DELETE on
+--      product_stock) so the legacy products.stock_qty column — still used
+--      everywhere on the public storefront (PDP "In Stock" badge, the
+--      "In Stock Only" filter, the quantity stepper) — always equals the sum
+--      of that product's per-location product_stock rows, instead of drifting
+--      out of sync with the new inventory system. Zero storefront code
+--      changes needed. A product with no product_stock rows yet (never
+--      purchased through the inventory module) is left alone, keeping
+--      whatever stock_qty an admin set by hand.
+--   9. Full-site review fix: replaced fn_order_confirmed_stock_decrease with
+--      a version keyed off a new orders.stock_deducted flag and switched its
+--      trigger from AFTER UPDATE to BEFORE UPDATE (required so it can set
+--      new.stock_deducted itself). Previously, flipping an order back to
+--      "pending" and re-confirming it deducted stock a second time, and
+--      cancelling a confirmed order never restored the stock at all. Now
+--      stock is decremented exactly once per order no matter how many times
+--      its status flips, and cancelling a previously-confirmed order restores
+--      the stock (with a matching 'in' stock_movements row) and clears the
+--      flag.
+--   10. Full-site review fix: added fn_create_purchase(...), an atomic RPC
+--      that inserts a purchases row and all of its purchase_items in a
+--      single function call (one implicit transaction), replacing the
+--      frontend's previous approach of inserting the purchase and then each
+--      item separately from JS with no transaction — which could leave a
+--      purchase half-created (some stock already incremented via triggers,
+--      some items missing) if a later item's insert failed. The frontend's
+--      createPurchase() now calls this RPC via supabase.rpc(...) instead of
+--      looping inserts.
 -- ============================================================================
 
 create extension if not exists "pgcrypto";
@@ -164,6 +193,31 @@ create table if not exists product_stock (
 drop trigger if exists trg_product_stock_updated_at on product_stock;
 create trigger trg_product_stock_updated_at
 before update on product_stock for each row execute function fn_set_updated_at();
+
+-- Keeps the storefront's products.stock_qty (used everywhere on the public
+-- site — PDP "In Stock" badge, the "In Stock Only" filter, the quantity
+-- stepper) equal to the real total across all locations, so the storefront
+-- and the inventory system can never drift apart. Only ever touches a
+-- product once it has at least one product_stock row (i.e. after its first
+-- purchase) — a product with none yet keeps whatever stock_qty an admin set
+-- by hand, matching the admin Products page's own fallback behavior.
+create or replace function fn_sync_product_stock_qty()
+returns trigger language plpgsql security definer as $$
+declare
+  v_product_id uuid;
+  v_total int;
+begin
+  v_product_id := coalesce(new.product_id, old.product_id);
+  select coalesce(sum(quantity), 0) into v_total from product_stock where product_id = v_product_id;
+  update products set stock_qty = v_total where id = v_product_id;
+  return coalesce(new, old);
+end;
+$$;
+
+drop trigger if exists trg_sync_product_stock_qty on product_stock;
+create trigger trg_sync_product_stock_qty
+after insert or update or delete on product_stock
+for each row execute function fn_sync_product_stock_qty();
 
 -- Full audit trail of every stock change — never delete rows from this table
 create table if not exists stock_movements (
@@ -350,6 +404,70 @@ drop trigger if exists trg_supplier_payment_after_insert on supplier_payments;
 create trigger trg_supplier_payment_after_insert
 after insert on supplier_payments for each row execute function fn_supplier_payment_after_insert();
 
+-- Creates a purchase and all its line items atomically. The frontend
+-- previously inserted the purchases row and then each purchase_items row
+-- one at a time from JS with no transaction — if an item failed partway
+-- through, the purchase was left half-created (some stock already
+-- incremented, some items missing) while the error toast implied nothing
+-- had happened. A single function call is one implicit transaction: if any
+-- insert inside raises, everything done so far in this call — including the
+-- purchases row and any purchase_items already inserted — is rolled back.
+create or replace function fn_create_purchase(
+  p_invoice_number text,
+  p_supplier_id uuid,
+  p_location_id uuid,
+  p_purchase_date date,
+  p_tax_amount numeric,
+  p_paid_amount numeric,
+  p_items jsonb -- [{ "product_id": uuid, "quantity": int, "unit_cost": numeric }, ...]
+)
+returns uuid
+language plpgsql security definer as $$
+declare
+  v_subtotal numeric := 0;
+  v_total numeric;
+  v_due numeric;
+  v_status text;
+  v_purchase_id uuid;
+  v_item jsonb;
+begin
+  if not fn_is_inventory_staff() then
+    raise exception 'Not authorized';
+  end if;
+
+  select coalesce(sum((item->>'quantity')::int * (item->>'unit_cost')::numeric), 0)
+  into v_subtotal
+  from jsonb_array_elements(p_items) as item;
+
+  v_total := v_subtotal + p_tax_amount;
+  v_due := greatest(v_total - p_paid_amount, 0);
+  v_status := case when v_due <= 0 then 'paid' when p_paid_amount > 0 then 'partial' else 'due' end;
+
+  insert into purchases (
+    invoice_number, supplier_id, location_id, purchase_date,
+    subtotal, tax_amount, total_amount, paid_amount, due_amount, payment_status
+  )
+  values (
+    p_invoice_number, p_supplier_id, p_location_id, p_purchase_date,
+    v_subtotal, p_tax_amount, v_total, p_paid_amount, v_due, v_status
+  )
+  returning id into v_purchase_id;
+
+  for v_item in select * from jsonb_array_elements(p_items)
+  loop
+    insert into purchase_items (purchase_id, product_id, quantity, unit_cost)
+    values (
+      v_purchase_id,
+      (v_item->>'product_id')::uuid,
+      (v_item->>'quantity')::int,
+      (v_item->>'unit_cost')::numeric
+    );
+  end loop;
+
+  return v_purchase_id;
+end;
+$$;
+
 -- ============================================================================
 -- PHASE 4: SALES INTEGRATION & CUSTOMER FINANCE
 -- ------------------------------------------------------------------------
@@ -415,17 +533,26 @@ create table if not exists sales_return_items (
   unit_price numeric(12,2) not null
 );
 
--- Stock-decrease trigger, adapted to the REAL order_items columns (qty, not
--- quantity) and the is_default location (web checkout doesn't ask which shop
--- fulfills the order). Fires only when an order's status transitions to
--- 'confirmed' — never on cart creation / initial 'pending' insert.
+-- stock_deducted tracks whether THIS order has already had its stock taken
+-- out, independent of the order's current status. Without it, an admin
+-- moving a confirmed order back to pending and re-confirming it (e.g. to
+-- fix a mistake) would fire the decrease a second time; cancelling a
+-- confirmed order also had no way to put the stock back at all.
+alter table orders add column if not exists stock_deducted boolean not null default false;
+
+-- Stock-decrease/restore trigger, adapted to the REAL order_items columns
+-- (qty, not quantity) and the is_default location (web checkout doesn't ask
+-- which shop fulfills the order). BEFORE UPDATE (not AFTER) so it can set
+-- new.stock_deducted itself. Decrements exactly once per order regardless of
+-- how many times status flips back and forth, and restores stock if a
+-- deducted order is cancelled.
 create or replace function fn_order_confirmed_stock_decrease()
 returns trigger language plpgsql security definer as $$
 declare
   v_default_location uuid;
   v_item record;
 begin
-  if new.status = 'confirmed' and old.status is distinct from 'confirmed' then
+  if new.status = 'confirmed' and not old.stock_deducted then
     select id into v_default_location from locations where is_default = true limit 1;
     if v_default_location is null then
       raise exception 'No default location set for stock deduction';
@@ -441,6 +568,25 @@ begin
         values (v_item.product_id, v_default_location, 'out', v_item.qty, 'sale', new.id);
       end if;
     end loop;
+    new.stock_deducted := true;
+
+  elsif new.status = 'cancelled' and old.stock_deducted and old.status is distinct from 'cancelled' then
+    select id into v_default_location from locations where is_default = true limit 1;
+    if v_default_location is null then
+      raise exception 'No default location set for stock restoration';
+    end if;
+
+    for v_item in select product_id, qty from order_items where order_id = new.id loop
+      if v_item.product_id is not null then
+        update product_stock
+        set quantity = quantity + v_item.qty, updated_at = now()
+        where product_id = v_item.product_id and location_id = v_default_location;
+
+        insert into stock_movements (product_id, location_id, movement_type, quantity, reference_type, reference_id)
+        values (v_item.product_id, v_default_location, 'in', v_item.qty, 'order_cancelled', new.id);
+      end if;
+    end loop;
+    new.stock_deducted := false;
   end if;
   return new;
 end;
@@ -448,7 +594,7 @@ $$;
 
 drop trigger if exists trg_order_confirmed_stock_decrease on orders;
 create trigger trg_order_confirmed_stock_decrease
-after update on orders for each row execute function fn_order_confirmed_stock_decrease();
+before update on orders for each row execute function fn_order_confirmed_stock_decrease();
 
 -- Pulled forward from Phase 5 (see correction #7 at the top of this file):
 -- Phase 4's own test checklist requires a customer payment to update the
@@ -695,6 +841,21 @@ drop policy if exists "staff_update_expenses" on expenses;
 create policy "staff_update_expenses" on expenses for update using (fn_is_inventory_staff());
 drop policy if exists "admin_delete_expenses" on expenses;
 create policy "admin_delete_expenses" on expenses for delete using (fn_is_admin());
+
+-- ============================================================================
+-- OPTIONAL ONE-TIME BACKFILL: pre-Phase-4 order payment status
+-- ------------------------------------------------------------------------
+-- Orders placed before the paid_amount/due_amount/payment_status columns
+-- existed got backfilled to 0/0/'due' by the ALTER TABLE defaults — showing
+-- an already-delivered order as having its full total still due. This marks
+-- already-delivered orders as fully paid (COD is the only payment method
+-- that reliably implies "paid" once delivered — 'confirmed'/'shipped'
+-- orders are left alone since they may genuinely still be unpaid). Run once,
+-- optionally, only if you have pre-Phase-4 orders you want corrected.
+-- ============================================================================
+-- update orders
+-- set paid_amount = total, due_amount = 0, payment_status = 'paid'
+-- where status = 'delivered' and payment_status = 'due' and paid_amount = 0;
 
 -- ============================================================================
 -- END OF SCHEMA
