@@ -103,6 +103,29 @@ export type Settings = {
   bkash_enabled: boolean
   nagad_enabled: boolean
   support_phone: string
+  facebook_url: string | null
+  instagram_url: string | null
+  youtube_url: string | null
+  linkedin_url: string | null
+  tiktok_url: string | null
+  contact_email: string | null
+  whatsapp_number: string | null
+}
+
+export type ContactMessageStatus = "new" | "read"
+
+export type ContactMessageInsert = {
+  name: string
+  email: string
+  phone: string | null
+  subject: string
+  message: string
+}
+
+export type ContactMessage = ContactMessageInsert & {
+  id: string
+  status: ContactMessageStatus
+  created_at: string
 }
 
 export type RoiTariffSlab = { minUnits: number; maxUnits: number | null; rate: number }

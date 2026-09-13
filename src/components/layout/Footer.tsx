@@ -1,11 +1,28 @@
 import { MapPin } from "lucide-react"
 import { Link } from "react-router-dom"
 
+import { FacebookIcon, InstagramIcon, LinkedinIcon, TiktokIcon, YoutubeIcon } from "@/components/icons/SocialIcons"
+import { useSettings } from "@/hooks/use-checkout"
+
 const shopLinks = ["Solar Panels", "Inverters", "Batteries", "MCB & MCCB", "Cables & Switchgear"]
 const serviceLinks = ["Track order", "Returns", "Warranty", "FAQ"]
-const companyLinks = ["About", "Contact", "Blog", "B2B pricing"]
+const companyLinks = [
+  { label: "About", to: "/about" },
+  { label: "Contact", to: "/contact" },
+]
 
 export function Footer() {
+  const { data: settings } = useSettings()
+  const whatsappNumber = settings?.whatsapp_number || "8801705742208"
+
+  const socialLinks = [
+    { url: settings?.facebook_url, icon: FacebookIcon, label: "Facebook" },
+    { url: settings?.instagram_url, icon: InstagramIcon, label: "Instagram" },
+    { url: settings?.youtube_url, icon: YoutubeIcon, label: "YouTube" },
+    { url: settings?.linkedin_url, icon: LinkedinIcon, label: "LinkedIn" },
+    { url: settings?.tiktok_url, icon: TiktokIcon, label: "TikTok" },
+  ].filter((s): s is typeof s & { url: string } => !!s.url)
+
   return (
     <footer className="bg-[linear-gradient(180deg,#052C6E,#041d49)] text-[#D6E4F7]">
       <div className="mx-auto max-w-[1280px] px-4 pb-6 pt-12 sm:px-6">
@@ -24,15 +41,31 @@ export function Footer() {
               and businesses across Bangladesh.
             </p>
             <a
-              href="https://wa.me/8801705742208"
+              href={`https://wa.me/${whatsappNumber}`}
               className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-bold text-[#053a1d] no-underline"
             >
               +880 1705-742208
             </a>
+            {socialLinks.length > 0 && (
+              <div className="mt-4 flex items-center gap-2.5">
+                {socialLinks.map((s) => (
+                  <a
+                    key={s.label}
+                    href={s.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={s.label}
+                    className="flex size-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-orange-500 hover:text-white"
+                  >
+                    <s.icon className="size-4" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
-          <FooterCol title="Shop" links={shopLinks} />
-          <FooterCol title="Customer service" links={serviceLinks} />
+          <FooterCol title="Shop" links={shopLinks.map((l) => ({ label: l, to: "/products" }))} />
+          <FooterCol title="Customer service" links={serviceLinks.map((l) => ({ label: l, to: "/products" }))} />
           <FooterCol title="Company" links={companyLinks} extra={{ label: "Get Free Quotation", to: "/get-quotation" }} />
 
           <div className="lg:col-span-2">
@@ -75,7 +108,7 @@ function FooterCol({
   extra,
 }: {
   title: string
-  links: string[]
+  links: { label: string; to: string }[]
   extra?: { label: string; to: string }
 }) {
   return (
@@ -83,8 +116,8 @@ function FooterCol({
       <div className="mb-3.5 font-heading text-sm font-bold text-white">{title}</div>
       <div className="flex flex-col gap-2.5">
         {links.map((link) => (
-          <Link key={link} to="/products" className="text-[13.5px] text-[#9DB6DA] no-underline hover:text-orange-400">
-            {link}
+          <Link key={link.label} to={link.to} className="text-[13.5px] text-[#9DB6DA] no-underline hover:text-orange-400">
+            {link.label}
           </Link>
         ))}
         {extra && (

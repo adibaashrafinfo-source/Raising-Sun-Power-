@@ -3,6 +3,7 @@ import type {
   Brand,
   CashBankAccount,
   Category,
+  ContactMessage,
   Coupon,
   Expense,
   ExpenseCategory,
@@ -271,6 +272,26 @@ export async function fetchAllLeads(filters: { status?: LeadStatus }): Promise<L
 
 export async function updateLead(id: string, patch: Partial<Pick<Lead, "status" | "admin_notes">>) {
   const { error } = await supabase.from("leads").update(patch).eq("id", id)
+  if (error) throw error
+}
+
+// ---------- Contact Messages ----------
+export async function fetchContactMessages(): Promise<ContactMessage[]> {
+  const { data, error } = await supabase
+    .from("contact_messages")
+    .select("*")
+    .order("created_at", { ascending: false })
+  if (error) throw error
+  return data ?? []
+}
+
+export async function markContactMessageRead(id: string) {
+  const { error } = await supabase.from("contact_messages").update({ status: "read" }).eq("id", id)
+  if (error) throw error
+}
+
+export async function deleteContactMessage(id: string) {
+  const { error } = await supabase.from("contact_messages").delete().eq("id", id)
   if (error) throw error
 }
 
