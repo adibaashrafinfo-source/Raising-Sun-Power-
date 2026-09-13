@@ -2,10 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import {
   adjustStock,
+  createExpense,
   createPurchase,
   createPurchaseReturn,
   createSalesReturn,
   deleteBrand,
+  deleteCashBankAccount,
   deleteCategory,
   deleteCoupon,
   deleteProduct,
@@ -16,8 +18,11 @@ import {
   fetchAllLeads,
   fetchAllOrders,
   fetchAllProductsAdmin,
+  fetchCashBankAccounts,
   fetchCustomers,
   fetchDashboardStats,
+  fetchExpenseCategories,
+  fetchExpenses,
   fetchLocations,
   fetchOrderPayments,
   fetchProductStock,
@@ -36,6 +41,7 @@ import {
   updateOrderStatus,
   updateSettings,
   upsertBrand,
+  upsertCashBankAccount,
   upsertCategory,
   upsertCoupon,
   upsertProduct,
@@ -336,5 +342,43 @@ export function useCreateSalesReturn() {
       queryClient.invalidateQueries({ queryKey: ["admin-product-stock"] })
       queryClient.invalidateQueries({ queryKey: ["admin-product-stock-totals"] })
     },
+  })
+}
+
+// ---------- Expenses ----------
+export function useExpenseCategories() {
+  return useQuery({ queryKey: ["admin-expense-categories"], queryFn: fetchExpenseCategories })
+}
+
+export function useExpenses(filters: { categoryId?: string; fromDate?: string; toDate?: string }) {
+  return useQuery({ queryKey: ["admin-expenses", filters], queryFn: () => fetchExpenses(filters) })
+}
+
+export function useCreateExpense() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: createExpense,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-expenses"] }),
+  })
+}
+
+// ---------- Cash & Bank Accounts ----------
+export function useCashBankAccounts() {
+  return useQuery({ queryKey: ["admin-cash-bank-accounts"], queryFn: fetchCashBankAccounts })
+}
+
+export function useUpsertCashBankAccount() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: upsertCashBankAccount,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-cash-bank-accounts"] }),
+  })
+}
+
+export function useDeleteCashBankAccount() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: deleteCashBankAccount,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-cash-bank-accounts"] }),
   })
 }

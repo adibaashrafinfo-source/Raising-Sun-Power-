@@ -358,3 +358,45 @@ export type SalesReturnItem = {
   quantity: number
   unit_price: number
 }
+
+// ---------- Inventory & Finance: Expenses / Accounts / Ledger ----------
+export type CashAccountType = "cash" | "bank" | "bkash" | "nagad"
+export type LedgerEntryType = "income" | "expense"
+
+export type ExpenseCategory = {
+  id: string
+  name: string
+}
+
+export type Expense = {
+  id: string
+  category_id: string
+  amount: number
+  expense_date: string
+  description: string | null
+  payment_method: FinancePaymentMethod
+  created_by: string | null
+  created_at: string
+  category?: Pick<ExpenseCategory, "id" | "name">
+}
+
+export type CashBankAccount = {
+  id: string
+  account_name: string
+  account_type: CashAccountType
+  account_number: string | null
+  current_balance: number
+  created_at: string
+}
+
+export type LedgerEntry = {
+  id: string
+  entry_type: LedgerEntryType
+  amount: number
+  source_type: string
+  source_id: string | null
+  description: string | null
+  entry_date: string
+  created_by: string | null
+  created_at: string
+}
