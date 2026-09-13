@@ -37,6 +37,8 @@ const AdminPurchaseReturnsPage = lazy(() => import("@/pages/admin/AdminPurchaseR
 const AdminSalesReturnsPage = lazy(() => import("@/pages/admin/AdminSalesReturnsPage"))
 const AdminExpensesPage = lazy(() => import("@/pages/admin/AdminExpensesPage"))
 const AdminAccountsPage = lazy(() => import("@/pages/admin/AdminAccountsPage"))
+const AdminFinanceDashboardPage = lazy(() => import("@/pages/admin/AdminFinanceDashboardPage"))
+const AdminInventoryReportsPage = lazy(() => import("@/pages/admin/AdminInventoryReportsPage"))
 const AdminCategoriesPage = lazy(() => import("@/pages/admin/AdminCategoriesPage"))
 const AdminBrandsPage = lazy(() => import("@/pages/admin/AdminBrandsPage"))
 const AdminCustomersPage = lazy(() => import("@/pages/admin/AdminCustomersPage"))
@@ -162,6 +164,22 @@ export default function App() {
             element={
               <Suspense fallback={<AdminFallback />}>
                 <AdminAccountsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="finance/dashboard"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminFinanceDashboardPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="inventory/reports"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminInventoryReportsPage />
               </Suspense>
             }
           />

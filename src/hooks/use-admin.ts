@@ -19,18 +19,27 @@ import {
   fetchAllOrders,
   fetchAllProductsAdmin,
   fetchCashBankAccounts,
+  fetchCustomerDueOrders,
+  fetchCustomerDueTotal,
   fetchCustomers,
   fetchDashboardStats,
   fetchExpenseCategories,
   fetchExpenses,
+  fetchLedgerSummary,
   fetchLocations,
+  fetchLowStockAlert,
+  fetchMonthlyExpenseSummary,
   fetchOrderPayments,
   fetchProductStock,
   fetchProductStockTotals,
+  fetchProfitLossMonthly,
+  fetchPurchaseHistoryReport,
   fetchPurchaseItems,
   fetchPurchaseReturns,
   fetchPurchases,
   fetchSalesReturns,
+  fetchStockValuation,
+  fetchSupplierDuesView,
   fetchSupplierPayments,
   fetchSupplierPurchases,
   fetchSuppliers,
@@ -380,5 +389,45 @@ export function useDeleteCashBankAccount() {
   return useMutation({
     mutationFn: deleteCashBankAccount,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-cash-bank-accounts"] }),
+  })
+}
+
+// ---------- Reports & Finance Dashboard ----------
+export function useStockValuation() {
+  return useQuery({ queryKey: ["admin-stock-valuation"], queryFn: fetchStockValuation })
+}
+
+export function useLowStockAlert() {
+  return useQuery({ queryKey: ["admin-low-stock-alert"], queryFn: fetchLowStockAlert })
+}
+
+export function useSupplierDuesView() {
+  return useQuery({ queryKey: ["admin-supplier-dues-view"], queryFn: fetchSupplierDuesView })
+}
+
+export function useMonthlyExpenseSummary() {
+  return useQuery({ queryKey: ["admin-monthly-expense-summary"], queryFn: fetchMonthlyExpenseSummary })
+}
+
+export function useLedgerSummary() {
+  return useQuery({ queryKey: ["admin-ledger-summary"], queryFn: fetchLedgerSummary })
+}
+
+export function useProfitLossMonthly() {
+  return useQuery({ queryKey: ["admin-profit-loss-monthly"], queryFn: fetchProfitLossMonthly })
+}
+
+export function useCustomerDueTotal() {
+  return useQuery({ queryKey: ["admin-customer-due-total"], queryFn: fetchCustomerDueTotal })
+}
+
+export function useCustomerDueOrders() {
+  return useQuery({ queryKey: ["admin-customer-due-orders"], queryFn: fetchCustomerDueOrders })
+}
+
+export function usePurchaseHistoryReport(filters: { fromDate?: string; toDate?: string }) {
+  return useQuery({
+    queryKey: ["admin-purchase-history-report", filters],
+    queryFn: () => fetchPurchaseHistoryReport(filters),
   })
 }

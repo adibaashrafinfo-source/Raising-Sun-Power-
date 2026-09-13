@@ -785,3 +785,112 @@ export async function deleteCashBankAccount(id: string) {
   const { error } = await supabase.from("cash_bank_accounts").delete().eq("id", id)
   if (error) throw error
 }
+
+// ---------- Reports & Finance Dashboard ----------
+export type StockValuationRow = {
+  product_id: string
+  name: string
+  sku: string | null
+  total_quantity: number
+  cost_price: number
+  stock_value: number
+}
+
+export async function fetchStockValuation(): Promise<StockValuationRow[]> {
+  const { data, error } = await supabase
+    .from("view_stock_valuation")
+    .select("*")
+    .order("stock_value", { ascending: false })
+  if (error) throw error
+  return data ?? []
+}
+
+export type LowStockAlertRow = {
+  product_id: string
+  name: string
+  sku: string | null
+  location_id: string
+  location_name: string
+  quantity: number
+  min_stock_level: number
+}
+
+export async function fetchLowStockAlert(): Promise<LowStockAlertRow[]> {
+  const { data, error } = await supabase
+    .from("view_low_stock_alert")
+    .select("*")
+    .order("quantity", { ascending: true })
+  if (error) throw error
+  return data ?? []
+}
+
+export type SupplierDueRow = { id: string; name: string; phone: string | null; current_due: number }
+
+export async function fetchSupplierDuesView(): Promise<SupplierDueRow[]> {
+  const { data, error } = await supabase.from("view_supplier_dues").select("*")
+  if (error) throw error
+  return data ?? []
+}
+
+export type MonthlyExpenseRow = { month: string; category: string; total_amount: number }
+
+export async function fetchMonthlyExpenseSummary(): Promise<MonthlyExpenseRow[]> {
+  const { data, error } = await supabase.from("view_monthly_expense_summary").select("*")
+  if (error) throw error
+  return data ?? []
+}
+
+export type LedgerSummaryRow = { month: string; total_income: number; total_expense: number; net_cash_flow: number }
+
+export async function fetchLedgerSummary(): Promise<LedgerSummaryRow[]> {
+  const { data, error } = await supabase
+    .from("view_ledger_summary")
+    .select("*")
+    .order("month", { ascending: false })
+    .limit(12)
+  if (error) throw error
+  return data ?? []
+}
+
+export type ProfitLossRow = { month: string; revenue: number; cogs: number }
+
+export async function fetchProfitLossMonthly(): Promise<ProfitLossRow[]> {
+  const { data, error } = await supabase
+    .from("view_profit_loss_monthly")
+    .select("*")
+    .order("month", { ascending: false })
+    .limit(12)
+  if (error) throw error
+  return data ?? []
+}
+
+export async function fetchCustomerDueTotal(): Promise<number> {
+  const { data, error } = await supabase.from("orders").select("due_amount").gt("due_amount", 0)
+  if (error) throw error
+  return (data ?? []).reduce((sum, o) => sum + Number(o.due_amount), 0)
+}
+
+export async function fetchCustomerDueOrders(): Promise<Order[]> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .gt("due_amount", 0)
+    .order("due_amount", { ascending: false })
+  if (error) throw error
+  return data ?? []
+}
+
+export async function fetchPurchaseHistoryReport(filters: {
+  fromDate?: string
+  toDate?: string
+}): Promise<Purchase[]> {
+  let query = supabase
+    .from("purchases")
+    .select(PURCHASE_SELECT)
+    .order("purchase_date", { ascending: false })
+  if (filters.fromDate) query = query.gte("purchase_date", filters.fromDate)
+  if (filters.toDate) query = query.lte("purchase_date", filters.toDate)
+  const { data, error } = await query
+  if (error) throw error
+  return (data as unknown as Purchase[]) ?? []
+}
