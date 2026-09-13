@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import {
+  adjustStock,
   deleteBrand,
   deleteCategory,
   deleteCoupon,
@@ -13,6 +14,10 @@ import {
   fetchAllProductsAdmin,
   fetchCustomers,
   fetchDashboardStats,
+  fetchLocations,
+  fetchProductStock,
+  fetchProductStockTotals,
+  transferStock,
   updateLead,
   updateOrderStatus,
   updateSettings,
@@ -150,5 +155,41 @@ export function useUpdateSettings() {
   return useMutation({
     mutationFn: updateSettings,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["settings"] }),
+  })
+}
+
+// ---------- Locations ----------
+export function useLocations() {
+  return useQuery({ queryKey: ["admin-locations"], queryFn: fetchLocations })
+}
+
+// ---------- Stock ----------
+export function useProductStock() {
+  return useQuery({ queryKey: ["admin-product-stock"], queryFn: fetchProductStock })
+}
+
+export function useProductStockTotals() {
+  return useQuery({ queryKey: ["admin-product-stock-totals"], queryFn: fetchProductStockTotals })
+}
+
+export function useAdjustStock() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: adjustStock,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-product-stock"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-product-stock-totals"] })
+    },
+  })
+}
+
+export function useTransferStock() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: transferStock,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-product-stock"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-product-stock-totals"] })
+    },
   })
 }

@@ -5,9 +5,11 @@ import type {
   Coupon,
   Lead,
   LeadStatus,
+  Location,
   Order,
   OrderStatus,
   Product,
+  ProductStock,
   Profile,
   Settings,
 } from "@/types/database"
@@ -128,9 +130,15 @@ export type ProductUpsert = {
   category_id: string | null
   brand_id: string | null
   sku: string | null
+  unit: string
   price: number
   sale_price: number | null
+  cost_price: number
   stock_qty: number
+  reorder_level: number
+  warranty_months: number
+  has_serial_tracking: boolean
+  is_active: boolean
   description: string | null
   specifications: Record<string, string>
   badges: string[]
@@ -260,4 +268,133 @@ export async function updateLead(id: string, patch: Partial<Pick<Lead, "status" 
 export async function updateSettings(patch: Partial<Settings>) {
   const { error } = await supabase.from("settings").update(patch).eq("id", 1)
   if (error) throw error
+}
+
+// ---------- Locations ----------
+export async function fetchLocations(): Promise<Location[]> {
+  const { data, error } = await supabase.from("locations").select("*").order("name")
+  if (error) throw error
+  return data ?? []
+}
+
+// ---------- Stock ----------
+const STOCK_SELECT =
+  "*, location:locations(id,name), product:products(id,name,sku,category:categories(id,name))"
+
+export async function fetchProductStock(): Promise<ProductStock[]> {
+  const { data, error } = await supabase
+    .from("product_stock")
+    .select(STOCK_SELECT)
+    .order("updated_at", { ascending: false })
+  if (error) throw error
+  return (data as unknown as ProductStock[]) ?? []
+}
+
+export async function fetchProductStockTotals(): Promise<Record<string, number>> {
+  const { data, error } = await supabase.from("product_stock").select("product_id, quantity")
+  if (error) throw error
+  const totals: Record<string, number> = {}
+  for (const row of data ?? []) {
+    totals[row.product_id] = (totals[row.product_id] ?? 0) + row.quantity
+  }
+  return totals
+}
+
+export async function adjustStock(input: {
+  productId: string
+  locationId: string
+  delta: number
+  reason: string
+}): Promise<void> {
+  const { data: existing, error: fetchError } = await supabase
+    .from("product_stock")
+    .select("quantity")
+    .eq("product_id", input.productId)
+    .eq("location_id", input.locationId)
+    .maybeSingle()
+  if (fetchError) throw fetchError
+
+  const newQuantity = (existing?.quantity ?? 0) + input.delta
+  if (newQuantity < 0) throw new Error("Adjustment would make stock negative")
+
+  const { error: upsertError } = await supabase
+    .from("product_stock")
+    .upsert(
+      { product_id: input.productId, location_id: input.locationId, quantity: newQuantity },
+      { onConflict: "product_id,location_id" },
+    )
+  if (upsertError) throw upsertError
+
+  const { error: movementError } = await supabase.from("stock_movements").insert({
+    product_id: input.productId,
+    location_id: input.locationId,
+    movement_type: "adjustment",
+    quantity: input.delta,
+    reference_type: "manual_adjustment",
+    reason: input.reason,
+  })
+  if (movementError) throw movementError
+}
+
+export async function transferStock(input: {
+  productId: string
+  fromLocationId: string
+  toLocationId: string
+  quantity: number
+}): Promise<void> {
+  if (input.fromLocationId === input.toLocationId) {
+    throw new Error("Source and destination location must be different")
+  }
+
+  const { data: source, error: sourceError } = await supabase
+    .from("product_stock")
+    .select("quantity")
+    .eq("product_id", input.productId)
+    .eq("location_id", input.fromLocationId)
+    .maybeSingle()
+  if (sourceError) throw sourceError
+  if ((source?.quantity ?? 0) < input.quantity) {
+    throw new Error("Not enough stock at the source location for this transfer")
+  }
+
+  const { data: dest, error: destError } = await supabase
+    .from("product_stock")
+    .select("quantity")
+    .eq("product_id", input.productId)
+    .eq("location_id", input.toLocationId)
+    .maybeSingle()
+  if (destError) throw destError
+
+  const { error: decError } = await supabase
+    .from("product_stock")
+    .update({ quantity: (source?.quantity ?? 0) - input.quantity })
+    .eq("product_id", input.productId)
+    .eq("location_id", input.fromLocationId)
+  if (decError) throw decError
+
+  const { error: incError } = await supabase
+    .from("product_stock")
+    .upsert(
+      { product_id: input.productId, location_id: input.toLocationId, quantity: (dest?.quantity ?? 0) + input.quantity },
+      { onConflict: "product_id,location_id" },
+    )
+  if (incError) throw incError
+
+  const { error: movementError } = await supabase.from("stock_movements").insert([
+    {
+      product_id: input.productId,
+      location_id: input.fromLocationId,
+      movement_type: "transfer_out",
+      quantity: input.quantity,
+      reference_type: "transfer",
+    },
+    {
+      product_id: input.productId,
+      location_id: input.toLocationId,
+      movement_type: "transfer_in",
+      quantity: input.quantity,
+      reference_type: "transfer",
+    },
+  ])
+  if (movementError) throw movementError
 }
