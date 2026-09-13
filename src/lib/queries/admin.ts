@@ -1,8 +1,11 @@
 import { supabase } from "@/lib/supabase"
 import type {
   Brand,
+  CashBankAccount,
   Category,
   Coupon,
+  Expense,
+  ExpenseCategory,
   FinancePaymentMethod,
   Lead,
   LeadStatus,
@@ -723,4 +726,62 @@ export async function createSalesReturn(input: NewSalesReturnInput): Promise<voi
     })
     if (movementError) throw movementError
   }
+}
+
+// ---------- Expenses ----------
+export async function fetchExpenseCategories(): Promise<ExpenseCategory[]> {
+  const { data, error } = await supabase.from("expense_categories").select("*").order("name")
+  if (error) throw error
+  return data ?? []
+}
+
+export async function fetchExpenses(filters: {
+  categoryId?: string
+  fromDate?: string
+  toDate?: string
+}): Promise<Expense[]> {
+  let query = supabase
+    .from("expenses")
+    .select("*, category:expense_categories(id,name)")
+    .order("expense_date", { ascending: false })
+  if (filters.categoryId) query = query.eq("category_id", filters.categoryId)
+  if (filters.fromDate) query = query.gte("expense_date", filters.fromDate)
+  if (filters.toDate) query = query.lte("expense_date", filters.toDate)
+  const { data, error } = await query
+  if (error) throw error
+  return (data as unknown as Expense[]) ?? []
+}
+
+export async function createExpense(input: {
+  category_id: string
+  amount: number
+  expense_date: string
+  description: string | null
+  payment_method: FinancePaymentMethod
+}) {
+  const { error } = await supabase.from("expenses").insert(input)
+  if (error) throw error
+}
+
+// ---------- Cash & Bank Accounts ----------
+export async function fetchCashBankAccounts(): Promise<CashBankAccount[]> {
+  const { data, error } = await supabase.from("cash_bank_accounts").select("*").order("account_name")
+  if (error) throw error
+  return data ?? []
+}
+
+export async function upsertCashBankAccount(account: Partial<CashBankAccount> & { account_name: string }) {
+  if (account.id) {
+    const { id, ...patch } = account
+    const { error } = await supabase.from("cash_bank_accounts").update(patch).eq("id", id)
+    if (error) throw error
+  } else {
+    const { error } = await supabase.from("cash_bank_accounts").insert(account)
+    if (error) throw error
+  }
+}
+
+export async function deleteCashBankAccount(id: string) {
+  const { error } = await supabase.from("cash_bank_accounts").delete().eq("id", id)
+  if (error) throw error
 }

@@ -35,6 +35,8 @@ const AdminSuppliersPage = lazy(() => import("@/pages/admin/AdminSuppliersPage")
 const AdminPurchasesPage = lazy(() => import("@/pages/admin/AdminPurchasesPage"))
 const AdminPurchaseReturnsPage = lazy(() => import("@/pages/admin/AdminPurchaseReturnsPage"))
 const AdminSalesReturnsPage = lazy(() => import("@/pages/admin/AdminSalesReturnsPage"))
+const AdminExpensesPage = lazy(() => import("@/pages/admin/AdminExpensesPage"))
+const AdminAccountsPage = lazy(() => import("@/pages/admin/AdminAccountsPage"))
 const AdminCategoriesPage = lazy(() => import("@/pages/admin/AdminCategoriesPage"))
 const AdminBrandsPage = lazy(() => import("@/pages/admin/AdminBrandsPage"))
 const AdminCustomersPage = lazy(() => import("@/pages/admin/AdminCustomersPage"))
@@ -144,6 +146,22 @@ export default function App() {
             element={
               <Suspense fallback={<AdminFallback />}>
                 <AdminSalesReturnsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="finance/expenses"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminExpensesPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="finance/accounts"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminAccountsPage />
               </Suspense>
             }
           />
