@@ -43,7 +43,7 @@ export default function SolarROICalculatorPage() {
     description:
       "See your solar payback period and lifetime ROI in Bangladesh — enter your monthly bill or units and get an instant investment breakdown.",
   })
-  const { data: settings, isLoading } = useRoiSettings()
+  const { data: settings, isLoading, isError } = useRoiSettings()
 
   const [inputMode, setInputMode] = useState<InputMode>("bill")
   const [monthlyUnits, setMonthlyUnits] = useState("")
@@ -86,7 +86,11 @@ export default function SolarROICalculatorPage() {
         </p>
       </div>
 
-      {isLoading || !settings ? (
+      {isError ? (
+        <div className="rounded-[22px] border border-red-500/30 bg-red-500/5 p-7 text-center text-sm text-muted">
+          Couldn't load the calculator right now. Please refresh the page or try again shortly.
+        </div>
+      ) : isLoading || !settings ? (
         <Skeleton className="h-80 w-full rounded-[22px]" />
       ) : (
         <div className="overflow-hidden rounded-[22px] border border-border bg-surface shadow-[var(--shadow-sm)]">

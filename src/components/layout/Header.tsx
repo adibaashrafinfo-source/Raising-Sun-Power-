@@ -75,7 +75,7 @@ export function Header() {
         </Link>
 
         <div className="hidden flex-1 items-center gap-4 lg:flex">
-          <div className="flex h-11 max-w-[520px] flex-1 items-center rounded-xl border border-border bg-surface-2 transition-shadow focus-within:shadow-[0_0_0_3px_color-mix(in_srgb,var(--blue)_35%,transparent)]">
+          <div className="flex h-11 min-w-0 max-w-[520px] flex-1 items-center rounded-xl border border-border bg-surface-2 transition-shadow focus-within:shadow-[0_0_0_3px_color-mix(in_srgb,var(--blue)_35%,transparent)]">
             <select className="h-full cursor-pointer border-r border-border bg-transparent px-3.5 text-[13px] font-semibold text-muted outline-none">
               <option>All</option>
               <option>Solar</option>
@@ -90,10 +90,10 @@ export function Header() {
               className="flex-1 bg-transparent px-3.5 text-sm text-text outline-none placeholder:text-muted"
             />
           </div>
-          <nav className="flex gap-0.5">
+          <nav className="flex shrink-0 gap-0.5 xl:gap-1">
             <Link
               to="/"
-              className="rounded-[10px] px-3 py-2 text-sm font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
             >
               Home
             </Link>
@@ -103,7 +103,7 @@ export function Header() {
             >
               <Link
                 to="/products"
-                className="inline-flex items-center gap-1 rounded-[10px] px-3 py-2 text-sm font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue"
+                className="inline-flex items-center gap-1 whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
               >
                 Products <ChevronDown className="size-[13px]" />
               </Link>
@@ -111,23 +111,23 @@ export function Header() {
             </div>
             <Link
               to="/solar-calculator"
-              className="rounded-[10px] px-3 py-2 text-sm font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
             >
               Solar Calculator
             </Link>
             <Link
               to="/solar-roi-calculator"
-              className="rounded-[10px] px-3 py-2 text-sm font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
             >
               ROI Calculator
             </Link>
-            <a className="rounded-[10px] px-3 py-2 text-sm font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue">
+            <a className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm">
               Brands
             </a>
-            <a className="rounded-[10px] px-3 py-2 text-sm font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue">
+            <a className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm">
               About
             </a>
-            <a className="rounded-[10px] px-3 py-2 text-sm font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue">
+            <a className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm">
               Contact
             </a>
           </nav>
