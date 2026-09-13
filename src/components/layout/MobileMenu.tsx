@@ -7,6 +7,7 @@ const links = [
   { to: "/", label: "Home" },
   { to: "/products", label: "Products" },
   { to: "/solar-calculator", label: "Solar Calculator" },
+  { to: "/solar-roi-calculator", label: "ROI Calculator" },
   { to: "#", label: "Brands" },
   { to: "#", label: "About" },
   { to: "#", label: "Contact" },

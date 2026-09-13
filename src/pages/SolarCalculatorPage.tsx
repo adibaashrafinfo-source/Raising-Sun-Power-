@@ -372,13 +372,16 @@ export default function SolarCalculatorPage() {
                 Free · No obligation · Response within 24 hours
               </div>
             </div>
-            <div className="mt-4 text-center">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-center">
               <button
                 onClick={() => setStep(1)}
                 className="text-[13.5px] font-semibold text-blue underline"
               >
                 ↺ Start over
               </button>
+              <Link to="/solar-roi-calculator" className="text-[13.5px] font-semibold text-blue no-underline hover:underline">
+                See payback period &amp; ROI →
+              </Link>
             </div>
           </div>
         )}

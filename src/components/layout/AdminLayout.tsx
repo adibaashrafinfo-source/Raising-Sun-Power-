@@ -2,6 +2,7 @@ import { useState } from "react"
 import {
   BarChart3,
   Boxes,
+  Calculator,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -48,6 +49,7 @@ const links = [
   { to: "/admin/coupons", label: "Coupons", icon: Ticket, adminOnly: true },
   { to: "/admin/leads", label: "Leads", icon: Users, adminOnly: true },
   { to: "/admin/settings", label: "Settings", icon: Settings, adminOnly: true },
+  { to: "/admin/roi-calculator", label: "ROI Calculator", icon: Calculator, adminOnly: true },
   { to: "/admin/staff", label: "Staff Management", icon: ShieldCheck, adminOnly: true },
 ]
 
