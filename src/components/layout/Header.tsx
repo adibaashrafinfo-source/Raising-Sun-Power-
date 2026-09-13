@@ -100,7 +100,6 @@ export function Header() {
             <div
               onMouseEnter={() => setMegaOpen(true)}
               onMouseLeave={() => setMegaOpen(false)}
-              className="relative"
             >
               <Link
                 to="/products"
