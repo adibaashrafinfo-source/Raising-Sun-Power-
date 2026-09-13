@@ -5,6 +5,8 @@ import { RequireAdminOnly, RequireAuth, RequireInventoryStaff } from "@/componen
 import { AccountLayout } from "@/components/layout/AccountLayout"
 import { AppLayout } from "@/components/layout/AppLayout"
 import Home from "@/pages/Home"
+import AboutPage from "@/pages/AboutPage"
+import ContactPage from "@/pages/ContactPage"
 import ComingSoon from "@/pages/ComingSoon"
 import ProductListPage from "@/pages/ProductListPage"
 import ProductDetailPage from "@/pages/ProductDetailPage"
@@ -46,6 +48,7 @@ const AdminBrandsPage = lazy(() => import("@/pages/admin/AdminBrandsPage"))
 const AdminCustomersPage = lazy(() => import("@/pages/admin/AdminCustomersPage"))
 const AdminCouponsPage = lazy(() => import("@/pages/admin/AdminCouponsPage"))
 const AdminLeadsPage = lazy(() => import("@/pages/admin/AdminLeadsPage"))
+const AdminContactMessagesPage = lazy(() => import("@/pages/admin/AdminContactMessagesPage"))
 const AdminSettingsPage = lazy(() => import("@/pages/admin/AdminSettingsPage"))
 const AdminRoiSettingsPage = lazy(() => import("@/pages/admin/AdminRoiSettingsPage"))
 const AdminStaffPage = lazy(() => import("@/pages/admin/AdminStaffPage"))
@@ -72,6 +75,8 @@ export default function App() {
         />
         <Route path="get-quotation" element={<GetQuotationPage />} />
         <Route path="quotation-received/:refId" element={<QuotationReceivedPage />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="contact" element={<ContactPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
@@ -161,6 +166,14 @@ export default function App() {
               element={
                 <Suspense fallback={<PageFallback />}>
                   <AdminLeadsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="messages"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminContactMessagesPage />
                 </Suspense>
               }
             />

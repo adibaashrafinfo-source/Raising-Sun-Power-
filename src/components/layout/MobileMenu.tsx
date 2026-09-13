@@ -9,8 +9,8 @@ const links = [
   { to: "/solar-calculator", label: "Solar Calculator" },
   { to: "/solar-roi-calculator", label: "ROI Calculator" },
   { to: "#", label: "Brands" },
-  { to: "#", label: "About" },
-  { to: "#", label: "Contact" },
+  { to: "/about", label: "About" },
+  { to: "/contact", label: "Contact" },
 ]
 
 export function MobileMenu() {

@@ -1,3 +1,4 @@
+import { FloatingWhatsAppButton } from "@/components/layout/FloatingWhatsAppButton"
 import { useProducts } from "@/hooks/use-catalog"
 import { useSeo } from "@/hooks/use-seo"
 import { BrandsStrip } from "@/pages/home/BrandsStrip"
@@ -50,6 +51,7 @@ export default function Home() {
       <Testimonials />
       <CtaBand />
       <Newsletter />
+      <FloatingWhatsAppButton />
     </main>
   )
 }

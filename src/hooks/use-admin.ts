@@ -9,6 +9,7 @@ import {
   deleteBrand,
   deleteCashBankAccount,
   deleteCategory,
+  deleteContactMessage,
   deleteCoupon,
   deleteExpense,
   deleteProduct,
@@ -21,6 +22,7 @@ import {
   fetchAllOrders,
   fetchAllProductsAdmin,
   fetchCashBankAccounts,
+  fetchContactMessages,
   fetchCustomerDueOrders,
   fetchCustomerDueTotal,
   fetchCustomers,
@@ -45,6 +47,7 @@ import {
   fetchSupplierPayments,
   fetchSupplierPurchases,
   fetchSuppliers,
+  markContactMessageRead,
   recordCustomerPayment,
   recordSupplierPayment,
   transferStock,
@@ -188,6 +191,27 @@ export function useUpdateSettings() {
   return useMutation({
     mutationFn: updateSettings,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["settings"] }),
+  })
+}
+
+// ---------- Contact Messages ----------
+export function useContactMessages() {
+  return useQuery({ queryKey: ["admin-contact-messages"], queryFn: fetchContactMessages })
+}
+
+export function useMarkContactMessageRead() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: markContactMessageRead,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-contact-messages"] }),
+  })
+}
+
+export function useDeleteContactMessage() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: deleteContactMessage,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-contact-messages"] }),
   })
 }
 
