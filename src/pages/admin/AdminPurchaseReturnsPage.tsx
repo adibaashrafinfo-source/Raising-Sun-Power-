@@ -11,7 +11,7 @@ import {
   usePurchaseReturns,
   usePurchases,
 } from "@/hooks/use-admin"
-import { formatBDT } from "@/lib/utils"
+import { formatBDT, getErrorMessage } from "@/lib/utils"
 
 export default function AdminPurchaseReturnsPage() {
   const { data: returns = [], isLoading } = usePurchaseReturns()
@@ -59,7 +59,7 @@ export default function AdminPurchaseReturnsPage() {
       setReason("")
       setReturnQty({})
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Couldn't record this return")
+      toast.error(getErrorMessage(err, "Couldn't record this return"))
     }
   }
 

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAllOrders, useCreateSalesReturn, useSalesReturns } from "@/hooks/use-admin"
 import { useOrderItems } from "@/hooks/use-checkout"
-import { formatBDT } from "@/lib/utils"
+import { formatBDT, getErrorMessage } from "@/lib/utils"
 
 const REFUND_VARIANT = { pending: "gold", refunded: "green", rejected: "neutral" } as const
 
@@ -56,7 +56,7 @@ export default function AdminSalesReturnsPage() {
       setReason("")
       setReturnQty({})
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Couldn't record this return")
+      toast.error(getErrorMessage(err, "Couldn't record this return"))
     }
   }
 

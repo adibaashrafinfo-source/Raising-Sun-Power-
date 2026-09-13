@@ -24,7 +24,7 @@ import {
   useSuppliers,
 } from "@/hooks/use-admin"
 import { useAuth } from "@/lib/auth-provider"
-import { formatBDT } from "@/lib/utils"
+import { formatBDT, getErrorMessage } from "@/lib/utils"
 import type { FinancePaymentMethod, Purchase } from "@/types/database"
 
 const STATUS_VARIANT = { due: "neutral", partial: "gold", paid: "green" } as const
@@ -184,7 +184,7 @@ function NewPurchaseDialog({ open, onOpenChange }: { open: boolean; onOpenChange
       setPaidAmount("0")
       setTaxAmount("0")
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Couldn't save this purchase")
+      toast.error(getErrorMessage(err, "Couldn't save this purchase"))
     } finally {
       setSubmitting(false)
     }
@@ -351,7 +351,7 @@ function RecordPaymentDialog({ purchase, onClose }: { purchase: Purchase; onClos
       toast.success("Payment recorded")
       onClose()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Couldn't record payment")
+      toast.error(getErrorMessage(err, "Couldn't record payment"))
     }
   }
 
