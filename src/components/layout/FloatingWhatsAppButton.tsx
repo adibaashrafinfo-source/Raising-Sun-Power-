@@ -16,7 +16,7 @@ export function FloatingWhatsAppButton() {
       aria-label="Chat with us on WhatsApp"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 no-underline sm:bottom-7 sm:right-7"
+      className="fixed bottom-[84px] right-4 z-50 flex items-center gap-2.5 no-underline lg:bottom-7 lg:right-7"
     >
       {hovered && (
         <span className="hidden animate-in fade-in slide-in-from-right-2 rounded-xl bg-[#111b0f] px-3.5 py-2 text-[13px] font-semibold text-white shadow-[var(--shadow)] duration-200 sm:block">
