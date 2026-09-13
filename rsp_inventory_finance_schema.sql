@@ -25,6 +25,19 @@
 --   5. Phase 4's stock-decrease trigger uses the REAL order_items column
 --      names discovered in Phase 0 (qty, not quantity) and the is_default
 --      location instead of a placeholder.
+--   6. Phase 4 adds a BEFORE INSERT trigger that computes orders.due_amount
+--      (= total - paid_amount) and payment_status on every new order, since
+--      the storefront's checkout code (unmodified) never sets these new
+--      columns itself — without this, every new order would insert with
+--      due_amount = 0 despite being fully unpaid.
+--   7. Phase 4 also creates fn_customer_payment_after_insert /
+--      trg_customer_payment_after_insert now (updating orders.paid_amount /
+--      due_amount / payment_status only) instead of waiting for Phase 5,
+--      because Phase 4's own test checklist requires "recording a customer
+--      payment updates orders.paid_amount/due_amount/payment_status" to work
+--      immediately. Phase 5 later replaces this function's body (same
+--      trigger, `create or replace function`) to also write a ledger_entries
+--      row once that table exists — it does not add a second trigger.
 -- ============================================================================
 
 create extension if not exists "pgcrypto";
@@ -351,6 +364,26 @@ alter table orders add column if not exists due_amount numeric(12,2) not null de
 alter table orders add column if not exists payment_status text not null default 'due'
   check (payment_status in ('due','partial','paid'));
 
+-- Keeps due_amount/payment_status correct on every insert without requiring
+-- any change to the existing (unmodified) storefront checkout code, which
+-- never sets these new columns itself.
+create or replace function fn_orders_set_due_before_insert()
+returns trigger language plpgsql as $$
+begin
+  new.due_amount := greatest(new.total - new.paid_amount, 0);
+  new.payment_status := case
+    when new.due_amount <= 0 then 'paid'
+    when new.paid_amount > 0 then 'partial'
+    else 'due'
+  end;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_orders_set_due_before_insert on orders;
+create trigger trg_orders_set_due_before_insert
+before insert on orders for each row execute function fn_orders_set_due_before_insert();
+
 create table if not exists customer_payments (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references orders(id),
@@ -416,6 +449,27 @@ $$;
 drop trigger if exists trg_order_confirmed_stock_decrease on orders;
 create trigger trg_order_confirmed_stock_decrease
 after update on orders for each row execute function fn_order_confirmed_stock_decrease();
+
+-- Pulled forward from Phase 5 (see correction #7 at the top of this file):
+-- Phase 4's own test checklist requires a customer payment to update the
+-- order's paid/due/status immediately. This version only touches `orders`;
+-- Phase 5 replaces the function body (same trigger) to also log a
+-- ledger_entries row once that table exists.
+create or replace function fn_customer_payment_after_insert()
+returns trigger language plpgsql security definer as $$
+begin
+  update orders
+  set paid_amount = paid_amount + new.amount,
+      due_amount = greatest(due_amount - new.amount, 0),
+      payment_status = case when due_amount - new.amount <= 0 then 'paid' else 'partial' end
+  where id = new.order_id;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_customer_payment_after_insert on customer_payments;
+create trigger trg_customer_payment_after_insert
+after insert on customer_payments for each row execute function fn_customer_payment_after_insert();
 
 -- ============================================================================
 -- PHASE 5: FINANCE / ACCOUNTING CORE
@@ -485,7 +539,12 @@ drop trigger if exists trg_supplier_payment_ledger on supplier_payments;
 create trigger trg_supplier_payment_ledger
 after insert on supplier_payments for each row execute function fn_supplier_payment_ledger();
 
-create or replace function fn_customer_payment_ledger()
+-- Replaces the Phase 4 fn_customer_payment_after_insert body (SAME trigger,
+-- trg_customer_payment_after_insert — not a second trigger) to also log a
+-- ledger_entries row, now that the table exists. If Phase 4's trigger was
+-- never created (schema run all at once instead of phase-by-phase), this
+-- creates it fresh.
+create or replace function fn_customer_payment_after_insert()
 returns trigger language plpgsql security definer as $$
 begin
   insert into ledger_entries (entry_type, amount, source_type, source_id, description, entry_date, created_by)
@@ -501,9 +560,9 @@ begin
 end;
 $$;
 
-drop trigger if exists trg_customer_payment_ledger on customer_payments;
-create trigger trg_customer_payment_ledger
-after insert on customer_payments for each row execute function fn_customer_payment_ledger();
+drop trigger if exists trg_customer_payment_after_insert on customer_payments;
+create trigger trg_customer_payment_after_insert
+after insert on customer_payments for each row execute function fn_customer_payment_after_insert();
 
 -- ============================================================================
 -- PHASE 6: REPORTS & DASHBOARD VIEWS
