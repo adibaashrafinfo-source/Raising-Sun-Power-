@@ -858,6 +858,17 @@ create policy "admin_delete_expenses" on expenses for delete using (fn_is_admin(
 -- where status = 'delivered' and payment_status = 'due' and paid_amount = 0;
 
 -- ============================================================================
+-- Tells PostgREST (the API layer Supabase's JS client talks to) to reload
+-- its schema cache immediately. Without this, a newly created/replaced
+-- function or table can 404 with "Could not find the function ... in the
+-- schema cache" from the browser for anywhere from a few seconds up to the
+-- ~10 minute auto-reload interval, even though the SQL ran successfully.
+-- Always run this as the LAST statement any time you add or change a
+-- function, table, or column via the SQL Editor.
+-- ============================================================================
+notify pgrst, 'reload schema';
+
+-- ============================================================================
 -- END OF SCHEMA
 -- Verify each phase in the Supabase SQL Editor sequentially before moving on.
 -- ============================================================================
