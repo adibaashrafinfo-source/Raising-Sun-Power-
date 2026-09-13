@@ -21,6 +21,7 @@ import {
   useAllCategoriesAdmin,
   useAllProductsAdmin,
   useDeleteProduct,
+  useProductStockTotals,
   useUpsertProduct,
 } from "@/hooks/use-admin"
 import { uploadProductImage } from "@/lib/queries/admin"
@@ -33,6 +34,7 @@ export default function AdminProductsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<Product | null>(null)
   const { data: products = [], isLoading } = useAllProductsAdmin()
+  const { data: stockTotals = {} } = useProductStockTotals()
   const deleteProduct = useDeleteProduct()
 
   const filtered = products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
@@ -89,8 +91,10 @@ export default function AdminProductsPage() {
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
                 <th className="px-4 py-3 font-semibold">Name</th>
+                <th className="px-4 py-3 font-semibold">SKU</th>
+                <th className="px-4 py-3 font-semibold">Brand</th>
                 <th className="px-4 py-3 font-semibold">Price</th>
-                <th className="px-4 py-3 font-semibold">Stock</th>
+                <th className="px-4 py-3 font-semibold">Total Stock</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
                 <th className="px-4 py-3 font-semibold" />
               </tr>
@@ -102,8 +106,20 @@ export default function AdminProductsPage() {
                     <div className="font-semibold text-text">{product.name}</div>
                     <div className="text-xs text-muted">{product.category?.name}</div>
                   </td>
+                  <td className="px-4 py-3 text-xs text-muted">{product.sku ?? "—"}</td>
+                  <td className="px-4 py-3 text-xs text-muted">{product.brand?.name ?? "—"}</td>
                   <td className="px-4 py-3 tabular-nums text-text">{formatBDT(product.price)}</td>
-                  <td className="px-4 py-3 tabular-nums text-text">{product.stock_qty}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={
+                        (stockTotals[product.id] ?? product.stock_qty) <= product.reorder_level
+                          ? "font-semibold tabular-nums text-red-500"
+                          : "tabular-nums text-text"
+                      }
+                    >
+                      {stockTotals[product.id] ?? product.stock_qty}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">
                     <Badge
                       variant={product.status === "published" ? "green" : product.status === "draft" ? "gold" : "neutral"}
@@ -167,14 +183,29 @@ function ProductDialog({
           categoryId: product.category_id ?? "",
           brandId: product.brand_id ?? "",
           sku: product.sku ?? "",
+          unit: product.unit,
           price: String(product.price),
           salePrice: product.sale_price != null ? String(product.sale_price) : "",
+          costPrice: String(product.cost_price),
           stockQty: String(product.stock_qty),
+          reorderLevel: String(product.reorder_level),
+          warrantyMonths: String(product.warranty_months),
+          hasSerialTracking: product.has_serial_tracking,
+          isActive: product.is_active,
           description: product.description ?? "",
           badges: product.badges.join(", "),
           status: product.status,
         }
-      : { status: "draft", stockQty: "0" },
+      : {
+          status: "draft",
+          unit: "pcs",
+          stockQty: "0",
+          costPrice: "0",
+          reorderLevel: "5",
+          warrantyMonths: "0",
+          hasSerialTracking: false,
+          isActive: true,
+        },
   })
 
   const name = watch("name")
@@ -209,9 +240,15 @@ function ProductDialog({
         category_id: values.categoryId || null,
         brand_id: values.brandId || null,
         sku: values.sku || null,
+        unit: values.unit,
         price: Number(values.price),
         sale_price: values.salePrice ? Number(values.salePrice) : null,
+        cost_price: Number(values.costPrice),
         stock_qty: Number(values.stockQty),
+        reorder_level: Number(values.reorderLevel),
+        warranty_months: Number(values.warrantyMonths),
+        has_serial_tracking: values.hasSerialTracking,
+        is_active: values.isActive,
         description: values.description || null,
         specifications,
         badges: values.badges ? values.badges.split(",").map((b) => b.trim()).filter(Boolean) : [],
@@ -275,12 +312,35 @@ function ProductDialog({
             <Field label="Sale price (৳)" error={errors.salePrice?.message as string}>
               <Input type="number" step="0.01" {...register("salePrice")} />
             </Field>
+            <Field label="Cost price (৳) *" error={errors.costPrice?.message}>
+              <Input type="number" step="0.01" {...register("costPrice")} />
+            </Field>
+            <Field label="Unit *" error={errors.unit?.message}>
+              <Input placeholder="pcs, box, meter…" {...register("unit")} />
+            </Field>
             <Field label="Stock quantity *" error={errors.stockQty?.message}>
               <Input type="number" {...register("stockQty")} />
+            </Field>
+            <Field label="Reorder level *" error={errors.reorderLevel?.message}>
+              <Input type="number" {...register("reorderLevel")} />
+            </Field>
+            <Field label="Warranty (months) *" error={errors.warrantyMonths?.message}>
+              <Input type="number" {...register("warrantyMonths")} />
             </Field>
             <Field label="Badges (comma separated)">
               <Input placeholder="New, Best Seller" {...register("badges")} />
             </Field>
+          </div>
+
+          <div className="flex flex-wrap gap-5">
+            <label className="flex items-center gap-2 text-sm font-semibold text-text">
+              <input type="checkbox" className="size-4" {...register("hasSerialTracking")} />
+              Track serial numbers
+            </label>
+            <label className="flex items-center gap-2 text-sm font-semibold text-text">
+              <input type="checkbox" className="size-4" {...register("isActive")} />
+              Active in inventory
+            </label>
           </div>
 
           <Field label="Description">

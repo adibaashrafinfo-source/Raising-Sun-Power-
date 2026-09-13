@@ -1,5 +1,6 @@
 import { useState } from "react"
 import {
+  Boxes,
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
@@ -24,6 +25,7 @@ const links = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/inventory/stock", label: "Stock", icon: Boxes },
   { to: "/admin/categories", label: "Categories", icon: ListTree },
   { to: "/admin/brands", label: "Brands", icon: Tags },
   { to: "/admin/customers", label: "Customers", icon: Users },

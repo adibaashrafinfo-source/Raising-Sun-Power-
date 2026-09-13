@@ -37,8 +37,52 @@ export type Product = {
   rating_count: number
   created_at: string
   updated_at: string
+  unit: string
+  cost_price: number
+  warranty_months: number
+  has_serial_tracking: boolean
+  reorder_level: number
+  is_active: boolean
   category?: Pick<Category, "id" | "name" | "slug"> | null
   brand?: Pick<Brand, "id" | "name" | "slug" | "logo_url"> | null
+}
+
+export type Location = {
+  id: string
+  name: string
+  address: string | null
+  phone: string | null
+  is_active: boolean
+  is_default: boolean
+  created_at: string
+}
+
+export type ProductStock = {
+  id: string
+  product_id: string
+  location_id: string
+  quantity: number
+  min_stock_level: number
+  updated_at: string
+  location?: Pick<Location, "id" | "name">
+  product?: Pick<Product, "id" | "name" | "sku"> & {
+    category?: Pick<Category, "id" | "name"> | null
+  }
+}
+
+export type StockMovementType = "in" | "out" | "transfer_in" | "transfer_out" | "adjustment"
+
+export type StockMovement = {
+  id: string
+  product_id: string
+  location_id: string
+  movement_type: StockMovementType
+  quantity: number
+  reference_type: string | null
+  reference_id: string | null
+  reason: string | null
+  created_by: string | null
+  created_at: string
 }
 
 export type Review = {

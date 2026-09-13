@@ -30,6 +30,7 @@ const AdminLayout = lazy(() =>
 const AdminDashboardPage = lazy(() => import("@/pages/admin/AdminDashboardPage"))
 const AdminOrdersPage = lazy(() => import("@/pages/admin/AdminOrdersPage"))
 const AdminProductsPage = lazy(() => import("@/pages/admin/AdminProductsPage"))
+const AdminStockPage = lazy(() => import("@/pages/admin/AdminStockPage"))
 const AdminCategoriesPage = lazy(() => import("@/pages/admin/AdminCategoriesPage"))
 const AdminBrandsPage = lazy(() => import("@/pages/admin/AdminBrandsPage"))
 const AdminCustomersPage = lazy(() => import("@/pages/admin/AdminCustomersPage"))
@@ -99,6 +100,14 @@ export default function App() {
             element={
               <Suspense fallback={<AdminFallback />}>
                 <AdminProductsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="inventory/stock"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminStockPage />
               </Suspense>
             }
           />
