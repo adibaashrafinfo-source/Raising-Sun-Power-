@@ -3,6 +3,7 @@ import type {
   Brand,
   Category,
   Coupon,
+  FinancePaymentMethod,
   Lead,
   LeadStatus,
   Location,
@@ -11,7 +12,10 @@ import type {
   Product,
   ProductStock,
   Profile,
+  Purchase,
+  PurchaseReturn,
   Settings,
+  Supplier,
 } from "@/types/database"
 
 const PRODUCT_SELECT =
@@ -397,4 +401,215 @@ export async function transferStock(input: {
     },
   ])
   if (movementError) throw movementError
+}
+
+// ---------- Suppliers ----------
+export async function fetchSuppliers(): Promise<Supplier[]> {
+  const { data, error } = await supabase.from("suppliers").select("*").order("name")
+  if (error) throw error
+  return data ?? []
+}
+
+export async function upsertSupplier(supplier: Partial<Supplier> & { name: string }) {
+  if (supplier.id) {
+    const { id, ...patch } = supplier
+    const { error } = await supabase.from("suppliers").update(patch).eq("id", id)
+    if (error) throw error
+  } else {
+    const { error } = await supabase.from("suppliers").insert(supplier)
+    if (error) throw error
+  }
+}
+
+export async function deleteSupplier(id: string) {
+  const { error } = await supabase.from("suppliers").delete().eq("id", id)
+  if (error) throw error
+}
+
+export async function fetchSupplierPurchases(supplierId: string): Promise<Purchase[]> {
+  const { data, error } = await supabase
+    .from("purchases")
+    .select("*, location:locations(id,name)")
+    .eq("supplier_id", supplierId)
+    .order("purchase_date", { ascending: false })
+  if (error) throw error
+  return (data as unknown as Purchase[]) ?? []
+}
+
+export async function fetchSupplierPayments(supplierId: string) {
+  const { data, error } = await supabase
+    .from("supplier_payments")
+    .select("*")
+    .eq("supplier_id", supplierId)
+    .order("payment_date", { ascending: false })
+  if (error) throw error
+  return data ?? []
+}
+
+// ---------- Purchases ----------
+const PURCHASE_SELECT = "*, supplier:suppliers(id,name,phone), location:locations(id,name)"
+
+export async function fetchPurchases(): Promise<Purchase[]> {
+  const { data, error } = await supabase
+    .from("purchases")
+    .select(PURCHASE_SELECT)
+    .order("purchase_date", { ascending: false })
+  if (error) throw error
+  return (data as unknown as Purchase[]) ?? []
+}
+
+export async function fetchPurchaseItems(purchaseId: string) {
+  const { data, error } = await supabase
+    .from("purchase_items")
+    .select("*, product:products(id,name,sku)")
+    .eq("purchase_id", purchaseId)
+  if (error) throw error
+  return data ?? []
+}
+
+export type NewPurchaseInput = {
+  invoice_number: string
+  supplier_id: string
+  location_id: string
+  purchase_date: string
+  tax_amount: number
+  paid_amount: number
+  items: { product_id: string; quantity: number; unit_cost: number }[]
+}
+
+export async function createPurchase(input: NewPurchaseInput): Promise<Purchase> {
+  const subtotal = input.items.reduce((sum, i) => sum + i.quantity * i.unit_cost, 0)
+  const total_amount = subtotal + input.tax_amount
+  const due_amount = Math.max(total_amount - input.paid_amount, 0)
+  const payment_status = due_amount <= 0 ? "paid" : input.paid_amount > 0 ? "partial" : "due"
+
+  const { data: purchase, error: purchaseError } = await supabase
+    .from("purchases")
+    .insert({
+      invoice_number: input.invoice_number,
+      supplier_id: input.supplier_id,
+      location_id: input.location_id,
+      purchase_date: input.purchase_date,
+      subtotal,
+      tax_amount: input.tax_amount,
+      total_amount,
+      paid_amount: input.paid_amount,
+      due_amount,
+      payment_status,
+    })
+    .select(PURCHASE_SELECT)
+    .single()
+  if (purchaseError) throw purchaseError
+
+  // Insert items one at a time (not a single batch insert) so each row's
+  // AFTER INSERT trigger fires per-row and increments stock correctly.
+  for (const item of input.items) {
+    const { error: itemError } = await supabase.from("purchase_items").insert({
+      purchase_id: purchase.id,
+      product_id: item.product_id,
+      quantity: item.quantity,
+      unit_cost: item.unit_cost,
+    })
+    if (itemError) throw itemError
+  }
+
+  return purchase as unknown as Purchase
+}
+
+export async function recordSupplierPayment(input: {
+  supplier_id: string
+  purchase_id: string | null
+  amount: number
+  payment_method: FinancePaymentMethod
+  payment_date: string
+  reference_note: string | null
+  currentDue: number
+}) {
+  if (input.amount > input.currentDue) {
+    throw new Error(`Payment amount can't exceed the due amount (${input.currentDue.toFixed(2)})`)
+  }
+  const { error } = await supabase.from("supplier_payments").insert({
+    supplier_id: input.supplier_id,
+    purchase_id: input.purchase_id,
+    amount: input.amount,
+    payment_method: input.payment_method,
+    payment_date: input.payment_date,
+    reference_note: input.reference_note,
+  })
+  if (error) throw error
+}
+
+// ---------- Purchase Returns ----------
+export async function fetchPurchaseReturns(): Promise<PurchaseReturn[]> {
+  const { data, error } = await supabase
+    .from("purchase_returns")
+    .select("*, supplier:suppliers(id,name), purchase:purchases(id,invoice_number)")
+    .order("return_date", { ascending: false })
+  if (error) throw error
+  return (data as unknown as PurchaseReturn[]) ?? []
+}
+
+export type NewPurchaseReturnInput = {
+  purchase_id: string
+  supplier_id: string
+  location_id: string
+  return_date: string
+  reason: string
+  items: { product_id: string; quantity: number; unit_cost: number }[]
+}
+
+export async function createPurchaseReturn(input: NewPurchaseReturnInput): Promise<void> {
+  const total_amount = input.items.reduce((sum, i) => sum + i.quantity * i.unit_cost, 0)
+  const returnNumber = `PR-${Date.now().toString(36).toUpperCase()}`
+
+  const { data: ret, error: returnError } = await supabase
+    .from("purchase_returns")
+    .insert({
+      return_number: returnNumber,
+      purchase_id: input.purchase_id,
+      supplier_id: input.supplier_id,
+      return_date: input.return_date,
+      total_amount,
+      reason: input.reason,
+    })
+    .select("id")
+    .single()
+  if (returnError) throw returnError
+
+  // No DB trigger exists for purchase returns (unlike purchase_items' stock-IN
+  // trigger), so stock is decremented here explicitly.
+  for (const item of input.items) {
+    const { error: itemError } = await supabase.from("purchase_return_items").insert({
+      return_id: ret.id,
+      product_id: item.product_id,
+      quantity: item.quantity,
+      unit_cost: item.unit_cost,
+    })
+    if (itemError) throw itemError
+
+    const { data: stockRow, error: stockFetchError } = await supabase
+      .from("product_stock")
+      .select("quantity")
+      .eq("product_id", item.product_id)
+      .eq("location_id", input.location_id)
+      .maybeSingle()
+    if (stockFetchError) throw stockFetchError
+
+    const { error: stockUpdateError } = await supabase
+      .from("product_stock")
+      .update({ quantity: Math.max((stockRow?.quantity ?? 0) - item.quantity, 0) })
+      .eq("product_id", item.product_id)
+      .eq("location_id", input.location_id)
+    if (stockUpdateError) throw stockUpdateError
+
+    const { error: movementError } = await supabase.from("stock_movements").insert({
+      product_id: item.product_id,
+      location_id: input.location_id,
+      movement_type: "out",
+      quantity: item.quantity,
+      reference_type: "purchase_return",
+      reference_id: ret.id,
+    })
+    if (movementError) throw movementError
+  }
 }

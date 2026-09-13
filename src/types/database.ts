@@ -240,3 +240,83 @@ export type ProductFilters = {
   pageSize?: number
   search?: string
 }
+
+// ---------- Inventory & Finance: Suppliers / Purchases ----------
+export type FinancePaymentMethod = "cash" | "bkash" | "nagad" | "bank" | "card"
+export type PurchasePaymentStatus = "due" | "partial" | "paid"
+
+export type Supplier = {
+  id: string
+  name: string
+  phone: string | null
+  email: string | null
+  address: string | null
+  payment_terms: string | null
+  opening_balance: number
+  current_due: number
+  is_active: boolean
+  created_at: string
+}
+
+export type Purchase = {
+  id: string
+  invoice_number: string
+  supplier_id: string
+  po_id: string | null
+  location_id: string
+  purchase_date: string
+  subtotal: number
+  tax_amount: number
+  total_amount: number
+  paid_amount: number
+  due_amount: number
+  payment_status: PurchasePaymentStatus
+  created_by: string | null
+  created_at: string
+  supplier?: Pick<Supplier, "id" | "name" | "phone">
+  location?: Pick<Location, "id" | "name">
+}
+
+export type PurchaseItem = {
+  id: string
+  purchase_id: string
+  product_id: string
+  quantity: number
+  unit_cost: number
+  subtotal: number
+  product?: Pick<Product, "id" | "name" | "sku">
+}
+
+export type SupplierPayment = {
+  id: string
+  supplier_id: string
+  purchase_id: string | null
+  amount: number
+  payment_method: FinancePaymentMethod
+  payment_date: string
+  reference_note: string | null
+  created_by: string | null
+  created_at: string
+}
+
+export type PurchaseReturn = {
+  id: string
+  return_number: string
+  purchase_id: string | null
+  supplier_id: string
+  return_date: string
+  total_amount: number
+  reason: string | null
+  created_by: string | null
+  created_at: string
+  supplier?: Pick<Supplier, "id" | "name">
+  purchase?: Pick<Purchase, "id" | "invoice_number">
+}
+
+export type PurchaseReturnItem = {
+  id: string
+  return_id: string
+  product_id: string
+  quantity: number
+  unit_cost: number
+}
