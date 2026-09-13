@@ -614,9 +614,21 @@ from ledger_entries
 group by date_trunc('month', entry_date)
 order by month desc;
 
--- NOTE: Full Profit & Loss view (Sales Revenue - COGS - Expenses) should be
--- finalized only after Phase 4's orders/order_items integration is verified
--- working — build it in Phase 6 of the build prompt, not before.
+-- Monthly Sales Revenue and COGS (quantity x cost_price at time of query —
+-- not a historical snapshot, since order_items doesn't store cost_price).
+-- Only counts orders that reached a real sale state (confirmed/shipped/
+-- delivered), matching the stock-decrease trigger's own status gate.
+create or replace view view_profit_loss_monthly as
+select
+  date_trunc('month', o.created_at) as month,
+  sum(oi.line_total) as revenue,
+  sum(oi.qty * coalesce(p.cost_price, 0)) as cogs
+from orders o
+join order_items oi on oi.order_id = o.id
+left join products p on p.id = oi.product_id
+where o.status in ('confirmed', 'shipped', 'delivered')
+group by date_trunc('month', o.created_at)
+order by month desc;
 
 -- ============================================================================
 -- PHASE 7: SECURITY (Row Level Security) & AUDIT LOG
