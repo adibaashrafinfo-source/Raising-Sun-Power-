@@ -10,7 +10,9 @@ import {
   deleteCashBankAccount,
   deleteCategory,
   deleteCoupon,
+  deleteExpense,
   deleteProduct,
+  deletePurchase,
   deleteSupplier,
   fetchAllBrands,
   fetchAllCategories,
@@ -48,6 +50,7 @@ import {
   transferStock,
   updateLead,
   updateOrderStatus,
+  updateProfileRole,
   updateSettings,
   upsertBrand,
   upsertCashBankAccount,
@@ -56,7 +59,7 @@ import {
   upsertProduct,
   upsertSupplier,
 } from "@/lib/queries/admin"
-import type { LeadStatus, OrderStatus } from "@/types/database"
+import type { LeadStatus, OrderStatus, ProfileRole } from "@/types/database"
 
 export function useDashboardStats() {
   return useQuery({ queryKey: ["admin-dashboard"], queryFn: fetchDashboardStats })
@@ -287,6 +290,19 @@ export function useCreatePurchase() {
   })
 }
 
+export function useDeletePurchase() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: deletePurchase,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-purchases"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-suppliers"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-product-stock"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-product-stock-totals"] })
+    },
+  })
+}
+
 export function useRecordSupplierPayment() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -371,6 +387,14 @@ export function useCreateExpense() {
   })
 }
 
+export function useDeleteExpense() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: deleteExpense,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-expenses"] }),
+  })
+}
+
 // ---------- Cash & Bank Accounts ----------
 export function useCashBankAccounts() {
   return useQuery({ queryKey: ["admin-cash-bank-accounts"], queryFn: fetchCashBankAccounts })
@@ -429,5 +453,14 @@ export function usePurchaseHistoryReport(filters: { fromDate?: string; toDate?: 
   return useQuery({
     queryKey: ["admin-purchase-history-report", filters],
     queryFn: () => fetchPurchaseHistoryReport(filters),
+  })
+}
+
+// ---------- Staff Management ----------
+export function useUpdateProfileRole() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: ProfileRole }) => updateProfileRole(userId, role),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-customers"] }),
   })
 }

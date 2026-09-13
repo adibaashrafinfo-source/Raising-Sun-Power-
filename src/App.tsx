@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react"
 import { Route, Routes } from "react-router-dom"
 
-import { RequireAdmin, RequireAuth } from "@/components/auth/RequireAuth"
+import { RequireAdminOnly, RequireAuth, RequireInventoryStaff } from "@/components/auth/RequireAuth"
 import { AccountLayout } from "@/components/layout/AccountLayout"
 import { AppLayout } from "@/components/layout/AppLayout"
 import Home from "@/pages/Home"
@@ -45,6 +45,7 @@ const AdminCustomersPage = lazy(() => import("@/pages/admin/AdminCustomersPage")
 const AdminCouponsPage = lazy(() => import("@/pages/admin/AdminCouponsPage"))
 const AdminLeadsPage = lazy(() => import("@/pages/admin/AdminLeadsPage"))
 const AdminSettingsPage = lazy(() => import("@/pages/admin/AdminSettingsPage"))
+const AdminStaffPage = lazy(() => import("@/pages/admin/AdminStaffPage"))
 
 export default function App() {
   return (
@@ -78,7 +79,7 @@ export default function App() {
         <Route path="*" element={<ComingSoon title="Page not found" />} />
       </Route>
 
-      <Route element={<RequireAdmin />}>
+      <Route element={<RequireInventoryStaff />}>
         <Route
           path="admin"
           element={
@@ -87,30 +88,89 @@ export default function App() {
             </Suspense>
           }
         >
-          <Route
-            index
-            element={
-              <Suspense fallback={<AdminFallback />}>
-                <AdminDashboardPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="orders"
-            element={
-              <Suspense fallback={<AdminFallback />}>
-                <AdminOrdersPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="products"
-            element={
-              <Suspense fallback={<AdminFallback />}>
-                <AdminProductsPage />
-              </Suspense>
-            }
-          />
+          <Route element={<RequireAdminOnly />}>
+            <Route
+              index
+              element={
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminDashboardPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="orders"
+              element={
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminOrdersPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="products"
+              element={
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminProductsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="categories"
+              element={
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminCategoriesPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="brands"
+              element={
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminBrandsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="customers"
+              element={
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminCustomersPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="coupons"
+              element={
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminCouponsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="leads"
+              element={
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminLeadsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="settings"
+              element={
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminSettingsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="staff"
+              element={
+                <Suspense fallback={<AdminFallback />}>
+                  <AdminStaffPage />
+                </Suspense>
+              }
+            />
+          </Route>
+
           <Route
             path="inventory/stock"
             element={
@@ -180,54 +240,6 @@ export default function App() {
             element={
               <Suspense fallback={<AdminFallback />}>
                 <AdminInventoryReportsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="categories"
-            element={
-              <Suspense fallback={<AdminFallback />}>
-                <AdminCategoriesPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="brands"
-            element={
-              <Suspense fallback={<AdminFallback />}>
-                <AdminBrandsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="customers"
-            element={
-              <Suspense fallback={<AdminFallback />}>
-                <AdminCustomersPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="coupons"
-            element={
-              <Suspense fallback={<AdminFallback />}>
-                <AdminCouponsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="leads"
-            element={
-              <Suspense fallback={<AdminFallback />}>
-                <AdminLeadsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="settings"
-            element={
-              <Suspense fallback={<AdminFallback />}>
-                <AdminSettingsPage />
               </Suspense>
             }
           />
