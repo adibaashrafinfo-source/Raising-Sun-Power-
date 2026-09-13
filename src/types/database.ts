@@ -105,6 +105,23 @@ export type Settings = {
   support_phone: string
 }
 
+export type RoiTariffSlab = { minUnits: number; maxUnits: number | null; rate: number }
+
+export type RoiCalculatorSettings = {
+  id: number
+  residential_slabs: RoiTariffSlab[]
+  commercial_rate: number
+  industrial_rate: number
+  avg_peak_sun_hours_per_day: number
+  system_efficiency_factor: number
+  cost_per_kw_installed_bdt: number
+  panel_lifespan_years: number
+  annual_degradation_rate: number
+  annual_electricity_price_escalation: number
+  annual_maintenance_cost_rate: number
+  updated_at: string
+}
+
 export type Coupon = {
   id: string
   code: string
@@ -167,7 +184,7 @@ export type OrderItem = OrderItemInsert & {
   order_id: string
 }
 
-export type LeadSource = "calculator" | "direct"
+export type LeadSource = "calculator" | "direct" | "roi_calculator"
 export type LeadStatus = "new" | "contacted" | "quoted" | "converted" | "lost"
 
 export type LeadInsert = {

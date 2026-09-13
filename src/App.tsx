@@ -24,6 +24,8 @@ import AccountWishlistPage from "@/pages/account/AccountWishlistPage"
 import AccountAddressesPage from "@/pages/account/AccountAddressesPage"
 import AccountProfilePage from "@/pages/account/AccountProfilePage"
 
+const SolarROICalculatorPage = lazy(() => import("@/pages/SolarROICalculatorPage"))
+
 const AdminLayout = lazy(() =>
   import("@/components/layout/AdminLayout").then((m) => ({ default: m.AdminLayout })),
 )
@@ -45,6 +47,7 @@ const AdminCustomersPage = lazy(() => import("@/pages/admin/AdminCustomersPage")
 const AdminCouponsPage = lazy(() => import("@/pages/admin/AdminCouponsPage"))
 const AdminLeadsPage = lazy(() => import("@/pages/admin/AdminLeadsPage"))
 const AdminSettingsPage = lazy(() => import("@/pages/admin/AdminSettingsPage"))
+const AdminRoiSettingsPage = lazy(() => import("@/pages/admin/AdminRoiSettingsPage"))
 const AdminStaffPage = lazy(() => import("@/pages/admin/AdminStaffPage"))
 
 export default function App() {
@@ -59,6 +62,14 @@ export default function App() {
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="order-confirmation/:orderId" element={<OrderConfirmationPage />} />
         <Route path="solar-calculator" element={<SolarCalculatorPage />} />
+        <Route
+          path="solar-roi-calculator"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <SolarROICalculatorPage />
+            </Suspense>
+          }
+        />
         <Route path="get-quotation" element={<GetQuotationPage />} />
         <Route path="quotation-received/:refId" element={<QuotationReceivedPage />} />
         <Route path="login" element={<LoginPage />} />
@@ -83,7 +94,7 @@ export default function App() {
         <Route
           path="admin"
           element={
-            <Suspense fallback={<AdminFallback />}>
+            <Suspense fallback={<PageFallback />}>
               <AdminLayout />
             </Suspense>
           }
@@ -92,7 +103,7 @@ export default function App() {
             <Route
               index
               element={
-                <Suspense fallback={<AdminFallback />}>
+                <Suspense fallback={<PageFallback />}>
                   <AdminDashboardPage />
                 </Suspense>
               }
@@ -100,7 +111,7 @@ export default function App() {
             <Route
               path="orders"
               element={
-                <Suspense fallback={<AdminFallback />}>
+                <Suspense fallback={<PageFallback />}>
                   <AdminOrdersPage />
                 </Suspense>
               }
@@ -108,7 +119,7 @@ export default function App() {
             <Route
               path="products"
               element={
-                <Suspense fallback={<AdminFallback />}>
+                <Suspense fallback={<PageFallback />}>
                   <AdminProductsPage />
                 </Suspense>
               }
@@ -116,7 +127,7 @@ export default function App() {
             <Route
               path="categories"
               element={
-                <Suspense fallback={<AdminFallback />}>
+                <Suspense fallback={<PageFallback />}>
                   <AdminCategoriesPage />
                 </Suspense>
               }
@@ -124,7 +135,7 @@ export default function App() {
             <Route
               path="brands"
               element={
-                <Suspense fallback={<AdminFallback />}>
+                <Suspense fallback={<PageFallback />}>
                   <AdminBrandsPage />
                 </Suspense>
               }
@@ -132,7 +143,7 @@ export default function App() {
             <Route
               path="customers"
               element={
-                <Suspense fallback={<AdminFallback />}>
+                <Suspense fallback={<PageFallback />}>
                   <AdminCustomersPage />
                 </Suspense>
               }
@@ -140,7 +151,7 @@ export default function App() {
             <Route
               path="coupons"
               element={
-                <Suspense fallback={<AdminFallback />}>
+                <Suspense fallback={<PageFallback />}>
                   <AdminCouponsPage />
                 </Suspense>
               }
@@ -148,7 +159,7 @@ export default function App() {
             <Route
               path="leads"
               element={
-                <Suspense fallback={<AdminFallback />}>
+                <Suspense fallback={<PageFallback />}>
                   <AdminLeadsPage />
                 </Suspense>
               }
@@ -156,15 +167,23 @@ export default function App() {
             <Route
               path="settings"
               element={
-                <Suspense fallback={<AdminFallback />}>
+                <Suspense fallback={<PageFallback />}>
                   <AdminSettingsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="roi-calculator"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminRoiSettingsPage />
                 </Suspense>
               }
             />
             <Route
               path="staff"
               element={
-                <Suspense fallback={<AdminFallback />}>
+                <Suspense fallback={<PageFallback />}>
                   <AdminStaffPage />
                 </Suspense>
               }
@@ -174,7 +193,7 @@ export default function App() {
           <Route
             path="inventory/stock"
             element={
-              <Suspense fallback={<AdminFallback />}>
+              <Suspense fallback={<PageFallback />}>
                 <AdminStockPage />
               </Suspense>
             }
@@ -182,7 +201,7 @@ export default function App() {
           <Route
             path="inventory/suppliers"
             element={
-              <Suspense fallback={<AdminFallback />}>
+              <Suspense fallback={<PageFallback />}>
                 <AdminSuppliersPage />
               </Suspense>
             }
@@ -190,7 +209,7 @@ export default function App() {
           <Route
             path="inventory/purchases"
             element={
-              <Suspense fallback={<AdminFallback />}>
+              <Suspense fallback={<PageFallback />}>
                 <AdminPurchasesPage />
               </Suspense>
             }
@@ -198,7 +217,7 @@ export default function App() {
           <Route
             path="inventory/purchase-returns"
             element={
-              <Suspense fallback={<AdminFallback />}>
+              <Suspense fallback={<PageFallback />}>
                 <AdminPurchaseReturnsPage />
               </Suspense>
             }
@@ -206,7 +225,7 @@ export default function App() {
           <Route
             path="inventory/sales-returns"
             element={
-              <Suspense fallback={<AdminFallback />}>
+              <Suspense fallback={<PageFallback />}>
                 <AdminSalesReturnsPage />
               </Suspense>
             }
@@ -214,7 +233,7 @@ export default function App() {
           <Route
             path="finance/expenses"
             element={
-              <Suspense fallback={<AdminFallback />}>
+              <Suspense fallback={<PageFallback />}>
                 <AdminExpensesPage />
               </Suspense>
             }
@@ -222,7 +241,7 @@ export default function App() {
           <Route
             path="finance/accounts"
             element={
-              <Suspense fallback={<AdminFallback />}>
+              <Suspense fallback={<PageFallback />}>
                 <AdminAccountsPage />
               </Suspense>
             }
@@ -230,7 +249,7 @@ export default function App() {
           <Route
             path="finance/dashboard"
             element={
-              <Suspense fallback={<AdminFallback />}>
+              <Suspense fallback={<PageFallback />}>
                 <AdminFinanceDashboardPage />
               </Suspense>
             }
@@ -238,7 +257,7 @@ export default function App() {
           <Route
             path="inventory/reports"
             element={
-              <Suspense fallback={<AdminFallback />}>
+              <Suspense fallback={<PageFallback />}>
                 <AdminInventoryReportsPage />
               </Suspense>
             }
@@ -249,6 +268,6 @@ export default function App() {
   )
 }
 
-function AdminFallback() {
+function PageFallback() {
   return <div className="flex min-h-screen items-center justify-center text-sm text-muted">Loading…</div>
 }

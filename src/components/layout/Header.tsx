@@ -115,6 +115,12 @@ export function Header() {
             >
               Solar Calculator
             </Link>
+            <Link
+              to="/solar-roi-calculator"
+              className="rounded-[10px] px-3 py-2 text-sm font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue"
+            >
+              ROI Calculator
+            </Link>
             <a className="rounded-[10px] px-3 py-2 text-sm font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue">
               Brands
             </a>
