@@ -1,4 +1,4 @@
-import { bestSellers, newArrivals } from "@/data/home-content"
+import { useProducts } from "@/hooks/use-catalog"
 import { useSeo } from "@/hooks/use-seo"
 import { BrandsStrip } from "@/pages/home/BrandsStrip"
 import { CategoryGrid } from "@/pages/home/CategoryGrid"
@@ -19,6 +19,9 @@ export default function Home() {
       "Genuine solar panels, inverters, batteries, MCB & MCCB and complete power solutions — delivered nationwide with COD, bKash & Nagad.",
   })
 
+  const bestSellers = useProducts({ sort: "rating", pageSize: 4 })
+  const newArrivals = useProducts({ sort: "newest", pageSize: 4 })
+
   return (
     <main>
       <Hero />
@@ -29,7 +32,8 @@ export default function Home() {
         kickerColor="#67A70E"
         title="Best sellers this month"
         linkLabel="See more"
-        products={bestSellers}
+        products={bestSellers.data?.products ?? []}
+        isLoading={bestSellers.isLoading}
       />
       <DealsBand />
       <ShopBySolution />
@@ -38,7 +42,8 @@ export default function Home() {
         kickerColor="#67A70E"
         title="New arrivals"
         linkLabel="Browse all"
-        products={newArrivals}
+        products={newArrivals.data?.products ?? []}
+        isLoading={newArrivals.isLoading}
       />
       <BrandsStrip />
       <WhyChooseUs />
