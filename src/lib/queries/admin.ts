@@ -16,29 +16,83 @@ const PRODUCT_SELECT =
   "*, category:categories(id,name,slug), brand:brands(id,name,slug,logo_url)"
 
 // ---------- Dashboard ----------
+const TREND_DAYS = 14
+
+export type DashboardStats = Awaited<ReturnType<typeof fetchDashboardStats>>
+
 export async function fetchDashboardStats() {
   const startOfToday = new Date()
   startOfToday.setHours(0, 0, 0, 0)
+  const startOfYesterday = new Date(startOfToday)
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1)
+  const trendStart = new Date(startOfToday)
+  trendStart.setDate(trendStart.getDate() - (TREND_DAYS - 1))
 
-  const [todayOrders, pendingOrders, allOrders, lowStock, recentOrders, topProducts] = await Promise.all([
+  const [
+    todayOrders,
+    yesterdayOrders,
+    pendingOrders,
+    allOrders,
+    lowStock,
+    recentOrders,
+    topProducts,
+    trendOrders,
+    statusRows,
+    customerCount,
+  ] = await Promise.all([
     supabase.from("orders").select("total").gte("created_at", startOfToday.toISOString()),
+    supabase
+      .from("orders")
+      .select("total")
+      .gte("created_at", startOfYesterday.toISOString())
+      .lt("created_at", startOfToday.toISOString()),
     supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("orders").select("id", { count: "exact", head: true }),
     supabase.from("products").select("id", { count: "exact", head: true }).lt("stock_qty", 10),
-    supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(5),
+    supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(6),
     supabase.from("products").select("*").order("rating_count", { ascending: false }).limit(5),
+    supabase.from("orders").select("total, created_at").gte("created_at", trendStart.toISOString()),
+    supabase.from("orders").select("status"),
+    supabase.from("profiles").select("id", { count: "exact", head: true }),
   ])
 
   const todaySales = (todayOrders.data ?? []).reduce((sum, o) => sum + Number(o.total), 0)
+  const yesterdaySales = (yesterdayOrders.data ?? []).reduce((sum, o) => sum + Number(o.total), 0)
+  const salesChangePct =
+    yesterdaySales > 0 ? ((todaySales - yesterdaySales) / yesterdaySales) * 100 : todaySales > 0 ? 100 : 0
+
+  const salesTrend: { date: string; sales: number; orders: number }[] = []
+  for (let i = TREND_DAYS - 1; i >= 0; i--) {
+    const d = new Date(startOfToday)
+    d.setDate(d.getDate() - i)
+    salesTrend.push({ date: d.toISOString().slice(0, 10), sales: 0, orders: 0 })
+  }
+  const trendMap = new Map(salesTrend.map((t) => [t.date, t]))
+  for (const o of trendOrders.data ?? []) {
+    const bucket = trendMap.get(String(o.created_at).slice(0, 10))
+    if (bucket) {
+      bucket.sales += Number(o.total)
+      bucket.orders += 1
+    }
+  }
+
+  const statusCounts: Record<string, number> = {}
+  for (const row of statusRows.data ?? []) {
+    statusCounts[row.status] = (statusCounts[row.status] ?? 0) + 1
+  }
 
   return {
     todaySales,
     todayOrderCount: todayOrders.data?.length ?? 0,
+    salesChangePct,
     pendingCount: pendingOrders.count ?? 0,
     totalOrders: allOrders.count ?? 0,
     lowStockCount: lowStock.count ?? 0,
+    customerCount: customerCount.count ?? 0,
     recentOrders: (recentOrders.data as Order[]) ?? [],
     topProducts: (topProducts.data as Product[]) ?? [],
+    salesTrend,
+    statusCounts,
   }
 }
 
