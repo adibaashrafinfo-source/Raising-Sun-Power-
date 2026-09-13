@@ -31,6 +31,9 @@ const AdminDashboardPage = lazy(() => import("@/pages/admin/AdminDashboardPage")
 const AdminOrdersPage = lazy(() => import("@/pages/admin/AdminOrdersPage"))
 const AdminProductsPage = lazy(() => import("@/pages/admin/AdminProductsPage"))
 const AdminStockPage = lazy(() => import("@/pages/admin/AdminStockPage"))
+const AdminSuppliersPage = lazy(() => import("@/pages/admin/AdminSuppliersPage"))
+const AdminPurchasesPage = lazy(() => import("@/pages/admin/AdminPurchasesPage"))
+const AdminPurchaseReturnsPage = lazy(() => import("@/pages/admin/AdminPurchaseReturnsPage"))
 const AdminCategoriesPage = lazy(() => import("@/pages/admin/AdminCategoriesPage"))
 const AdminBrandsPage = lazy(() => import("@/pages/admin/AdminBrandsPage"))
 const AdminCustomersPage = lazy(() => import("@/pages/admin/AdminCustomersPage"))
@@ -108,6 +111,30 @@ export default function App() {
             element={
               <Suspense fallback={<AdminFallback />}>
                 <AdminStockPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="inventory/suppliers"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminSuppliersPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="inventory/purchases"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminPurchasesPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="inventory/purchase-returns"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminPurchaseReturnsPage />
               </Suspense>
             }
           />
