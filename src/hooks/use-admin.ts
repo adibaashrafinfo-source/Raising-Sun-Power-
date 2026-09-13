@@ -4,6 +4,7 @@ import {
   adjustStock,
   createPurchase,
   createPurchaseReturn,
+  createSalesReturn,
   deleteBrand,
   deleteCategory,
   deleteCoupon,
@@ -18,14 +19,17 @@ import {
   fetchCustomers,
   fetchDashboardStats,
   fetchLocations,
+  fetchOrderPayments,
   fetchProductStock,
   fetchProductStockTotals,
   fetchPurchaseItems,
   fetchPurchaseReturns,
   fetchPurchases,
+  fetchSalesReturns,
   fetchSupplierPayments,
   fetchSupplierPurchases,
   fetchSuppliers,
+  recordCustomerPayment,
   recordSupplierPayment,
   transferStock,
   updateLead,
@@ -292,6 +296,43 @@ export function useCreatePurchaseReturn() {
     mutationFn: createPurchaseReturn,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-purchase-returns"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-product-stock"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-product-stock-totals"] })
+    },
+  })
+}
+
+// ---------- Customer Payments ----------
+export function useOrderPayments(orderId: string | undefined) {
+  return useQuery({
+    queryKey: ["admin-order-payments", orderId],
+    queryFn: () => fetchOrderPayments(orderId!),
+    enabled: !!orderId,
+  })
+}
+
+export function useRecordCustomerPayment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: recordCustomerPayment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-order-payments"] })
+    },
+  })
+}
+
+// ---------- Sales Returns ----------
+export function useSalesReturns() {
+  return useQuery({ queryKey: ["admin-sales-returns"], queryFn: fetchSalesReturns })
+}
+
+export function useCreateSalesReturn() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: createSalesReturn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-sales-returns"] })
       queryClient.invalidateQueries({ queryKey: ["admin-product-stock"] })
       queryClient.invalidateQueries({ queryKey: ["admin-product-stock-totals"] })
     },

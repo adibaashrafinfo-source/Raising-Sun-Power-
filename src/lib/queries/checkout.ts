@@ -51,7 +51,17 @@ export async function createOrder(
     .insert(items.map((item) => ({ ...item, order_id: id })))
   if (itemsError) throw itemsError
 
-  return { ...order, id, user_id: order.user_id ?? null, courier_status: null, created_at: now, updated_at: now }
+  return {
+    ...order,
+    id,
+    user_id: order.user_id ?? null,
+    courier_status: null,
+    paid_amount: 0,
+    due_amount: order.total,
+    payment_status: "due",
+    created_at: now,
+    updated_at: now,
+  }
 }
 
 export async function fetchOrder(orderId: string): Promise<Order | null> {

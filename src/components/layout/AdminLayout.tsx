@@ -32,6 +32,7 @@ const links = [
   { to: "/admin/inventory/suppliers", label: "Suppliers", icon: Truck },
   { to: "/admin/inventory/purchases", label: "Purchases", icon: ClipboardList },
   { to: "/admin/inventory/purchase-returns", label: "Purchase Returns", icon: RotateCcw },
+  { to: "/admin/inventory/sales-returns", label: "Sales Returns", icon: RotateCcw },
   { to: "/admin/categories", label: "Categories", icon: ListTree },
   { to: "/admin/brands", label: "Brands", icon: Tags },
   { to: "/admin/customers", label: "Customers", icon: Users },

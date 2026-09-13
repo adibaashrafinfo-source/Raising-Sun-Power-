@@ -1,17 +1,26 @@
 import { useState } from "react"
-import { Search, X } from "lucide-react"
+import { Search, Wallet, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useAllOrders, useUpdateOrderStatus } from "@/hooks/use-admin"
+import { useAllOrders, useRecordCustomerPayment, useUpdateOrderStatus } from "@/hooks/use-admin"
 import { useOrderItems } from "@/hooks/use-checkout"
 import { formatBDT } from "@/lib/utils"
-import type { Order, OrderStatus } from "@/types/database"
+import type { FinancePaymentMethod, Order, OrderStatus } from "@/types/database"
 
 const STATUSES: OrderStatus[] = ["pending", "confirmed", "shipped", "delivered", "cancelled"]
+const PAYMENT_STATUS_VARIANT = { due: "neutral", partial: "gold", paid: "green" } as const
 
 export default function AdminOrdersPage() {
   const [status, setStatus] = useState<OrderStatus | "">("")
@@ -76,7 +85,8 @@ export default function AdminOrdersPage() {
                 <th className="px-4 py-3 font-semibold">Customer</th>
                 <th className="px-4 py-3 font-semibold">Total</th>
                 <th className="px-4 py-3 font-semibold">Payment</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold">Due / Payment Status</th>
+                <th className="px-4 py-3 font-semibold">Order Status</th>
                 <th className="px-4 py-3 font-semibold">Date</th>
               </tr>
             </thead>
@@ -95,6 +105,12 @@ export default function AdminOrdersPage() {
                   <td className="px-4 py-3 font-bold tabular-nums text-text">{formatBDT(order.total)}</td>
                   <td className="px-4 py-3">
                     <Badge variant="outline">{order.payment_method.toUpperCase()}</Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="tabular-nums text-text">{formatBDT(order.due_amount)}</span>
+                    <div className="mt-0.5">
+                      <Badge variant={PAYMENT_STATUS_VARIANT[order.payment_status]}>{order.payment_status}</Badge>
+                    </div>
                   </td>
                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <select
@@ -126,6 +142,7 @@ export default function AdminOrdersPage() {
 
 function OrderDetailDialog({ order, onClose }: { order: Order | null; onClose: () => void }) {
   const { data: items = [] } = useOrderItems(order?.id)
+  const [payOpen, setPayOpen] = useState(false)
 
   return (
     <Dialog open={!!order} onOpenChange={(open) => !open && onClose()}>
@@ -176,9 +193,105 @@ function OrderDetailDialog({ order, onClose }: { order: Order | null; onClose: (
                   <span>{formatBDT(order.total)}</span>
                 </div>
               </div>
+
+              <div className="flex items-center justify-between rounded-xl border border-border p-3">
+                <div>
+                  <div className="text-xs text-muted">
+                    Paid: <b className="text-text">{formatBDT(order.paid_amount)}</b> · Due:{" "}
+                    <b className={order.due_amount > 0 ? "text-red-500" : "text-text"}>
+                      {formatBDT(order.due_amount)}
+                    </b>
+                  </div>
+                  <Badge variant={PAYMENT_STATUS_VARIANT[order.payment_status]} className="mt-1">
+                    {order.payment_status}
+                  </Badge>
+                </div>
+                <Button size="sm" disabled={order.due_amount <= 0} onClick={() => setPayOpen(true)}>
+                  <Wallet className="size-3.5" />
+                  Record Payment
+                </Button>
+              </div>
             </div>
           </>
         )}
+      </DialogContent>
+      {order && payOpen && <RecordOrderPaymentDialog order={order} onClose={() => setPayOpen(false)} />}
+    </Dialog>
+  )
+}
+
+function RecordOrderPaymentDialog({ order, onClose }: { order: Order; onClose: () => void }) {
+  const recordPayment = useRecordCustomerPayment()
+  const [amount, setAmount] = useState(String(order.due_amount))
+  const [method, setMethod] = useState<FinancePaymentMethod>("cash")
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [note, setNote] = useState("")
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const amt = Number(amount)
+    if (!amt || amt <= 0) {
+      toast.error("Enter a valid amount")
+      return
+    }
+    try {
+      await recordPayment.mutateAsync({
+        order_id: order.id,
+        amount: amt,
+        payment_method: method,
+        payment_date: date,
+        reference_note: note || null,
+        currentDue: order.due_amount,
+      })
+      toast.success("Payment recorded")
+      onClose()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't record payment")
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-[420px]">
+        <DialogHeader>
+          <DialogTitle>Record Payment — {order.order_number}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={onSubmit} className="flex flex-col gap-3.5">
+          <p className="text-xs text-muted">
+            Due: <b className="text-text">{formatBDT(order.due_amount)}</b>
+          </p>
+          <div>
+            <Label className="mb-1.5 block">Amount (৳) *</Label>
+            <Input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          </div>
+          <div>
+            <Label className="mb-1.5 block">Payment method *</Label>
+            <select
+              value={method}
+              onChange={(e) => setMethod(e.target.value as FinancePaymentMethod)}
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+            >
+              <option value="cash">Cash</option>
+              <option value="bkash">bKash</option>
+              <option value="nagad">Nagad</option>
+              <option value="bank">Bank Transfer</option>
+              <option value="card">Card</option>
+            </select>
+          </div>
+          <div>
+            <Label className="mb-1.5 block">Date *</Label>
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </div>
+          <div>
+            <Label className="mb-1.5 block">Reference note</Label>
+            <Input value={note} onChange={(e) => setNote(e.target.value)} />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={recordPayment.isPending}>
+              {recordPayment.isPending ? "Saving…" : "Record Payment"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )
