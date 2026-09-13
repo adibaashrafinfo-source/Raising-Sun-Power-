@@ -14,6 +14,7 @@ import type {
   Profile,
   Purchase,
   PurchaseReturn,
+  SalesReturn,
   Settings,
   Supplier,
 } from "@/types/database"
@@ -608,6 +609,116 @@ export async function createPurchaseReturn(input: NewPurchaseReturnInput): Promi
       movement_type: "out",
       quantity: item.quantity,
       reference_type: "purchase_return",
+      reference_id: ret.id,
+    })
+    if (movementError) throw movementError
+  }
+}
+
+// ---------- Customer Payments ----------
+export async function fetchOrderPayments(orderId: string) {
+  const { data, error } = await supabase
+    .from("customer_payments")
+    .select("*")
+    .eq("order_id", orderId)
+    .order("payment_date", { ascending: false })
+  if (error) throw error
+  return data ?? []
+}
+
+export async function recordCustomerPayment(input: {
+  order_id: string
+  amount: number
+  payment_method: FinancePaymentMethod
+  payment_date: string
+  reference_note: string | null
+  currentDue: number
+}) {
+  if (input.amount > input.currentDue) {
+    throw new Error(`Payment amount can't exceed the due amount (${input.currentDue.toFixed(2)})`)
+  }
+  const { error } = await supabase.from("customer_payments").insert({
+    order_id: input.order_id,
+    amount: input.amount,
+    payment_method: input.payment_method,
+    payment_date: input.payment_date,
+    reference_note: input.reference_note,
+  })
+  if (error) throw error
+}
+
+// ---------- Sales Returns ----------
+export async function fetchSalesReturns(): Promise<SalesReturn[]> {
+  const { data, error } = await supabase
+    .from("sales_returns")
+    .select("*, order:orders(id,order_number)")
+    .order("return_date", { ascending: false })
+  if (error) throw error
+  return (data as unknown as SalesReturn[]) ?? []
+}
+
+export async function fetchDefaultLocation(): Promise<Location> {
+  const { data, error } = await supabase.from("locations").select("*").eq("is_default", true).single()
+  if (error) throw error
+  return data
+}
+
+export type NewSalesReturnInput = {
+  order_id: string
+  reason: string
+  items: { product_id: string; quantity: number; unit_price: number }[]
+}
+
+export async function createSalesReturn(input: NewSalesReturnInput): Promise<void> {
+  const total_amount = input.items.reduce((sum, i) => sum + i.quantity * i.unit_price, 0)
+  const returnNumber = `SR-${Date.now().toString(36).toUpperCase()}`
+  const defaultLocation = await fetchDefaultLocation()
+
+  const { data: ret, error: returnError } = await supabase
+    .from("sales_returns")
+    .insert({
+      return_number: returnNumber,
+      order_id: input.order_id,
+      total_amount,
+      reason: input.reason,
+    })
+    .select("id")
+    .single()
+  if (returnError) throw returnError
+
+  // No DB trigger exists for sales returns (a separate flow from the
+  // purchase-in side), so stock is re-added here explicitly.
+  for (const item of input.items) {
+    const { error: itemError } = await supabase.from("sales_return_items").insert({
+      return_id: ret.id,
+      product_id: item.product_id,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+    })
+    if (itemError) throw itemError
+
+    const { data: stockRow, error: stockFetchError } = await supabase
+      .from("product_stock")
+      .select("quantity")
+      .eq("product_id", item.product_id)
+      .eq("location_id", defaultLocation.id)
+      .maybeSingle()
+    if (stockFetchError) throw stockFetchError
+
+    const { error: stockUpsertError } = await supabase
+      .from("product_stock")
+      .upsert(
+        { product_id: item.product_id, location_id: defaultLocation.id, quantity: (stockRow?.quantity ?? 0) + item.quantity },
+        { onConflict: "product_id,location_id" },
+      )
+    if (stockUpsertError) throw stockUpsertError
+
+    const { error: movementError } = await supabase.from("stock_movements").insert({
+      product_id: item.product_id,
+      location_id: defaultLocation.id,
+      movement_type: "in",
+      quantity: item.quantity,
+      reference_type: "sales_return",
       reference_id: ret.id,
     })
     if (movementError) throw movementError

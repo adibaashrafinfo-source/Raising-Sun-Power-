@@ -155,6 +155,9 @@ export type Order = OrderInsert & {
   id: string
   user_id: string | null
   courier_status: string | null
+  paid_amount: number
+  due_amount: number
+  payment_status: PurchasePaymentStatus
   created_at: string
   updated_at: string
 }
@@ -319,4 +322,39 @@ export type PurchaseReturnItem = {
   product_id: string
   quantity: number
   unit_cost: number
+}
+
+// ---------- Inventory & Finance: Customer Payments / Sales Returns ----------
+export type RefundStatus = "pending" | "refunded" | "rejected"
+
+export type CustomerPayment = {
+  id: string
+  order_id: string
+  amount: number
+  payment_method: FinancePaymentMethod
+  payment_date: string
+  reference_note: string | null
+  created_by: string | null
+  created_at: string
+}
+
+export type SalesReturn = {
+  id: string
+  return_number: string
+  order_id: string
+  return_date: string
+  total_amount: number
+  reason: string | null
+  refund_status: RefundStatus
+  created_by: string | null
+  created_at: string
+  order?: Pick<Order, "id" | "order_number">
+}
+
+export type SalesReturnItem = {
+  id: string
+  return_id: string
+  product_id: string
+  quantity: number
+  unit_price: number
 }
