@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAdjustStock, useLocations, useProductStock, useTransferStock } from "@/hooks/use-admin"
+import { getErrorMessage } from "@/lib/utils"
 import type { ProductStock } from "@/types/database"
 
 export default function AdminStockPage() {
@@ -162,7 +163,7 @@ function AdjustStockDialog({ row, onClose }: { row: ProductStock; onClose: () =>
       toast.success("Stock adjusted")
       onClose()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Couldn't adjust stock")
+      toast.error(getErrorMessage(err, "Couldn't adjust stock"))
     }
   }
 
@@ -234,7 +235,7 @@ function TransferStockDialog({
       toast.success("Stock transferred")
       onClose()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Couldn't transfer stock")
+      toast.error(getErrorMessage(err, "Couldn't transfer stock"))
     }
   }
 

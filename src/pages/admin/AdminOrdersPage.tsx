@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAllOrders, useRecordCustomerPayment, useUpdateOrderStatus } from "@/hooks/use-admin"
 import { useOrderItems } from "@/hooks/use-checkout"
-import { formatBDT } from "@/lib/utils"
+import { formatBDT, getErrorMessage } from "@/lib/utils"
 import type { FinancePaymentMethod, Order, OrderStatus } from "@/types/database"
 
 const STATUSES: OrderStatus[] = ["pending", "confirmed", "shipped", "delivered", "cancelled"]
@@ -246,7 +246,7 @@ function RecordOrderPaymentDialog({ order, onClose }: { order: Order; onClose: (
       toast.success("Payment recorded")
       onClose()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Couldn't record payment")
+      toast.error(getErrorMessage(err, "Couldn't record payment"))
     }
   }
 
