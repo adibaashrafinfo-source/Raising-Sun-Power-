@@ -1,5 +1,6 @@
 import { useState } from "react"
 import {
+  BarChart3,
   Boxes,
   ChevronLeft,
   ChevronRight,
@@ -10,6 +11,7 @@ import {
   LogOut,
   Menu,
   Package,
+  PieChart,
   Receipt,
   RotateCcw,
   Settings,
@@ -35,6 +37,8 @@ const links = [
   { to: "/admin/inventory/purchases", label: "Purchases", icon: ClipboardList },
   { to: "/admin/inventory/purchase-returns", label: "Purchase Returns", icon: RotateCcw },
   { to: "/admin/inventory/sales-returns", label: "Sales Returns", icon: RotateCcw },
+  { to: "/admin/inventory/reports", label: "Inventory Reports", icon: BarChart3 },
+  { to: "/admin/finance/dashboard", label: "Finance Dashboard", icon: PieChart },
   { to: "/admin/finance/expenses", label: "Expenses", icon: Receipt },
   { to: "/admin/finance/accounts", label: "Cash & Bank", icon: Landmark },
   { to: "/admin/categories", label: "Categories", icon: ListTree },
