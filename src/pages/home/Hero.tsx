@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { Typewriter } from "@/components/ui/typewriter"
+import { useSiteContent } from "@/hooks/use-site-content"
 
 const FEATURE_CARDS = [
   {
@@ -42,6 +43,15 @@ const SHOWCASE_POINTS = [
 ]
 
 export function Hero() {
+  const { data: cms } = useSiteContent()
+  const badge = cms?.hero_badge || "Bangladesh's trusted solar & electrical store"
+  const headlinePrefix = cms?.hero_headline_prefix || "Powering Bangladesh with green &"
+  const headlineHighlight = cms?.hero_headline_highlight || "renewable energy."
+  const subheading =
+    cms?.hero_subheading ||
+    "Genuine solar panels, inverters, batteries, MCB & MCCB and complete power solutions — delivered nationwide with Cash on Delivery, bKash & Nagad."
+  const heroImage = cms?.hero_image_url || "/hero-product-cutout.png"
+
   return (
     <section className="relative overflow-hidden">
       <HeroBackground />
@@ -54,16 +64,15 @@ export function Hero() {
               style={{ animationDelay: "0ms" }}
             >
               <span className="size-[7px] rounded-full bg-green-400 shadow-[0_0_0_4px_rgba(103,167,14,.2)]" />
-              Bangladesh's trusted solar &amp; electrical store
+              {badge}
             </span>
             <h1 className="mt-5 text-balance font-heading text-[clamp(32px,4.6vw,52px)] font-extrabold leading-[1.08] tracking-tight text-text">
               <span className="rsp-animate-fade-up block" style={{ animationDelay: "120ms" }}>
-                Powering Bangladesh with
+                {headlinePrefix}
               </span>
               <span className="rsp-animate-fade-up block" style={{ animationDelay: "260ms" }}>
-                <span className="text-blue">green &amp;</span>{" "}
                 <span className="relative inline-block bg-[linear-gradient(120deg,#2A6B08,#67A70E)] bg-clip-text text-transparent">
-                  renewable energy.
+                  {headlineHighlight}
                   <svg
                     viewBox="0 0 220 14"
                     className="absolute -bottom-2 left-0 h-3 w-full text-orange-500"
@@ -82,7 +91,7 @@ export function Hero() {
               </span>
             </h1>
             <p className="mt-6 min-h-[3.5em] max-w-[480px] text-[clamp(15px,2vw,18px)] leading-relaxed text-muted sm:min-h-[3em]">
-              <Typewriter text="Genuine solar panels, inverters, batteries, MCB & MCCB and complete power solutions — delivered nationwide with Cash on Delivery, bKash & Nagad." />
+              <Typewriter text={subheading} />
             </p>
             <div className="rsp-animate-fade-up mt-7 flex flex-wrap gap-3.5" style={{ animationDelay: "420ms" }}>
               <Button asChild size="lg">
@@ -137,7 +146,7 @@ export function Hero() {
               </span>
 
               <img
-                src="/hero-product-cutout.png"
+                src={heroImage}
                 alt="Solar panels, Longi battery, Luminous battery, Growatt inverter and Schneider MCBs"
                 className="mx-auto w-full max-w-[560px] object-contain drop-shadow-[0_24px_50px_rgba(5,44,110,.3)]"
               />

@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/lib/auth-provider"
+import { useSiteContent } from "@/hooks/use-site-content"
 import { useWishlist } from "@/hooks/use-wishlist"
 import { signOut } from "@/lib/queries/auth"
 import { useTheme } from "@/lib/theme-provider"
@@ -52,6 +53,8 @@ export function Header() {
   const cartCount = useCartStore((s) => s.cartCount())
   const { items: wishlistItems } = useWishlist()
   const wishlistCount = wishlistItems.length
+  const { data: siteContent } = useSiteContent()
+  const headerLogo = siteContent?.header_logo_url || "/logo.jpg"
 
   const handleSignOut = async () => {
     await signOut()
@@ -72,7 +75,7 @@ export function Header() {
 
         <Link to="/" className="flex shrink-0 items-center gap-2.5 no-underline">
           <span className="flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)]">
-            <img src="/logo.jpg" alt="RSP" className="size-full object-cover" />
+            <img src={headerLogo} alt="RSP" className="size-full object-cover" />
           </span>
           <span className="hidden flex-col leading-tight sm:flex">
             <span className="font-heading text-lg font-extrabold tracking-wide text-text">

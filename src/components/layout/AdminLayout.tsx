@@ -8,6 +8,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   Landmark,
+  LayoutTemplate,
   ListTree,
   LogOut,
   Mail,
@@ -51,6 +52,7 @@ const links = [
   { to: "/admin/leads", label: "Leads", icon: Users, adminOnly: true },
   { to: "/admin/messages", label: "Contact Messages", icon: Mail, adminOnly: true },
   { to: "/admin/settings", label: "Settings", icon: Settings, adminOnly: true },
+  { to: "/admin/cms", label: "Site Content", icon: LayoutTemplate, adminOnly: true },
   { to: "/admin/roi-calculator", label: "ROI Calculator", icon: Calculator, adminOnly: true },
   { to: "/admin/staff", label: "Staff Management", icon: ShieldCheck, adminOnly: true },
 ]
