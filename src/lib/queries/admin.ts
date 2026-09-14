@@ -189,6 +189,7 @@ export type ProductUpsert = {
   warranty_months: number
   has_serial_tracking: boolean
   is_active: boolean
+  short_description: string | null
   description: string | null
   specifications: Record<string, string>
   badges: string[]
