@@ -1,6 +1,21 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Eye, ImageIcon, Pencil, Plus, Search, Trash2, Upload, X } from "lucide-react"
+import {
+  Bold,
+  Eye,
+  Heading,
+  ImageIcon,
+  Italic,
+  List,
+  ListChecks,
+  ListOrdered,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
@@ -219,6 +234,7 @@ function ProductDialog({
           warrantyMonths: String(product.warranty_months),
           hasSerialTracking: product.has_serial_tracking,
           isActive: product.is_active,
+          shortDescription: product.short_description ?? "",
           description: product.description ?? "",
           badges: product.badges.join(", "),
           status: product.status,
@@ -239,6 +255,57 @@ function ProductDialog({
   useEffect(() => {
     if (!product && name) setValue("slug", slugify(name))
   }, [name, product, setValue])
+
+  // Lightweight markdown formatting toolbar for the long description. Buttons
+  // insert markdown the public product page renders as premium sections; if the
+  // admin never uses them, the page still auto-formats plain text.
+  const descRef = useRef<HTMLTextAreaElement | null>(null)
+  const descReg = register("description")
+
+  const commitDesc = (nextValue: string, selStart: number, selEnd: number) => {
+    setValue("description", nextValue, { shouldDirty: true })
+    requestAnimationFrame(() => {
+      const ta = descRef.current
+      if (ta) {
+        ta.focus()
+        ta.setSelectionRange(selStart, selEnd)
+      }
+    })
+  }
+
+  const wrapInline = (marker: string) => {
+    const ta = descRef.current
+    if (!ta) return
+    const { selectionStart: s, selectionEnd: e, value } = ta
+    const selected = value.slice(s, e) || "text"
+    const inserted = `${marker}${selected}${marker}`
+    commitDesc(value.slice(0, s) + inserted + value.slice(e), s + marker.length, s + marker.length + selected.length)
+  }
+
+  const prefixLines = (makePrefix: (index: number) => string) => {
+    const ta = descRef.current
+    if (!ta) return
+    const { selectionStart: s, selectionEnd: e, value } = ta
+    const lineStart = value.lastIndexOf("\n", s - 1) + 1
+    let lineEnd = value.indexOf("\n", e)
+    if (lineEnd === -1) lineEnd = value.length
+    const block = value.slice(lineStart, lineEnd)
+    const stripMarker = /^(\s*)(?:#{1,6}\s+|[-*•]\s+|\d+[.)]\s+|[✅✔☑✓]️?\s*)?/
+    const rebuilt = block
+      .split("\n")
+      .map((line, i) => line.replace(stripMarker, `$1${makePrefix(i)}`))
+      .join("\n")
+    commitDesc(value.slice(0, lineStart) + rebuilt + value.slice(lineEnd), lineStart, lineStart + rebuilt.length)
+  }
+
+  const FORMAT_BUTTONS = [
+    { icon: Heading, title: "Heading", run: () => prefixLines(() => "## ") },
+    { icon: Bold, title: "Bold", run: () => wrapInline("**") },
+    { icon: Italic, title: "Italic", run: () => wrapInline("*") },
+    { icon: ListChecks, title: "Checklist", run: () => prefixLines(() => "✅ ") },
+    { icon: List, title: "Bullet list", run: () => prefixLines(() => "- ") },
+    { icon: ListOrdered, title: "Numbered list", run: () => prefixLines((i) => `${i + 1}. `) },
+  ]
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -276,7 +343,8 @@ function ProductDialog({
         warranty_months: Number(values.warrantyMonths),
         has_serial_tracking: values.hasSerialTracking,
         is_active: values.isActive,
-        description: values.description || null,
+        short_description: values.shortDescription?.trim() || null,
+        description: values.description?.trim() || null,
         specifications,
         badges: values.badges ? values.badges.split(",").map((b) => b.trim()).filter(Boolean) : [],
         images,
@@ -370,12 +438,47 @@ function ProductDialog({
             </label>
           </div>
 
-          <Field label="Description">
+          <Field label="Short description" error={errors.shortDescription?.message}>
             <textarea
-              {...register("description")}
-              className="min-h-[84px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-3 text-sm text-text outline-none"
+              {...register("shortDescription")}
+              rows={2}
+              placeholder="One or two lines shown right under the product name."
+              className="w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-2.5 text-sm text-text outline-none"
             />
           </Field>
+
+          <div>
+            <Label className="mb-1.5 block">Full description</Label>
+            <div className="overflow-hidden rounded-[var(--radius-sm)] border border-border bg-surface-2">
+              <div className="flex flex-wrap items-center gap-1 border-b border-border bg-surface px-2 py-1.5">
+                {FORMAT_BUTTONS.map((b) => (
+                  <button
+                    key={b.title}
+                    type="button"
+                    title={b.title}
+                    onClick={b.run}
+                    className="flex size-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-2 hover:text-text"
+                  >
+                    <b.icon className="size-4" />
+                  </button>
+                ))}
+              </div>
+              <textarea
+                {...descReg}
+                ref={(el) => {
+                  descReg.ref(el)
+                  descRef.current = el
+                }}
+                rows={8}
+                placeholder="Write the full description. Use the toolbar to add headings, checklists and bullets — or just paste your text and the site will auto-format it into sections."
+                className="min-h-[160px] w-full resize-y bg-surface-2 px-3.5 py-3 text-sm leading-relaxed text-text outline-none"
+              />
+            </div>
+            <p className="mt-1.5 text-xs text-muted">
+              Tip: start feature lines with ✅ (Checklist button). Even unformatted text is auto-arranged into
+              premium sections on the product page.
+            </p>
+          </div>
 
           <div>
             <Label className="mb-2 block">Specifications</Label>

@@ -15,6 +15,7 @@ export const productSchema = z.object({
   warrantyMonths: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0, "Enter warranty months"),
   hasSerialTracking: z.boolean(),
   isActive: z.boolean(),
+  shortDescription: z.string().optional(),
   description: z.string().optional(),
   badges: z.string().optional(),
   status: z.enum(["draft", "published", "archived"]),

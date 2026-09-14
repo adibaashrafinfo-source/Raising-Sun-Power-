@@ -28,6 +28,7 @@ export type Product = {
   price: number
   sale_price: number | null
   stock_qty: number
+  short_description: string | null
   description: string | null
   specifications: Record<string, string>
   badges: string[]

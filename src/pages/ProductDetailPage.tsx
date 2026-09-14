@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { ChevronRight, Heart, Minus, Plus, ShoppingCart, Star, Truck } from "lucide-react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 
+import { ProductDescription } from "@/components/ProductDescription"
 import { CatalogProductCard } from "@/components/product/CatalogProductCard"
 import { ProductArt } from "@/components/product/ProductArt"
 import { Button } from "@/components/ui/button"
@@ -205,6 +206,9 @@ export default function ProductDetailPage() {
           <h1 className="text-balance font-heading text-[clamp(24px,3.2vw,30px)] font-extrabold leading-tight tracking-tight text-text">
             {product.name}
           </h1>
+          {product.short_description && (
+            <p className="mt-2.5 text-[15px] leading-relaxed text-muted">{product.short_description}</p>
+          )}
           <div className="mt-3 flex items-center gap-2">
             <span className="flex gap-0.5 text-gold-400">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -316,15 +320,21 @@ export default function ProductDetailPage() {
             <TabsTrigger value="specifications">Specifications</TabsTrigger>
             <TabsTrigger value="reviews">Reviews ({reviews.length})</TabsTrigger>
           </TabsList>
-          <TabsContent value="description" className="max-w-[760px]">
-            <p className="mb-4 text-[15px] leading-relaxed text-muted">
-              {product.description ||
-                `The ${product.name} is sourced from authorized channels and shipped with genuine warranty documentation. Built for the Bangladeshi climate and grid conditions, it delivers dependable performance for home backup, commercial supply, or a full solar installation.`}
-            </p>
-            <p className="text-[15px] leading-relaxed text-muted">
-              Every unit is inspected before dispatch and delivered nationwide through Steadfast Courier with
-              Cash on Delivery available.
-            </p>
+          <TabsContent value="description" className="max-w-[820px]">
+            <ProductDescription
+              text={product.description}
+              fallback={
+                <div className="flex flex-col gap-3.5">
+                  <p className="text-[15px] leading-relaxed text-muted">
+                    {`The ${product.name} is sourced from authorized channels and shipped with genuine warranty documentation. Built for the Bangladeshi climate and grid conditions, it delivers dependable performance for home backup, commercial supply, or a full solar installation.`}
+                  </p>
+                  <p className="text-[15px] leading-relaxed text-muted">
+                    Every unit is inspected before dispatch and delivered nationwide through Steadfast Courier with
+                    Cash on Delivery available.
+                  </p>
+                </div>
+              }
+            />
           </TabsContent>
           <TabsContent value="specifications">
             {specs.length === 0 ? (
