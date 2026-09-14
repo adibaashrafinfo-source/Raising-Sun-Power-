@@ -112,6 +112,30 @@ export type Settings = {
   whatsapp_number: string | null
 }
 
+export type SiteContent = {
+  id: number
+  header_logo_url: string | null
+  footer_logo_url: string | null
+  hero_image_url: string | null
+  hero_badge: string | null
+  hero_headline_prefix: string | null
+  hero_headline_highlight: string | null
+  hero_subheading: string | null
+  footer_description: string | null
+  footer_designed_by: string | null
+  about_badge: string | null
+  about_title: string | null
+  about_highlight: string | null
+  about_intro: string | null
+  about_story: string | null
+  showroom_1_name: string | null
+  showroom_1_address: string | null
+  showroom_2_name: string | null
+  showroom_2_address: string | null
+  business_hours: string | null
+  updated_at: string
+}
+
 export type ContactMessageStatus = "new" | "read"
 
 export type ContactMessageInsert = {

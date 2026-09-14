@@ -4,6 +4,7 @@ import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { CtaBand } from "@/pages/home/CtaBand"
 import { useSeo } from "@/hooks/use-seo"
+import { useSiteContent } from "@/hooks/use-site-content"
 
 const STATS = [
   { value: "12,000+", label: "Orders delivered" },
@@ -49,6 +50,21 @@ export default function AboutPage() {
     description:
       "Rising Sun Power BD is Bangladesh's trusted solar & electrical products store — genuine brands, engineered reliability, nationwide delivery.",
   })
+  const { data: cms } = useSiteContent()
+  const badge = cms?.about_badge || "Bangladesh's trusted solar & electrical store"
+  const title = cms?.about_title || "Powering Bangladeshi homes and businesses"
+  const highlight = cms?.about_highlight || "since day one."
+  const intro =
+    cms?.about_intro ||
+    "Rising Sun Power BD started with a simple frustration: too many customers were being sold mismatched, undersized or outright fake solar equipment. We built a store — and a team — around fixing that."
+  const storyParagraphs = (cms?.about_story || "")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+  const showrooms = [
+    { name: cms?.showroom_1_name || "Dhaka Showroom", address: cms?.showroom_1_address || "Nawabpur Road, Electrical Market, Dhaka 1100" },
+    { name: cms?.showroom_2_name || "Chattogram Branch", address: cms?.showroom_2_address || "Reazuddin Bazar, Kotwali, Chattogram 4000" },
+  ].filter((s) => s.name || s.address)
 
   return (
     <main>
@@ -74,19 +90,15 @@ export default function AboutPage() {
         <div className="relative mx-auto max-w-[760px] text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-muted shadow-[var(--shadow-sm)]">
             <span className="size-[7px] rounded-full bg-green-400 shadow-[0_0_0_4px_rgba(103,167,14,.2)]" />
-            Bangladesh's trusted solar &amp; electrical store
+            {badge}
           </span>
           <h1 className="mt-5 text-balance font-heading text-[clamp(30px,4.6vw,48px)] font-extrabold leading-[1.1] tracking-tight text-text">
-            Powering Bangladeshi homes and businesses{" "}
+            {title}{" "}
             <span className="bg-[linear-gradient(120deg,#217CCA,#F49E09_52%,#67A70E)] bg-clip-text text-transparent">
-              since day one.
+              {highlight}
             </span>
           </h1>
-          <p className="mt-5 text-[clamp(15px,2vw,17px)] leading-relaxed text-muted">
-            Rising Sun Power BD started with a simple frustration: too many customers were being sold
-            mismatched, undersized or outright fake solar equipment. We built a store — and a team — around
-            fixing that.
-          </p>
+          <p className="mt-5 text-[clamp(15px,2vw,17px)] leading-relaxed text-muted">{intro}</p>
         </div>
 
         <div className="mx-auto mt-9 flex max-w-[820px] flex-wrap items-center justify-center gap-6 sm:gap-10">
@@ -111,17 +123,11 @@ export default function AboutPage() {
             <h2 className="mt-2 font-heading text-[clamp(22px,3vw,28px)] font-extrabold tracking-tight text-text">
               From one showroom to a nationwide supplier
             </h2>
-            <p className="mt-4 text-[15px] leading-relaxed text-muted">
-              We opened our first shop on Nawabpur Road, Dhaka's historic electrical goods market, selling
-              switchgear and cables to local installers. As load-shedding pushed more households and
-              businesses toward solar backup, we expanded into full solar systems — but kept the same rule:
-              never sell anything we wouldn't install in our own homes.
-            </p>
-            <p className="mt-4 text-[15px] leading-relaxed text-muted">
-              Today we stock genuine panels, inverters, batteries and switchgear from trusted brands, run a
-              Chattogram branch alongside our Dhaka showroom, and ship nationwide — backed by engineers who
-              size your system for free before you spend a single taka.
-            </p>
+            {storyParagraphs.map((p, i) => (
+              <p key={i} className="mt-4 text-[15px] leading-relaxed text-muted">
+                {p}
+              </p>
+            ))}
           </div>
 
           <div>
@@ -180,8 +186,9 @@ export default function AboutPage() {
           </h2>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <ShowroomCard name="Dhaka Showroom" address="Nawabpur Road, Electrical Market, Dhaka 1100" />
-          <ShowroomCard name="Chattogram Branch" address="Reazuddin Bazar, Kotwali, Chattogram 4000" />
+          {showrooms.map((s) => (
+            <ShowroomCard key={s.name} name={s.name} address={s.address} />
+          ))}
         </div>
         <div className="mt-6 flex justify-center">
           <Button asChild size="lg" variant="outline">

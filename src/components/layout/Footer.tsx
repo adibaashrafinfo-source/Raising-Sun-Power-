@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 
 import { FacebookIcon, InstagramIcon, LinkedinIcon, TiktokIcon, YoutubeIcon } from "@/components/icons/SocialIcons"
 import { useSettings } from "@/hooks/use-checkout"
+import { useSiteContent } from "@/hooks/use-site-content"
 
 const shopLinks = ["Solar Panels", "Inverters", "Batteries", "MCB & MCCB", "Cables & Switchgear"]
 const serviceLinks = ["Track order", "Returns", "Warranty", "FAQ"]
@@ -15,9 +16,19 @@ const companyLinks = [
 
 export function Footer() {
   const { data: settings } = useSettings()
+  const { data: cms } = useSiteContent()
   const whatsappNumber = settings?.whatsapp_number || "8801786896390"
   const phone = settings?.support_phone || "+8801786896390"
   const email = settings?.contact_email || "info@risingsunpowerbd.com"
+  const logo = cms?.footer_logo_url || "/logo.jpg"
+  const description =
+    cms?.footer_description ||
+    "Genuine solar & electrical products with engineered reliability — powering homes and businesses across Bangladesh with clean, renewable energy."
+  const designedBy = cms?.footer_designed_by || "Abrar IT"
+  const showrooms = [
+    { name: cms?.showroom_1_name || "Dhaka Showroom", address: cms?.showroom_1_address || "Nawabpur Road, Electrical Market, Dhaka 1100" },
+    { name: cms?.showroom_2_name || "Chattogram Branch", address: cms?.showroom_2_address || "Reazuddin Bazar, Kotwali, Chattogram 4000" },
+  ].filter((s) => s.name || s.address)
 
   const socialLinks = [
     { url: settings?.facebook_url, icon: FacebookIcon, label: "Facebook" },
@@ -47,7 +58,7 @@ export function Footer() {
           <div className="lg:col-span-4">
             <div className="flex items-center gap-3">
               <span className="flex size-[52px] items-center justify-center overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,.25)]">
-                <img src="/logo.jpg" alt="RSP" className="size-full object-cover" />
+                <img src={logo} alt="RSP" className="size-full object-cover" />
               </span>
               <span className="flex flex-col leading-tight">
                 <span className="font-heading text-[18px] font-extrabold tracking-wide text-white">
@@ -58,10 +69,7 @@ export function Footer() {
                 </span>
               </span>
             </div>
-            <p className="mt-4 max-w-[320px] text-[13.5px] leading-relaxed text-[#9DB6DA]">
-              Genuine solar &amp; electrical products with engineered reliability — powering homes and
-              businesses across Bangladesh with clean, renewable energy.
-            </p>
+            <p className="mt-4 max-w-[320px] text-[13.5px] leading-relaxed text-[#9DB6DA]">{description}</p>
 
             <div className="mt-5 flex flex-col gap-2.5">
               <ContactChip icon={Phone} href={`tel:${phone.replace(/\s|-/g, "")}`} label={phone} />
@@ -103,8 +111,9 @@ export function Footer() {
           <div className="lg:col-span-3">
             <div className="mb-4 font-heading text-sm font-bold uppercase tracking-wide text-white">Our Shops</div>
             <div className="flex flex-col gap-4">
-              <ShopAddress name="Dhaka Showroom" address="Nawabpur Road, Electrical Market, Dhaka 1100" />
-              <ShopAddress name="Chattogram Branch" address="Reazuddin Bazar, Kotwali, Chattogram 4000" />
+              {showrooms.map((s) => (
+                <ShopAddress key={s.name} name={s.name} address={s.address} />
+              ))}
             </div>
           </div>
         </div>
@@ -124,9 +133,11 @@ export function Footer() {
           <span className="text-[12.5px] text-[#7E98C2]">
             © {new Date().getFullYear()} Rising Sun Power BD. All rights reserved.
           </span>
-          <span className="text-[12.5px] text-[#7E98C2]">
-            Designed by <b className="text-gold-400">Abrar IT</b>
-          </span>
+          {designedBy && (
+            <span className="text-[12.5px] text-[#7E98C2]">
+              Designed by <b className="text-gold-400">{designedBy}</b>
+            </span>
+          )}
         </div>
       </div>
     </footer>

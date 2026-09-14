@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { useSettings } from "@/hooks/use-checkout"
 import { useCreateContactMessage } from "@/hooks/use-contact"
 import { useSeo } from "@/hooks/use-seo"
+import { useSiteContent } from "@/hooks/use-site-content"
 import { type ContactFormValues, contactSchema } from "@/lib/schemas/contact"
 import { cn } from "@/lib/utils"
 
@@ -20,11 +21,17 @@ export default function ContactPage() {
       "Get in touch with Rising Sun Power BD — call, WhatsApp, email, or visit our Dhaka and Chattogram showrooms.",
   })
   const { data: settings } = useSettings()
+  const { data: cms } = useSiteContent()
   const createMessage = useCreateContactMessage()
 
   const whatsappNumber = settings?.whatsapp_number || "8801786896390"
   const phone = settings?.support_phone || "+8801786896390"
   const email = settings?.contact_email || "info@risingsunpowerbd.com"
+  const businessHours = cms?.business_hours || "Sat–Thu, 10am–8pm"
+  const showrooms = [
+    { name: cms?.showroom_1_name || "Dhaka Showroom", address: cms?.showroom_1_address || "Nawabpur Road, Electrical Market, Dhaka 1100" },
+    { name: cms?.showroom_2_name || "Chattogram Branch", address: cms?.showroom_2_address || "Reazuddin Bazar, Kotwali, Chattogram 4000" },
+  ].filter((s) => s.name || s.address)
 
   const {
     register,
@@ -86,7 +93,7 @@ export default function ContactPage() {
           href={`https://wa.me/${whatsappNumber}`}
         />
         <ContactCard icon={Mail} color="#F49E09" tint="rgba(244,158,9,.16)" label="Email" value={email} href={`mailto:${email}`} />
-        <ContactCard icon={Clock} color="#67A70E" tint="rgba(103,167,14,.14)" label="Business hours" value="Sat–Thu, 10am–8pm" />
+        <ContactCard icon={Clock} color="#67A70E" tint="rgba(103,167,14,.14)" label="Business hours" value={businessHours} />
       </div>
 
       <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">
@@ -122,8 +129,9 @@ export default function ContactPage() {
         </form>
 
         <div className="flex flex-col gap-4">
-          <ShowroomCard name="Dhaka Showroom" address="Nawabpur Road, Electrical Market, Dhaka 1100" />
-          <ShowroomCard name="Chattogram Branch" address="Reazuddin Bazar, Kotwali, Chattogram 4000" />
+          {showrooms.map((s) => (
+            <ShowroomCard key={s.name} name={s.name} address={s.address} />
+          ))}
           <a
             href={`https://wa.me/${whatsappNumber}`}
             className="flex items-center justify-center gap-2.5 rounded-[18px] bg-[#25D366] px-5 py-4 text-[15px] font-bold text-[#053a1d] no-underline shadow-[0_10px_26px_rgba(37,211,102,.3)]"
