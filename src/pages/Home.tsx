@@ -1,4 +1,5 @@
 import { FloatingWhatsAppButton } from "@/components/layout/FloatingWhatsAppButton"
+import { Reveal } from "@/components/ui/reveal"
 import { useProducts } from "@/hooks/use-catalog"
 import { useSeo } from "@/hooks/use-seo"
 import { BrandsStrip } from "@/pages/home/BrandsStrip"
@@ -6,7 +7,6 @@ import { CategoryGrid } from "@/pages/home/CategoryGrid"
 import { CtaBand } from "@/pages/home/CtaBand"
 import { DealsBand } from "@/pages/home/DealsBand"
 import { Hero } from "@/pages/home/Hero"
-import { Newsletter } from "@/pages/home/Newsletter"
 import { ProductGridSection } from "@/pages/home/ProductGridSection"
 import { ShopBySolution } from "@/pages/home/ShopBySolution"
 import { Testimonials } from "@/pages/home/Testimonials"
@@ -26,31 +26,34 @@ export default function Home() {
   return (
     <main>
       <Hero />
-      <TrustChips />
-      <CategoryGrid />
-      <ProductGridSection
-        kicker="Loved by installers"
-        kickerColor="#67A70E"
-        title="Best sellers this month"
-        linkLabel="See more"
-        products={bestSellers.data?.products ?? []}
-        isLoading={bestSellers.isLoading}
-      />
-      <DealsBand />
-      <ShopBySolution />
-      <ProductGridSection
-        kicker="Just landed"
-        kickerColor="#67A70E"
-        title="New arrivals"
-        linkLabel="Browse all"
-        products={newArrivals.data?.products ?? []}
-        isLoading={newArrivals.isLoading}
-      />
-      <BrandsStrip />
-      <WhyChooseUs />
-      <Testimonials />
-      <CtaBand />
-      <Newsletter />
+      <Reveal><TrustChips /></Reveal>
+      <Reveal><CategoryGrid /></Reveal>
+      <Reveal>
+        <ProductGridSection
+          kicker="Loved by installers"
+          kickerColor="#67A70E"
+          title="Best sellers this month"
+          linkLabel="See more"
+          products={bestSellers.data?.products ?? []}
+          isLoading={bestSellers.isLoading}
+        />
+      </Reveal>
+      <Reveal><DealsBand /></Reveal>
+      <Reveal><ShopBySolution /></Reveal>
+      <Reveal>
+        <ProductGridSection
+          kicker="Just landed"
+          kickerColor="#67A70E"
+          title="New arrivals"
+          linkLabel="Browse all"
+          products={newArrivals.data?.products ?? []}
+          isLoading={newArrivals.isLoading}
+        />
+      </Reveal>
+      <Reveal><BrandsStrip /></Reveal>
+      <Reveal><WhyChooseUs /></Reveal>
+      <Reveal><Testimonials /></Reveal>
+      <Reveal><CtaBand /></Reveal>
       <FloatingWhatsAppButton />
     </main>
   )
