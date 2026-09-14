@@ -100,8 +100,8 @@ export default function AdminCmsPage() {
         </Section>
 
         {/* Hero */}
-        <Section title="Homepage Hero" subtitle="The headline, subheading and product image at the top of the homepage.">
-          <ImageField label="Hero product image (transparent PNG recommended)" value={form.hero_image_url} onChange={(v) => set("hero_image_url", v)} wide />
+        <Section title="Homepage Hero" subtitle="The full-width background image, headline and subheading at the top of the homepage.">
+          <ImageField label="Hero background image (wide landscape scene)" value={form.hero_image_url} onChange={(v) => set("hero_image_url", v)} wide />
           <TextField label="Badge text" value={form.hero_badge} onChange={(v) => set("hero_badge", v)} />
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
             <TextField label="Headline — first part" value={form.hero_headline_prefix} onChange={(v) => set("hero_headline_prefix", v)} />
