@@ -6,6 +6,7 @@ import { BrandsStrip } from "@/pages/home/BrandsStrip"
 import { CategoryGrid } from "@/pages/home/CategoryGrid"
 import { CtaBand } from "@/pages/home/CtaBand"
 import { DealsBand } from "@/pages/home/DealsBand"
+import { FeaturedProducts } from "@/pages/home/FeaturedProducts"
 import { Hero } from "@/pages/home/Hero"
 import { ProductGridSection } from "@/pages/home/ProductGridSection"
 import { ShopBySolution } from "@/pages/home/ShopBySolution"
@@ -38,6 +39,7 @@ export default function Home() {
           isLoading={bestSellers.isLoading}
         />
       </Reveal>
+      <Reveal><FeaturedProducts /></Reveal>
       <Reveal><DealsBand /></Reveal>
       <Reveal><ShopBySolution /></Reveal>
       <Reveal>
