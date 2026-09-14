@@ -6,7 +6,7 @@ import { useSettings } from "@/hooks/use-checkout"
 export function FloatingWhatsAppButton() {
   const { data: settings } = useSettings()
   const [hovered, setHovered] = useState(false)
-  const whatsappNumber = settings?.whatsapp_number || "8801705742208"
+  const whatsappNumber = settings?.whatsapp_number || "8801786896390"
 
   return (
     <a

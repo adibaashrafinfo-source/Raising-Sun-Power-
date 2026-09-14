@@ -145,7 +145,7 @@ export default function OrderConfirmationPage() {
           <Link to="/products">Continue Shopping</Link>
         </Button>
         <Button asChild size="lg">
-          <a href="https://wa.me/8801705742208">
+          <a href="https://wa.me/8801786896390">
             <MessageCircle className="size-[18px]" />
             WhatsApp Support
           </a>

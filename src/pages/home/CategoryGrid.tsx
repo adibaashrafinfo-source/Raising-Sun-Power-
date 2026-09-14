@@ -14,23 +14,20 @@ export function CategoryGrid() {
         linkTo="/products"
         linkLabel="View all"
       />
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-8 lg:gap-3.5">
         {categories.map((cat) => (
           <Link
             key={cat.slug}
             to={`/category/${cat.slug}`}
-            className="flex flex-col gap-3.5 rounded-[18px] border border-border bg-surface p-5 no-underline shadow-[var(--shadow-sm)] transition-[transform,box-shadow,border-color] duration-250 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-[var(--shadow)]"
+            className="flex flex-col items-center gap-2.5 rounded-[16px] border border-border bg-surface px-3 py-4 text-center no-underline shadow-[var(--shadow-sm)] transition-[transform,box-shadow,border-color] duration-250 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-[var(--shadow)]"
           >
             <span
-              className="flex size-[52px] items-center justify-center rounded-2xl shadow-[inset_0_1px_0_rgba(255,255,255,.35)]"
+              className="flex size-11 items-center justify-center rounded-2xl shadow-[inset_0_1px_0_rgba(255,255,255,.35)]"
               style={{ background: cat.tint }}
             >
               <CategoryIcon slug={cat.slug} />
             </span>
-            <div>
-              <div className="font-heading text-[15px] font-bold text-text">{cat.name}</div>
-              <div className="mt-0.5 text-[12.5px] text-muted">{cat.count}</div>
-            </div>
+            <div className="font-heading text-[12.5px] font-bold leading-tight text-text">{cat.name}</div>
           </Link>
         ))}
       </div>

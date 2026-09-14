@@ -22,8 +22,8 @@ export default function ContactPage() {
   const { data: settings } = useSettings()
   const createMessage = useCreateContactMessage()
 
-  const whatsappNumber = settings?.whatsapp_number || "8801705742208"
-  const phone = settings?.support_phone || "+8801705742208"
+  const whatsappNumber = settings?.whatsapp_number || "8801786896390"
+  const phone = settings?.support_phone || "+8801786896390"
   const email = settings?.contact_email || "info@risingsunpowerbd.com"
 
   const {

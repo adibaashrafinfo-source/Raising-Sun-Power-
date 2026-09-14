@@ -2,12 +2,20 @@ import { Link } from "react-router-dom"
 
 import { megaCols } from "@/data/home-content"
 
-export function MegaMenu({ onClose }: { onClose: () => void }) {
+export function MegaMenu({
+  onClose,
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  onClose: () => void
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
+}) {
   return (
     <div
-      onMouseEnter={(e) => e.stopPropagation()}
-      onMouseLeave={onClose}
-      className="absolute inset-x-0 top-full border-b border-border bg-surface shadow-[var(--shadow)]"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className="absolute inset-x-0 top-full border-b border-border bg-surface shadow-[var(--shadow)] before:absolute before:inset-x-0 before:-top-2 before:h-2 before:content-['']"
     >
       <div className="mx-auto grid max-w-[1280px] grid-cols-2 gap-6 px-6 py-6 sm:grid-cols-3 lg:grid-cols-[repeat(5,1fr)_1.2fr]">
         {megaCols.map((col) => (

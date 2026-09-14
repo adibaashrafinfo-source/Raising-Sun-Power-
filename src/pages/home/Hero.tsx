@@ -59,9 +59,9 @@ export function Hero() {
           </span>
           <h1 className="mt-5 text-balance font-heading text-[clamp(32px,4.6vw,52px)] font-extrabold leading-[1.08] tracking-tight text-text">
             Powering Bangladesh with{" "}
-            <span className="text-blue">clean,</span>{" "}
+            <span className="text-blue">green &amp;</span>{" "}
             <span className="relative inline-block bg-[linear-gradient(120deg,#2A6B08,#67A70E)] bg-clip-text text-transparent">
-              reliable energy.
+              renewable energy.
               <svg
                 viewBox="0 0 220 14"
                 className="absolute -bottom-2 left-0 h-3 w-full text-orange-500"

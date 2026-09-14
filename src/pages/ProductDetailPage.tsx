@@ -291,7 +291,7 @@ export default function ProductDetailPage() {
           <div className="mt-3 text-[12.5px] text-muted">
             💳 EMI available on cards ·{" "}
             <b className="text-text">Need bulk pricing?</b>{" "}
-            <a href="https://wa.me/8801705742208" className="text-blue no-underline">
+            <a href="https://wa.me/8801786896390" className="text-blue no-underline">
               Ask on WhatsApp
             </a>
           </div>

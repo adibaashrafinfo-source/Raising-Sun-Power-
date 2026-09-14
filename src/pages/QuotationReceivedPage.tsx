@@ -62,7 +62,7 @@ export default function QuotationReceivedPage() {
 
       <div className="mt-[22px] flex flex-wrap gap-3">
         <Button asChild size="lg" className="min-w-[170px] flex-1">
-          <a href={`https://wa.me/8801705742208?text=${encodeURIComponent(waMessage)}`}>
+          <a href={`https://wa.me/8801786896390?text=${encodeURIComponent(waMessage)}`}>
             <MessageCircle className="size-[18px]" />
             Chat on WhatsApp Now
           </a>
@@ -73,8 +73,8 @@ export default function QuotationReceivedPage() {
       </div>
       <div className="mt-[22px] rounded-2xl bg-surface-2 p-4 text-center text-[13.5px] text-muted">
         Questions?{" "}
-        <a href="https://wa.me/8801705742208" className="font-bold text-blue no-underline">
-          Call/WhatsApp +880 1705-742208
+        <a href="https://wa.me/8801786896390" className="font-bold text-blue no-underline">
+          Call/WhatsApp +880 1786-896390
         </a>
       </div>
     </main>

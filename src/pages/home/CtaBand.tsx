@@ -20,13 +20,13 @@ export function CtaBand() {
           </div>
           <div className="flex flex-wrap gap-3">
             <a
-              href="https://wa.me/8801705742208"
+              href="https://wa.me/8801786896390"
               className="flex h-[52px] items-center gap-2.5 rounded-2xl bg-[#25D366] px-6 text-[15px] font-bold text-[#053a1d] no-underline shadow-[0_10px_26px_rgba(37,211,102,.35)]"
             >
               WhatsApp us
             </a>
             <a
-              href="tel:+8801705742208"
+              href="tel:+8801786896390"
               className="flex h-[52px] items-center gap-2.5 rounded-2xl border border-white/20 bg-white/15 px-6 text-[15px] font-bold text-white no-underline"
             >
               <Phone className="size-[18px]" />
