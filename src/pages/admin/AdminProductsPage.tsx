@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Pencil, Plus, Search, Trash2, Upload, X } from "lucide-react"
+import { Eye, ImageIcon, Pencil, Plus, Search, Trash2, Upload, X } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
@@ -103,8 +103,19 @@ export default function AdminProductsPage() {
               {filtered.map((product) => (
                 <tr key={product.id} className="border-b border-border last:border-0 hover:bg-surface-2">
                   <td className="px-4 py-3">
-                    <div className="font-semibold text-text">{product.name}</div>
-                    <div className="text-xs text-muted">{product.category?.name}</div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-2">
+                        {product.images?.[0] ? (
+                          <img src={product.images[0]} alt="" className="size-full object-cover" />
+                        ) : (
+                          <ImageIcon className="size-4 text-muted" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-semibold text-text">{product.name}</div>
+                        <div className="text-xs text-muted">{product.category?.name}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-xs text-muted">{product.sku ?? "—"}</td>
                   <td className="px-4 py-3 text-xs text-muted">{product.brand?.name ?? "—"}</td>
@@ -129,10 +140,26 @@ export default function AdminProductsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => openEdit(product)}>
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        title="View on site"
+                      >
+                        <a href={`/product/${product.slug}`} target="_blank" rel="noreferrer">
+                          <Eye className="size-3.5" />
+                        </a>
+                      </Button>
+                      <Button variant="outline" size="sm" title="Edit" onClick={() => openEdit(product)}>
                         <Pencil className="size-3.5" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(product)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title="Delete"
+                        className="text-red-500 hover:text-red-600"
+                        onClick={() => handleDelete(product)}
+                      >
                         <Trash2 className="size-3.5" />
                       </Button>
                     </div>

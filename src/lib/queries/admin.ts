@@ -123,6 +123,46 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
   if (error) throw error
 }
 
+// Orders own several dependent rows. order_items cascade-delete with the order,
+// but customer_payments and sales_returns reference orders WITHOUT a cascade, so
+// they'd block the delete — remove them first. Each customer payment also wrote a
+// ledger_entries row (via trg_customer_payment_after_insert, source_id = payment
+// id, no FK), which is cleared here too so the finance ledger doesn't keep phantom
+// income after the order is gone. (Deleting an order does not restore stock —
+// cancel the order for that; delete is for erroneous/duplicate orders.)
+export async function deleteOrder(id: string): Promise<void> {
+  const { data: payments, error: paymentsFetchError } = await supabase
+    .from("customer_payments")
+    .select("id")
+    .eq("order_id", id)
+  if (paymentsFetchError) throw paymentsFetchError
+
+  const paymentIds = (payments ?? []).map((p) => p.id)
+  if (paymentIds.length > 0) {
+    const { error: ledgerError } = await supabase
+      .from("ledger_entries")
+      .delete()
+      .eq("source_type", "sale_payment")
+      .in("source_id", paymentIds)
+    if (ledgerError) throw ledgerError
+
+    const { error: paymentsDeleteError } = await supabase
+      .from("customer_payments")
+      .delete()
+      .eq("order_id", id)
+    if (paymentsDeleteError) throw paymentsDeleteError
+  }
+
+  // sales_return_items cascade with their sales_returns parent.
+  const { error: returnsError } = await supabase.from("sales_returns").delete().eq("order_id", id)
+  if (returnsError) throw returnsError
+
+  const { error } = await supabase.from("orders").delete().eq("id", id)
+  if (error) throw error
+
+  await logActivity({ action: "delete", table_name: "orders", record_id: id })
+}
+
 // ---------- Products ----------
 export async function fetchAllProductsAdmin(): Promise<Product[]> {
   const { data, error } = await supabase

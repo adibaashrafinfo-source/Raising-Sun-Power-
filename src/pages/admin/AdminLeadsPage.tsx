@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { X } from "lucide-react"
+import { Eye, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -58,14 +58,14 @@ export default function AdminLeadsPage() {
                 <th className="px-4 py-3 font-semibold">Load</th>
                 <th className="px-4 py-3 font-semibold">Source</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 text-right font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {leads.map((lead) => (
                 <tr
                   key={lead.id}
-                  onClick={() => setSelected(lead)}
-                  className="cursor-pointer border-b border-border last:border-0 hover:bg-surface-2"
+                  className="border-b border-border last:border-0 hover:bg-surface-2"
                 >
                   <td className="px-4 py-3 font-semibold text-text">{lead.name}</td>
                   <td className="px-4 py-3 text-muted">{lead.phone}</td>
@@ -80,6 +80,13 @@ export default function AdminLeadsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <Badge variant={STATUS_VARIANT[lead.status]}>{lead.status}</Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm" title="View" onClick={() => setSelected(lead)}>
+                        <Eye className="size-3.5" />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}

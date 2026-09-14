@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Pencil, Plus, Trash2 } from "lucide-react"
+import { Eye, Pencil, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -101,10 +101,19 @@ export default function AdminSuppliersPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => openEdit(s)}>
+                      <Button variant="outline" size="sm" title="View" onClick={() => setDetailSupplier(s)}>
+                        <Eye className="size-3.5" />
+                      </Button>
+                      <Button variant="outline" size="sm" title="Edit" onClick={() => openEdit(s)}>
                         <Pencil className="size-3.5" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(s)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title="Delete"
+                        className="text-red-500 hover:text-red-600"
+                        onClick={() => handleDelete(s)}
+                      >
                         <Trash2 className="size-3.5" />
                       </Button>
                     </div>
