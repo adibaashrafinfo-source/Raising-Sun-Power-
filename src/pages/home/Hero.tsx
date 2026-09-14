@@ -29,18 +29,23 @@ export function Hero() {
   const heroBg = cms?.hero_image_url || "/hero-bg.png"
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative flex min-h-[560px] items-center overflow-hidden sm:min-h-[600px] lg:min-h-[660px]">
       {/* Full-bleed background image + legibility overlays */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[#04102a]" />
-        <img src={heroBg} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover" />
+        <img
+          src={heroBg}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 size-full object-cover object-center"
+        />
         {/* left-weighted darkening so headline text stays readable */}
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,16,42,.94)_0%,rgba(4,16,42,.78)_38%,rgba(4,16,42,.45)_66%,rgba(4,16,42,.2)_100%)]" />
         {/* subtle bottom fade into the page */}
         <div className="absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(180deg,transparent,var(--bg))]" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[1280px] px-4 py-14 sm:px-6 lg:py-24">
+      <div className="relative z-10 mx-auto w-full max-w-[1280px] px-4 py-14 sm:px-6 lg:py-20">
         <div className="max-w-[640px]">
           <span
             className="rsp-animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-sm"
