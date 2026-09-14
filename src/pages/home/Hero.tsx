@@ -122,25 +122,22 @@ export function Hero() {
 
         <div>
           <div className="relative">
-            <div className="relative overflow-hidden rounded-3xl bg-[#0a1f0f] shadow-[0_24px_60px_rgba(5,44,110,.4)]">
-              <img
-                src="/hero-product-cutout.png"
-                alt="Solar panels, Longi battery, Luminous battery, Growatt inverter and Schneider MCBs"
-                className="aspect-[4/3.4] w-full object-cover sm:aspect-[4/3]"
-              />
-              <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-5 sm:p-6">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#F4D560,#F49E09)] px-3 py-1.5 text-xs font-extrabold text-[#3a2600]">
-                  ☀ Best Seller
-                </span>
-                <span className="hidden max-w-[150px] rounded-xl bg-black/35 px-3 py-2 text-right text-[11px] font-bold leading-tight text-white backdrop-blur-sm sm:block">
-                  Clean Energy,
-                  <br />
-                  <span className="text-gold-400">Brighter Tomorrow</span>
-                </span>
-              </div>
-            </div>
+            <span className="absolute left-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#F4D560,#F49E09)] px-3 py-1.5 text-xs font-extrabold text-[#3a2600] shadow-[var(--shadow-sm)]">
+              ☀ Best Seller
+            </span>
+            <span className="absolute right-0 top-0 z-10 hidden max-w-[150px] -rotate-2 text-right font-heading text-[15px] font-bold italic leading-tight text-blue sm:block">
+              Clean Energy,
+              <br />
+              <span className="text-green-600">Brighter Tomorrow</span>
+            </span>
 
-            <div className="absolute -bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2.5 whitespace-nowrap rounded-2xl border border-border bg-surface px-4 py-3 shadow-[var(--shadow)]">
+            <img
+              src="/hero-product-cutout.png"
+              alt="Solar panels, Longi battery, Luminous battery, Growatt inverter and Schneider MCBs"
+              className="mx-auto w-full max-w-[560px] object-contain"
+            />
+
+            <div className="absolute -bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-2.5 whitespace-nowrap rounded-2xl border border-border bg-surface px-4 py-3 shadow-[var(--shadow)]">
               <span className="flex size-9 items-center justify-center rounded-[10px] bg-green-500/15">
                 <Leaf className="size-[18px] text-green-600" />
               </span>
