@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Search, Wallet, X } from "lucide-react"
+import { Eye, Pencil, Search, Trash2, Wallet, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useAllOrders, useRecordCustomerPayment, useUpdateOrderStatus } from "@/hooks/use-admin"
+import { useAllOrders, useDeleteOrder, useRecordCustomerPayment, useUpdateOrderStatus } from "@/hooks/use-admin"
 import { useOrderItems } from "@/hooks/use-checkout"
 import { formatBDT, getErrorMessage } from "@/lib/utils"
 import type { FinancePaymentMethod, Order, OrderStatus } from "@/types/database"
@@ -31,6 +31,7 @@ export default function AdminOrdersPage() {
     search: search || undefined,
   })
   const updateStatus = useUpdateOrderStatus()
+  const deleteOrder = useDeleteOrder()
 
   const handleStatusChange = async (order: Order, newStatus: OrderStatus) => {
     try {
@@ -38,6 +39,18 @@ export default function AdminOrdersPage() {
       toast.success(`Order ${order.order_number} marked ${newStatus}`)
     } catch {
       toast.error("Couldn't update order status")
+    }
+  }
+
+  const handleDelete = async (order: Order) => {
+    if (!window.confirm(`Delete order ${order.order_number}? This permanently removes the order and its payment records and can't be undone.`)) {
+      return
+    }
+    try {
+      await deleteOrder.mutateAsync(order.id)
+      toast.success(`Order ${order.order_number} deleted`)
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't delete order"))
     }
   }
 
@@ -88,14 +101,14 @@ export default function AdminOrdersPage() {
                 <th className="px-4 py-3 font-semibold">Due / Payment Status</th>
                 <th className="px-4 py-3 font-semibold">Order Status</th>
                 <th className="px-4 py-3 font-semibold">Date</th>
+                <th className="px-4 py-3 text-right font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((order) => (
                 <tr
                   key={order.id}
-                  onClick={() => setSelected(order)}
-                  className="cursor-pointer border-b border-border last:border-0 hover:bg-surface-2"
+                  className="border-b border-border last:border-0 hover:bg-surface-2"
                 >
                   <td className="px-4 py-3 font-semibold text-text">{order.order_number}</td>
                   <td className="px-4 py-3 text-muted">
@@ -112,7 +125,7 @@ export default function AdminOrdersPage() {
                       <Badge variant={PAYMENT_STATUS_VARIANT[order.payment_status]}>{order.payment_status}</Badge>
                     </div>
                   </td>
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-4 py-3">
                     <select
                       value={order.status}
                       onChange={(e) => handleStatusChange(order, e.target.value as OrderStatus)}
@@ -127,6 +140,26 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-xs text-muted">
                     {new Date(order.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm" title="View" onClick={() => setSelected(order)}>
+                        <Eye className="size-3.5" />
+                      </Button>
+                      <Button variant="outline" size="sm" title="Edit / Record payment" onClick={() => setSelected(order)}>
+                        <Pencil className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title="Delete"
+                        className="text-red-500 hover:text-red-600"
+                        disabled={deleteOrder.isPending}
+                        onClick={() => handleDelete(order)}
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}

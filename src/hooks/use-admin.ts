@@ -12,6 +12,7 @@ import {
   deleteContactMessage,
   deleteCoupon,
   deleteExpense,
+  deleteOrder,
   deleteProduct,
   deletePurchase,
   deleteSupplier,
@@ -77,6 +78,17 @@ export function useUpdateOrderStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: OrderStatus }) => updateOrderStatus(id, status),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-orders"] }),
+  })
+}
+
+export function useDeleteOrder() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: deleteOrder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] })
+    },
   })
 }
 
