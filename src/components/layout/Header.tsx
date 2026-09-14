@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import {
   ChevronDown,
@@ -37,6 +37,16 @@ export function Header() {
   const { session, profile, isAdmin } = useAuth()
   const navigate = useNavigate()
   const [megaOpen, setMegaOpen] = useState(false)
+  const megaCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const openMega = () => {
+    if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current)
+    setMegaOpen(true)
+  }
+  const scheduleCloseMega = () => {
+    if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current)
+    megaCloseTimer.current = setTimeout(() => setMegaOpen(false), 200)
+  }
   const openCart = useCartStore((s) => s.openCart)
   const openMobileMenu = useCartStore((s) => s.openMobileMenu)
   const cartCount = useCartStore((s) => s.cartCount())
@@ -65,11 +75,11 @@ export function Header() {
             <img src="/logo.jpg" alt="RSP" className="size-full object-cover" />
           </span>
           <span className="hidden flex-col leading-tight sm:flex">
-            <span className="font-heading text-base font-extrabold tracking-tight text-text">
+            <span className="font-heading text-lg font-extrabold tracking-wide text-text">
               Rising Sun Power
             </span>
             <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-orange-500">
-              Solar &amp; Electrical · BD
+              Solar &amp; Electrical
             </span>
           </span>
         </Link>
@@ -97,17 +107,16 @@ export function Header() {
             >
               Home
             </Link>
-            <div
-              onMouseEnter={() => setMegaOpen(true)}
-              onMouseLeave={() => setMegaOpen(false)}
-            >
+            <div onMouseEnter={openMega} onMouseLeave={scheduleCloseMega}>
               <Link
                 to="/products"
                 className="inline-flex items-center gap-1 whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
               >
                 Products <ChevronDown className="size-[13px]" />
               </Link>
-              {megaOpen && <MegaMenu onClose={() => setMegaOpen(false)} />}
+              {megaOpen && (
+                <MegaMenu onClose={() => setMegaOpen(false)} onMouseEnter={openMega} onMouseLeave={scheduleCloseMega} />
+              )}
             </div>
             <Link
               to="/solar-calculator"

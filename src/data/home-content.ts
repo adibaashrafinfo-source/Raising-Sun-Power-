@@ -19,6 +19,13 @@ export const categories = [
   { slug: "cables-wires", name: "Cables & Wires", count: "110+ items", tint: tG },
   { slug: "complete-solutions", name: "Complete Solutions", count: "Custom builds", tint: tGold },
   { slug: "accessories", name: "Accessories", count: "200+ items", tint: tB },
+  { slug: "dc-fan", name: "DC Fan", count: "25+ items", tint: tO },
+  { slug: "dc-light", name: "DC Light", count: "30+ items", tint: tG },
+  { slug: "ac-fan", name: "AC Fan", count: "20+ items", tint: tB },
+  { slug: "switch-socket", name: "Switch & Socket", count: "80+ items", tint: tGold },
+  { slug: "gadgets", name: "Gadgets", count: "40+ items", tint: tO },
+  { slug: "ips", name: "IPS", count: "35+ items", tint: tG },
+  { slug: "portable-power-station", name: "Portable Power Station", count: "15+ items", tint: tB },
 ]
 
 export const solutions = [
@@ -120,7 +127,7 @@ export const megaCols = [
   {
     title: "Solar",
     color: "#217CCA",
-    items: ["Solar Panels", "Charge Controllers", "Mounting & Rails", "Solar Cables", "Combo Kits"],
+    items: ["Solar Panels", "Mounting Structure", "Charge Controllers", "Solar Cables", "Combo Kits"],
   },
   {
     title: "Circuit Breakers",
@@ -130,16 +137,23 @@ export const megaCols = [
   {
     title: "Inverters & Batteries",
     color: "#67A70E",
-    items: ["Solar Inverters", "Hybrid Inverters", "Tubular Batteries", "Lithium Batteries", "IPS/UPS"],
+    items: [
+      "Off-Grid Hybrid Inverter",
+      "On-Grid Hybrid Inverter",
+      "On-Grid Inverter",
+      "Tubular Batteries",
+      "Lithium Batteries",
+      "IPS/UPS",
+    ],
   },
   {
     title: "Cables & Accessories",
     color: "#217CCA",
-    items: ["Copper Cables", "Wires", "Connectors", "Switches & Sockets", "Tools"],
+    items: ["Copper Cables", "Wires", "Connectors", "Switches & Sockets", "Grounding/Earthing Cable"],
   },
   {
-    title: "Switchgear",
+    title: "Switchgear & Protection",
     color: "#F49E09",
-    items: ["Contactors", "Relays", "Timers", "Meters", "Enclosures"],
+    items: ["Thunder/Surge Arrester", "DC SPD", "AC SPD", "AC AFDD", "Contactors", "Relays"],
   },
 ]

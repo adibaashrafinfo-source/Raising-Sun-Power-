@@ -360,7 +360,7 @@ export default function SolarCalculatorPage() {
                   Get a Formal Quotation →
                 </Button>
                 <a
-                  href={`https://wa.me/8801705742208?text=${encodeURIComponent(waMessage)}`}
+                  href={`https://wa.me/8801786896390?text=${encodeURIComponent(waMessage)}`}
                   className="inline-flex h-[54px] min-w-[220px] flex-1 items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/15 text-[15px] font-bold text-white no-underline"
                 >
                   <MessageCircle className="size-[18px]" />

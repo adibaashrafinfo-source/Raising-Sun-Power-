@@ -13,7 +13,7 @@ const companyLinks = [
 
 export function Footer() {
   const { data: settings } = useSettings()
-  const whatsappNumber = settings?.whatsapp_number || "8801705742208"
+  const whatsappNumber = settings?.whatsapp_number || "8801786896390"
 
   const socialLinks = [
     { url: settings?.facebook_url, icon: FacebookIcon, label: "Facebook" },
@@ -44,7 +44,7 @@ export function Footer() {
               href={`https://wa.me/${whatsappNumber}`}
               className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-bold text-[#053a1d] no-underline"
             >
-              +880 1705-742208
+              +880 1786-896390
             </a>
             {socialLinks.length > 0 && (
               <div className="mt-4 flex items-center gap-2.5">
@@ -90,8 +90,8 @@ export function Footer() {
           <div className="flex items-center gap-2.5">
             <PaymentBadge bg="#E2136E" color="#fff">bKash</PaymentBadge>
             <PaymentBadge bg="#EE6123" color="#fff">Nagad</PaymentBadge>
+            <PaymentBadge bg="#0B3F94" color="#fff">Bank</PaymentBadge>
             <PaymentBadge bg="#67A70E" color="#fff">COD</PaymentBadge>
-            <PaymentBadge bg="#F4D560" color="#052C6E">Steadfast</PaymentBadge>
           </div>
           <span className="text-[12.5px] text-[#7E98C2]">
             Designed by <b className="text-gold-400">Abrar IT</b>
