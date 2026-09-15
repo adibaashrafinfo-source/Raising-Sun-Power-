@@ -13,7 +13,9 @@ import {
 } from "lucide-react"
 import { Link } from "react-router-dom"
 
+import { useProductsByPlacement } from "@/hooks/use-catalog"
 import { formatBDT } from "@/lib/utils"
+import type { Product } from "@/types/database"
 
 // Curated marketing showcase. Product photos live in /public/featured/*.png — until
 // those files are added, each tile shows a tasteful gradient fallback so the
@@ -24,6 +26,7 @@ const FEATURED = {
   name: "Longi 550W Solar Panel",
   tagline: "More power. More savings. A cleaner tomorrow.",
   image: "/featured/panel.png",
+  href: "/products",
   price: 28500,
   original: 32000,
   features: [
@@ -43,6 +46,19 @@ type MiniProduct = {
   rating: number
   reviews: number
   offPct: number
+  href: string
+}
+
+type FeaturedItem = {
+  badge: string
+  eyebrow: string
+  name: string
+  tagline: string
+  image: string
+  price: number
+  original: number
+  features: { icon: typeof Zap; text: string }[]
+  href: string
 }
 
 const PRODUCTS: MiniProduct[] = [
@@ -50,6 +66,7 @@ const PRODUCTS: MiniProduct[] = [
     name: "Growatt 5kW Solar Inverter",
     tagline: "Reliable. Efficient. Smart.",
     image: "/featured/inverter.png",
+    href: "/products",
     price: 75000,
     original: 88000,
     rating: 4.5,
@@ -60,6 +77,7 @@ const PRODUCTS: MiniProduct[] = [
     name: "Deye 5kWh Lithium Battery",
     tagline: "Power Your Life, Uninterrupted.",
     image: "/featured/battery.png",
+    href: "/products",
     price: 125000,
     original: 139000,
     rating: 4.5,
@@ -70,6 +88,7 @@ const PRODUCTS: MiniProduct[] = [
     name: "Schneider Electrical Accessories",
     tagline: "Safe. Reliable. Worldwide.",
     image: "/featured/accessories.png",
+    href: "/products",
     price: 320,
     original: 365,
     rating: 4.5,
@@ -80,6 +99,7 @@ const PRODUCTS: MiniProduct[] = [
     name: "LED Lighting Solutions",
     tagline: "Bright Ideas. Brighter Spaces.",
     image: "/featured/lighting.png",
+    href: "/products",
     price: 450,
     original: 565,
     rating: 4.5,
@@ -88,6 +108,8 @@ const PRODUCTS: MiniProduct[] = [
   },
 ]
 
+const FEATURE_ICONS = [Zap, ShieldCheck, Settings, Leaf] as const
+
 const TRUST = [
   { icon: Truck, title: "Free Shipping", sub: "On orders over ৳5,000" },
   { icon: ShieldCheck, title: "Secure Payment", sub: "100% safe & trusted" },
@@ -95,7 +117,49 @@ const TRUST = [
   { icon: Leaf, title: "Clean Energy", sub: "A Greener Future" },
 ]
 
+/** Map an admin-pinned product onto the small showcase card shape. */
+function toMiniProduct(p: Product): MiniProduct {
+  const onSale = p.sale_price != null && p.sale_price < p.price
+  const price = onSale ? p.sale_price! : p.price
+  return {
+    name: p.name,
+    tagline: p.short_description ?? p.brand?.name ?? "",
+    image: p.images?.[0] ?? "",
+    price,
+    original: p.price,
+    rating: p.rating_avg,
+    reviews: p.rating_count,
+    offPct: onSale ? Math.round(((p.price - price) / p.price) * 100) : 0,
+    href: `/product/${p.slug}`,
+  }
+}
+
+/** Map an admin-pinned product onto the large featured card shape. */
+function toFeaturedItem(p: Product): FeaturedItem {
+  const onSale = p.sale_price != null && p.sale_price < p.price
+  const specFeatures = Object.entries(p.specifications ?? {})
+    .slice(0, 4)
+    .map(([k, v], i) => ({ icon: FEATURE_ICONS[i % FEATURE_ICONS.length], text: `${k}: ${v}` }))
+  return {
+    badge: p.badges?.[0] ?? "Featured",
+    eyebrow: p.brand?.name ?? p.category?.name ?? "Featured",
+    name: p.name,
+    tagline: p.short_description ?? "",
+    image: p.images?.[0] ?? "",
+    price: onSale ? p.sale_price! : p.price,
+    original: p.price,
+    features: specFeatures.length ? specFeatures : FEATURED.features,
+    href: `/product/${p.slug}`,
+  }
+}
+
 export function FeaturedProducts() {
+  // Products the admin ticked as "Featured Product"; the curated demo content
+  // stands in until at least one product is pinned.
+  const { data: pinned = [] } = useProductsByPlacement("is_featured", 5)
+  const featured: FeaturedItem = pinned.length ? toFeaturedItem(pinned[0]) : FEATURED
+  const products: MiniProduct[] = pinned.length > 1 ? pinned.slice(1, 5).map(toMiniProduct) : PRODUCTS
+
   return (
     <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-12">
       {/* Header */}
@@ -123,9 +187,9 @@ export function FeaturedProducts() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.12fr_1fr]">
-        <FeaturedCard />
+        <FeaturedCard item={featured} />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {PRODUCTS.map((p) => (
+          {products.map((p) => (
             <MiniCard key={p.name} product={p} />
           ))}
         </div>
@@ -156,7 +220,8 @@ export function FeaturedProducts() {
   )
 }
 
-function FeaturedCard() {
+function FeaturedCard({ item }: { item: FeaturedItem }) {
+  const FEATURED = item
   return (
     <div className="relative overflow-hidden rounded-[22px] border border-green-600/15 bg-[linear-gradient(155deg,#ecf8f0_0%,#f6fbf8_55%,#eef7f1_100%)] p-6 dark:bg-[linear-gradient(155deg,rgba(34,197,94,.10),rgba(34,197,94,.03))] sm:p-7">
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_0.85fr]">
@@ -204,7 +269,7 @@ function FeaturedCard() {
 
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-[1.1fr_0.9fr]">
         <Link
-          to="/products"
+          to={FEATURED.href}
           className="flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-green-600 text-[15px] font-bold text-white no-underline shadow-[0_10px_26px_rgba(22,163,74,.3)] transition-all hover:-translate-y-0.5 hover:bg-green-700"
         >
           <ShoppingCart className="size-[18px]" /> Add to Cart <ArrowRight className="size-[18px]" />
@@ -247,11 +312,11 @@ function MiniCard({ product }: { product: MiniProduct }) {
         <Heart className="size-4" stroke="#E23B3B" fill={isWishlisted ? "#E23B3B" : "none"} strokeWidth={1.75} />
       </button>
 
-      <Link to="/products" className="flex items-center justify-center">
+      <Link to={product.href} className="flex items-center justify-center">
         <ShowcaseImage src={product.image} alt={product.name} className="aspect-[4/3] w-full" />
       </Link>
 
-      <Link to="/products" className="mt-2 line-clamp-2 font-heading text-[14px] font-bold leading-tight text-text no-underline">
+      <Link to={product.href} className="mt-2 line-clamp-2 font-heading text-[14px] font-bold leading-tight text-text no-underline">
         {product.name}
       </Link>
       <p className="mt-1 line-clamp-1 text-[12px] text-muted">{product.tagline}</p>
@@ -273,7 +338,7 @@ function MiniCard({ product }: { product: MiniProduct }) {
       </div>
 
       <Link
-        to="/products"
+        to={product.href}
         className="mt-2.5 flex h-10 items-center justify-center gap-2 rounded-xl bg-green-600/12 text-[13px] font-bold text-green-700 no-underline transition-colors hover:bg-green-600 hover:text-white dark:text-green-500"
       >
         <ShoppingCart className="size-4" /> Add to Cart

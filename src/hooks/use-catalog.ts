@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
 
 import {
+  type HomePlacement,
   fetchBrands,
   fetchCategories,
   fetchProductBySlug,
   fetchProducts,
+  fetchProductsByPlacement,
   fetchRelatedProducts,
   fetchReviews,
 } from "@/lib/queries/catalog"
@@ -23,6 +25,14 @@ export function useProducts(filters: ProductFilters) {
     queryKey: ["products", filters],
     queryFn: () => fetchProducts(filters),
     placeholderData: (prev) => prev,
+  })
+}
+
+/** Products pinned to a homepage section from the admin product form. */
+export function useProductsByPlacement(flag: HomePlacement, limit = 8) {
+  return useQuery({
+    queryKey: ["products-placement", flag, limit],
+    queryFn: () => fetchProductsByPlacement(flag, limit),
   })
 }
 

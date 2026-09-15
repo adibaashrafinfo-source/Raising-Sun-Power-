@@ -1,7 +1,7 @@
 import { FloatingWhatsAppButton } from "@/components/layout/FloatingWhatsAppButton"
 import { Reveal } from "@/components/ui/reveal"
 import { SEO_KEYWORDS, SITE_DESCRIPTION } from "@/data/company"
-import { useProducts } from "@/hooks/use-catalog"
+import { useProducts, useProductsByPlacement } from "@/hooks/use-catalog"
 import { useSeo } from "@/hooks/use-seo"
 import { BrandsStrip } from "@/pages/home/BrandsStrip"
 import { CategoryGrid } from "@/pages/home/CategoryGrid"
@@ -22,8 +22,19 @@ export default function Home() {
     keywords: SEO_KEYWORDS,
   })
 
-  const bestSellers = useProducts({ sort: "rating", pageSize: 4 })
-  const newArrivals = useProducts({ sort: "newest", pageSize: 4 })
+  // Admin-pinned products win; when a section has none pinned we fall back to
+  // the automatic list so the homepage is never empty.
+  const pinnedBestSellers = useProductsByPlacement("is_best_seller", 4)
+  const pinnedNewArrivals = useProductsByPlacement("is_new_arrival", 4)
+  const autoBestSellers = useProducts({ sort: "rating", pageSize: 4 })
+  const autoNewArrivals = useProducts({ sort: "newest", pageSize: 4 })
+
+  const bestSellerProducts = pinnedBestSellers.data?.length
+    ? pinnedBestSellers.data
+    : (autoBestSellers.data?.products ?? [])
+  const newArrivalProducts = pinnedNewArrivals.data?.length
+    ? pinnedNewArrivals.data
+    : (autoNewArrivals.data?.products ?? [])
 
   return (
     <main>
@@ -36,8 +47,8 @@ export default function Home() {
           kickerColor="#67A70E"
           title="Best sellers this month"
           linkLabel="See more"
-          products={bestSellers.data?.products ?? []}
-          isLoading={bestSellers.isLoading}
+          products={bestSellerProducts}
+          isLoading={pinnedBestSellers.isLoading || autoBestSellers.isLoading}
         />
       </Reveal>
       <Reveal><FeaturedProducts /></Reveal>
@@ -49,8 +60,8 @@ export default function Home() {
           kickerColor="#67A70E"
           title="New arrivals"
           linkLabel="Browse all"
-          products={newArrivals.data?.products ?? []}
-          isLoading={newArrivals.isLoading}
+          products={newArrivalProducts}
+          isLoading={pinnedNewArrivals.isLoading || autoNewArrivals.isLoading}
         />
       </Reveal>
       <Reveal><BrandsStrip /></Reveal>

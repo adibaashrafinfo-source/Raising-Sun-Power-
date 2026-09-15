@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   LogOut,
   MapPin,
+  LayoutGrid,
   Menu,
   Moon,
   Package,
@@ -27,8 +28,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/lib/auth-provider"
+import { useCategories } from "@/hooks/use-catalog"
 import { useSiteContent } from "@/hooks/use-site-content"
-import { useWishlist } from "@/hooks/use-wishlist"
 import { signOut } from "@/lib/queries/auth"
 import { useTheme } from "@/lib/theme-provider"
 import { useCartStore } from "@/store/cart-store"
@@ -51,8 +52,22 @@ export function Header() {
   const openCart = useCartStore((s) => s.openCart)
   const openMobileMenu = useCartStore((s) => s.openMobileMenu)
   const cartCount = useCartStore((s) => s.cartCount())
-  const { items: wishlistItems } = useWishlist()
-  const wishlistCount = wishlistItems.length
+  const { data: categories = [] } = useCategories()
+  const [searchCat, setSearchCat] = useState<{ label: string; slug: string | null }>({
+    label: "All",
+    slug: null,
+  })
+  const [searchTerm, setSearchTerm] = useState("")
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    const q = searchTerm.trim()
+    if (searchCat.slug) {
+      navigate(q ? `/category/${searchCat.slug}?search=${encodeURIComponent(q)}` : `/category/${searchCat.slug}`)
+    } else {
+      navigate(q ? `/products?search=${encodeURIComponent(q)}` : "/products")
+    }
+  }
   const { data: siteContent } = useSiteContent()
   const headerLogo = siteContent?.header_logo_url || "/logo.jpg"
 
@@ -87,78 +102,47 @@ export function Header() {
           </span>
         </Link>
 
-        <div className="hidden flex-1 items-center gap-4 lg:flex">
-          <div className="flex h-11 min-w-0 max-w-[520px] flex-1 items-center rounded-xl border border-border bg-surface-2 transition-shadow focus-within:shadow-[0_0_0_3px_color-mix(in_srgb,var(--blue)_35%,transparent)]">
-            <select className="h-full cursor-pointer border-r border-border bg-transparent px-3.5 text-[13px] font-semibold text-muted outline-none">
-              <option>All</option>
-              <option>Solar</option>
-              <option>Inverters</option>
-              <option>Batteries</option>
-              <option>MCB/MCCB</option>
-              <option>Cables</option>
-            </select>
+        {/* Search — grows to fill row one */}
+        <form onSubmit={submitSearch} className="hidden min-w-0 flex-1 lg:flex">
+          <div className="flex h-11 min-w-0 w-full items-center rounded-xl border border-border bg-surface-2 transition-shadow focus-within:shadow-[0_0_0_3px_color-mix(in_srgb,var(--blue)_35%,transparent)]">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="group flex h-full shrink-0 items-center gap-1.5 rounded-l-xl border-r border-border px-3.5 text-[13px] font-semibold text-muted outline-none transition-colors hover:bg-surface-3 hover:text-text data-[state=open]:bg-surface-3 data-[state=open]:text-text">
+                <LayoutGrid className="size-[15px]" />
+                <span className="max-w-[110px] truncate">{searchCat.label}</span>
+                <ChevronDown className="size-[13px] transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="max-h-[320px] w-60 overflow-y-auto p-1.5">
+                <DropdownMenuLabel className="px-2 pb-1 text-[11px] uppercase tracking-wide text-muted">
+                  Shop by category
+                </DropdownMenuLabel>
+                <DropdownMenuItem
+                  onSelect={() => setSearchCat({ label: "All", slug: null })}
+                  className="rounded-lg text-[13.5px] font-semibold"
+                >
+                  <LayoutGrid className="size-4 text-blue" /> All Categories
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {categories.map((c) => (
+                  <DropdownMenuItem
+                    key={c.id}
+                    onSelect={() => setSearchCat({ label: c.name, slug: c.slug })}
+                    className="rounded-lg text-[13.5px]"
+                  >
+                    <span className="size-1.5 rounded-full bg-orange-500" />
+                    {c.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Search className="ml-3 size-[17px] shrink-0 text-muted" />
             <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search MCB, solar panel, inverter…"
-              className="flex-1 bg-transparent px-3.5 text-sm text-text outline-none placeholder:text-muted"
+              className="min-w-0 flex-1 bg-transparent px-3.5 text-sm text-text outline-none placeholder:text-muted"
             />
           </div>
-          <nav className="flex shrink-0 gap-0.5 xl:gap-1">
-            <Link
-              to="/"
-              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
-            >
-              Home
-            </Link>
-            <div onMouseEnter={openMega} onMouseLeave={scheduleCloseMega}>
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-1 whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
-              >
-                Products <ChevronDown className="size-[13px]" />
-              </Link>
-              {megaOpen && (
-                <MegaMenu onClose={() => setMegaOpen(false)} onMouseEnter={openMega} onMouseLeave={scheduleCloseMega} />
-              )}
-            </div>
-            <Link
-              to="/solar-calculator"
-              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
-            >
-              Solar Calculator
-            </Link>
-            <Link
-              to="/solar-roi-calculator"
-              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
-            >
-              ROI Calculator
-            </Link>
-            <Link
-              to="/wholesale"
-              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
-            >
-              Wholesale
-            </Link>
-            <Link
-              to="/blog"
-              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
-            >
-              Blog
-            </Link>
-            <Link
-              to="/about"
-              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
-            >
-              Contact
-            </Link>
-          </nav>
-        </div>
+        </form>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <button
@@ -172,18 +156,6 @@ export function Header() {
               <Moon className="size-[19px]" stroke="#0B3F94" />
             )}
           </button>
-          <Link
-            to="/account/wishlist"
-            aria-label="Wishlist"
-            className="relative hidden size-[42px] items-center justify-center rounded-xl border border-border bg-surface-2 text-text no-underline transition-colors hover:bg-surface-3 lg:flex"
-          >
-            <Heart className="size-[19px]" />
-            {wishlistCount > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10.5px] font-bold text-white">
-                {wishlistCount}
-              </span>
-            )}
-          </Link>
           <button
             onClick={openCart}
             aria-label="Cart"
@@ -247,6 +219,67 @@ export function Header() {
               Login
             </Link>
           )}
+        </div>
+      </div>
+
+      {/* Row two — primary navigation, so nothing is squeezed or cropped */}
+      <div className="hidden border-t border-border lg:block">
+        <div className="mx-auto max-w-[1280px] px-4 sm:px-6">
+          <nav className="flex flex-wrap items-center gap-0.5 py-1.5 xl:gap-1">
+            <Link
+              to="/"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+            >
+              Home
+            </Link>
+            <div onMouseEnter={openMega} onMouseLeave={scheduleCloseMega}>
+              <Link
+                to="/products"
+                className="inline-flex items-center gap-1 whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+              >
+                Products <ChevronDown className="size-[13px]" />
+              </Link>
+              {megaOpen && (
+                <MegaMenu onClose={() => setMegaOpen(false)} onMouseEnter={openMega} onMouseLeave={scheduleCloseMega} />
+              )}
+            </div>
+            <Link
+              to="/solar-calculator"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+            >
+              Solar Calculator
+            </Link>
+            <Link
+              to="/solar-roi-calculator"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+            >
+              ROI Calculator
+            </Link>
+            <Link
+              to="/wholesale"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+            >
+              Wholesale
+            </Link>
+            <Link
+              to="/blog"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+            >
+              Blog
+            </Link>
+            <Link
+              to="/about"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+            >
+              About
+            </Link>
+            <Link
+              to="/contact"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+            >
+              Contact
+            </Link>
+          </nav>
         </div>
       </div>
     </header>

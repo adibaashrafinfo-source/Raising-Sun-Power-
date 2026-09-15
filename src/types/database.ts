@@ -44,6 +44,9 @@ export type Product = {
   has_serial_tracking: boolean
   reorder_level: number
   is_active: boolean
+  is_best_seller: boolean
+  is_new_arrival: boolean
+  is_featured: boolean
   category?: Pick<Category, "id" | "name" | "slug"> | null
   brand?: Pick<Brand, "id" | "name" | "slug" | "logo_url"> | null
 }

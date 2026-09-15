@@ -44,6 +44,12 @@ import { type ProductFormValues, productSchema, slugify } from "@/lib/schemas/pr
 import { formatBDT, getErrorMessage } from "@/lib/utils"
 import type { Product } from "@/types/database"
 
+const HOMEPAGE_PLACEMENTS = [
+  { field: "isBestSeller", label: "Best Seller", hint: "Best sellers this month" },
+  { field: "isNewArrival", label: "New Arrival", hint: "New arrivals" },
+  { field: "isFeatured", label: "Featured Product", hint: "Our Featured Products" },
+] as const
+
 export default function AdminProductsPage() {
   const [search, setSearch] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -234,6 +240,9 @@ function ProductDialog({
           warrantyMonths: String(product.warranty_months),
           hasSerialTracking: product.has_serial_tracking,
           isActive: product.is_active,
+          isBestSeller: product.is_best_seller,
+          isNewArrival: product.is_new_arrival,
+          isFeatured: product.is_featured,
           shortDescription: product.short_description ?? "",
           description: product.description ?? "",
           badges: product.badges.join(", "),
@@ -248,6 +257,9 @@ function ProductDialog({
           warrantyMonths: "0",
           hasSerialTracking: false,
           isActive: true,
+          isBestSeller: false,
+          isNewArrival: false,
+          isFeatured: false,
         },
   })
 
@@ -343,6 +355,9 @@ function ProductDialog({
         warranty_months: Number(values.warrantyMonths),
         has_serial_tracking: values.hasSerialTracking,
         is_active: values.isActive,
+        is_best_seller: values.isBestSeller,
+        is_new_arrival: values.isNewArrival,
+        is_featured: values.isFeatured,
         short_description: values.shortDescription?.trim() || null,
         description: values.description?.trim() || null,
         specifications,
@@ -436,6 +451,28 @@ function ProductDialog({
               <input type="checkbox" className="size-4" {...register("isActive")} />
               Active in inventory
             </label>
+          </div>
+
+          {/* Homepage placement — drives the matching sections on the home page */}
+          <div className="rounded-[var(--radius-sm)] border border-border bg-surface-2 p-4">
+            <Label className="mb-1 block">Show on homepage</Label>
+            <p className="mb-3 text-xs text-muted">
+              Tick a section and this product appears there on the home page.
+            </p>
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+              {HOMEPAGE_PLACEMENTS.map((pl) => (
+                <label
+                  key={pl.field}
+                  className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-border bg-surface p-3 text-sm font-semibold text-text"
+                >
+                  <input type="checkbox" className="size-4" {...register(pl.field)} />
+                  <span>
+                    {pl.label}
+                    <span className="block text-[11px] font-medium text-muted">{pl.hint}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
 
           <Field label="Short description" error={errors.shortDescription?.message}>

@@ -119,3 +119,19 @@ export async function fetchReviews(productId: string): Promise<Review[]> {
   if (error) throw error
   return data ?? []
 }
+
+/** Homepage placement flags an admin can tick on a product. */
+export type HomePlacement = "is_best_seller" | "is_new_arrival" | "is_featured"
+
+/** Products an admin has explicitly pinned to a homepage section. */
+export async function fetchProductsByPlacement(flag: HomePlacement, limit = 8): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_SELECT)
+    .eq("status", "published")
+    .eq(flag, true)
+    .order("created_at", { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return (data as unknown as Product[]) ?? []
+}
