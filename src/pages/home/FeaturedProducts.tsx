@@ -223,9 +223,10 @@ export function FeaturedProducts() {
 function FeaturedCard({ item }: { item: FeaturedItem }) {
   const FEATURED = item
   return (
-    <div className="relative overflow-hidden rounded-[22px] border border-green-600/15 bg-[linear-gradient(155deg,#ecf8f0_0%,#f6fbf8_55%,#eef7f1_100%)] p-6 dark:bg-[linear-gradient(155deg,rgba(34,197,94,.10),rgba(34,197,94,.03))] sm:p-7">
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_0.85fr]">
-        <div className="flex flex-col">
+    <div className="relative flex flex-col overflow-hidden rounded-[22px] border border-green-600/15 bg-[linear-gradient(155deg,#ecf8f0_0%,#f6fbf8_55%,#eef7f1_100%)] dark:bg-[linear-gradient(155deg,rgba(34,197,94,.10),rgba(34,197,94,.03))]">
+      {/* Copy on the left, product shot bleeding to the card edges on the right */}
+      <div className="grid flex-1 grid-cols-1 sm:grid-cols-[1fr_0.92fr]">
+        <div className="order-2 flex flex-col p-6 sm:order-1 sm:p-7 sm:pr-3">
           <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-gold-400 px-3 py-1.5 text-[12px] font-extrabold text-[#3d2f00]">
             <Zap className="size-3.5 fill-current" /> {FEATURED.badge}
           </span>
@@ -247,27 +248,38 @@ function FeaturedCard({ item }: { item: FeaturedItem }) {
               </li>
             ))}
           </ul>
+
+          <div className="mt-auto flex flex-wrap items-baseline gap-3 pt-5">
+            <span className="font-heading text-[clamp(28px,4vw,36px)] font-extrabold tabular-nums text-green-700 dark:text-green-500">
+              {formatBDT(FEATURED.price)}
+            </span>
+            {FEATURED.original > FEATURED.price && (
+              <span className="text-lg tabular-nums text-muted line-through">
+                {formatBDT(FEATURED.original)}
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="relative flex items-start justify-center">
-          <ShowcaseImage src={FEATURED.image} alt={FEATURED.name} className="aspect-square w-full" />
-          <span className="absolute right-0 top-0 flex size-[76px] flex-col items-center justify-center rounded-full bg-green-700 text-center text-[9px] font-extrabold uppercase leading-tight tracking-wide text-white shadow-lg">
-            <Leaf className="mb-0.5 size-3" />
+        {/* Full-bleed image column — fills the card's top-right corner */}
+        <div className="relative order-1 min-h-[260px] sm:order-2 sm:min-h-[400px]">
+          <ShowcaseImage
+            src={FEATURED.image}
+            alt={FEATURED.name}
+            fit="cover"
+            className="absolute inset-0 size-full"
+          />
+          <span className="absolute right-5 top-5 flex size-[86px] flex-col items-center justify-center rounded-full bg-green-700 text-center text-[9.5px] font-extrabold uppercase leading-tight tracking-wide text-white shadow-[0_8px_24px_rgba(0,0,0,.28)]">
+            <Leaf className="mb-0.5 size-3.5" />
             Save Energy
-            <span className="my-0.5 h-px w-6 bg-white/40" />
+            <span className="my-1 h-px w-7 bg-white/40" />
             Save Money
           </span>
         </div>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-baseline gap-3">
-        <span className="font-heading text-[clamp(28px,4vw,36px)] font-extrabold tabular-nums text-green-700 dark:text-green-500">
-          {formatBDT(FEATURED.price)}
-        </span>
-        <span className="text-lg tabular-nums text-muted line-through">{formatBDT(FEATURED.original)}</span>
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-[1.1fr_0.9fr]">
+      {/* Bottom action row spans the full card width */}
+      <div className="grid grid-cols-1 gap-3 p-6 pt-0 sm:grid-cols-[1.1fr_0.9fr] sm:p-7 sm:pt-0">
         <Link
           to={FEATURED.href}
           className="flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-green-600 text-[15px] font-bold text-white no-underline shadow-[0_10px_26px_rgba(22,163,74,.3)] transition-all hover:-translate-y-0.5 hover:bg-green-700"
@@ -349,7 +361,17 @@ function MiniCard({ product }: { product: MiniProduct }) {
 
 // Renders the product photo, falling back to a branded gradient tile with the
 // product's initial if the /public/featured/*.png file isn't present yet.
-function ShowcaseImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+function ShowcaseImage({
+  src,
+  alt,
+  className,
+  fit = "contain",
+}: {
+  src: string
+  alt: string
+  className?: string
+  fit?: "contain" | "cover"
+}) {
   const [failed, setFailed] = useState(false)
   if (failed) {
     return (
@@ -366,7 +388,7 @@ function ShowcaseImage({ src, alt, className }: { src: string; alt: string; clas
       alt={alt}
       loading="lazy"
       onError={() => setFailed(true)}
-      className={`object-contain ${className ?? ""}`}
+      className={`${fit === "cover" ? "object-cover" : "object-contain"} ${className ?? ""}`}
     />
   )
 }
