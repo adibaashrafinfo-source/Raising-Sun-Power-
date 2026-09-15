@@ -41,6 +41,7 @@ import {
 } from "@/hooks/use-admin"
 import { uploadProductImage } from "@/lib/queries/admin"
 import { type ProductFormValues, productSchema, slugify } from "@/lib/schemas/product"
+import { formatBytes } from "@/lib/compress-image"
 import { formatBDT, getErrorMessage } from "@/lib/utils"
 import type { Product } from "@/types/database"
 
@@ -324,8 +325,13 @@ function ProductDialog({
     if (!file) return
     setUploading(true)
     try {
-      const url = await uploadProductImage(file)
-      setImages((prev) => [...prev, url])
+      const result = await uploadProductImage(file)
+      setImages((prev) => [...prev, result.url])
+      toast.success(
+        result.compressed
+          ? `Image optimized — ${formatBytes(result.originalSize)} → ${formatBytes(result.size)}`
+          : "Image uploaded",
+      )
     } catch (err) {
       toast.error(getErrorMessage(err, "Couldn't upload image"))
     } finally {
@@ -559,7 +565,11 @@ function ProductDialog({
           </div>
 
           <div>
-            <Label className="mb-2 block">Images</Label>
+            <Label className="mb-1 block">Images</Label>
+            <p className="mb-2.5 text-xs text-muted">
+              Uploads are optimized automatically — resized to max 1600px and compressed to around
+              300&nbsp;KB, so large photos still load fast.
+            </p>
             <div className="flex flex-wrap gap-2.5">
               {images.map((img, i) => (
                 <div key={img} className="relative size-20 overflow-hidden rounded-xl border border-border">

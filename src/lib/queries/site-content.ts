@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase"
+import { type UploadedImage, uploadImageToBucket } from "@/lib/upload-image"
 import type { SiteContent } from "@/types/database"
 
 export async function fetchSiteContent(): Promise<SiteContent> {
@@ -12,13 +13,9 @@ export async function updateSiteContent(patch: Partial<SiteContent>) {
   if (error) throw error
 }
 
-// Uploads an image to the public `site-assets` bucket and returns its URL.
-// Used by the CMS for logos, the hero image and any other site imagery.
-export async function uploadSiteAsset(file: File): Promise<string> {
-  const ext = file.name.split(".").pop()
-  const path = `${crypto.randomUUID()}.${ext}`
-  const { error } = await supabase.storage.from("site-assets").upload(path, file)
-  if (error) throw error
-  const { data } = supabase.storage.from("site-assets").getPublicUrl(path)
-  return data.publicUrl
+// Uploads an image to the public `site-assets` bucket. Used by the CMS for
+// logos, the hero image and any other site imagery. The hero is full-bleed, so
+// site assets keep a larger budget than product photos.
+export function uploadSiteAsset(file: File): Promise<UploadedImage> {
+  return uploadImageToBucket("site-assets", file, { maxDimension: 2000, maxBytes: 400_000 })
 }
