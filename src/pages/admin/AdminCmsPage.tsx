@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSiteContent, useUpdateSiteContent } from "@/hooks/use-site-content"
+import { formatBytes } from "@/lib/compress-image"
 import { uploadSiteAsset } from "@/lib/queries/site-content"
 import { getErrorMessage } from "@/lib/utils"
 import type { SiteContent } from "@/types/database"
@@ -213,9 +214,13 @@ function ImageField({
     if (!file) return
     setUploading(true)
     try {
-      const url = await uploadSiteAsset(file)
-      onChange(url)
-      toast.success("Image uploaded")
+      const result = await uploadSiteAsset(file)
+      onChange(result.url)
+      toast.success(
+        result.compressed
+          ? `Image optimized — ${formatBytes(result.originalSize)} → ${formatBytes(result.size)}`
+          : "Image uploaded",
+      )
     } catch (err) {
       toast.error(getErrorMessage(err, "Couldn't upload image"))
     } finally {

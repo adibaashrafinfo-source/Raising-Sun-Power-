@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase"
+import { type UploadedImage, uploadImageToBucket } from "@/lib/upload-image"
 import type {
   Brand,
   CashBankAccount,
@@ -217,13 +218,9 @@ export async function deleteProduct(id: string): Promise<void> {
   await logActivity({ action: "delete", table_name: "products", record_id: id })
 }
 
-export async function uploadProductImage(file: File): Promise<string> {
-  const ext = file.name.split(".").pop()
-  const path = `${crypto.randomUUID()}.${ext}`
-  const { error } = await supabase.storage.from("product-images").upload(path, file)
-  if (error) throw error
-  const { data } = supabase.storage.from("product-images").getPublicUrl(path)
-  return data.publicUrl
+// Product photos are optimised in the browser first — see uploadImageToBucket.
+export function uploadProductImage(file: File): Promise<UploadedImage> {
+  return uploadImageToBucket("product-images", file, { maxDimension: 1600, maxBytes: 300_000 })
 }
 
 // ---------- Categories ----------
