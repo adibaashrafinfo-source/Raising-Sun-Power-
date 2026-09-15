@@ -27,6 +27,10 @@ import AccountAddressesPage from "@/pages/account/AccountAddressesPage"
 import AccountProfilePage from "@/pages/account/AccountProfilePage"
 
 const SolarROICalculatorPage = lazy(() => import("@/pages/SolarROICalculatorPage"))
+const SolarAssessmentPage = lazy(() => import("@/pages/SolarAssessmentPage"))
+const WholesalePage = lazy(() => import("@/pages/WholesalePage"))
+const BlogPage = lazy(() => import("@/pages/BlogPage"))
+const BlogPostPage = lazy(() => import("@/pages/BlogPostPage"))
 
 const AdminLayout = lazy(() =>
   import("@/components/layout/AdminLayout").then((m) => ({ default: m.AdminLayout })),
@@ -76,6 +80,38 @@ export default function App() {
         />
         <Route path="get-quotation" element={<GetQuotationPage />} />
         <Route path="quotation-received/:refId" element={<QuotationReceivedPage />} />
+        <Route
+          path="solar-assessment"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <SolarAssessmentPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="wholesale"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <WholesalePage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="blog"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <BlogPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="blog/:slug"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <BlogPostPage />
+            </Suspense>
+          }
+        />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
         <Route path="login" element={<LoginPage />} />

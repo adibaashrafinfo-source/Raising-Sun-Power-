@@ -15,8 +15,10 @@ export type DescriptionBlock =
   | { type: "heading"; text: string }
   | { type: "paragraph"; text: string }
   | { type: "checklist"; items: string[] }
+  | { type: "crosslist"; items: string[] }
   | { type: "bullets"; items: string[] }
   | { type: "ordered"; items: string[] }
+  | { type: "table"; header: string[]; rows: string[][] }
 
 const CHECK_CHARS = "✅✔☑✓"
 const CHECK_LINE = new RegExp(`^\\s*(?:[${CHECK_CHARS}]\\uFE0F?|-\\s*\\[[ xX]\\])\\s*`)
@@ -24,9 +26,24 @@ const CHECK_SPLIT = new RegExp(`[${CHECK_CHARS}]\\uFE0F?`, "g")
 // Non-global companions for boolean checks — .test() on a /g regex is stateful.
 const HAS_CHECK = new RegExp(`[${CHECK_CHARS}]`)
 const STARTS_WITH_CHECK = new RegExp(`^\\s*[${CHECK_CHARS}]`)
+// "Don't do this" lines, the mirror of the ✅ checklist.
+const CROSS_CHARS = "❌✖✗"
+const CROSS_LINE = new RegExp(`^\\s*[${CROSS_CHARS}]\\uFE0F?\\s*`)
 const BULLET_LINE = /^\s*[-*•]\s+/
 const ORDERED_LINE = /^\s*\d+[.)]\s+/
 const HEADING_LINE = /^\s*#{1,6}\s+/
+// Markdown table: a `| a | b |` row followed by a `|---|---|` separator.
+const TABLE_ROW = /^\s*\|.*\|\s*$/
+const TABLE_SEP = /^\s*\|[\s:|-]+\|\s*$/
+
+function splitTableRow(line: string): string[] {
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((c) => c.trim())
+}
 
 // Phrases that, when they lead a short sentence, deserve to become a section
 // heading in an otherwise unstructured blob.
@@ -61,6 +78,18 @@ function parseStructured(text: string): DescriptionBlock[] {
       continue
     }
 
+    if (TABLE_ROW.test(line) && i + 1 < lines.length && TABLE_SEP.test(lines[i + 1])) {
+      const header = splitTableRow(line)
+      i += 2 // skip the header and the separator
+      const rows: string[][] = []
+      while (i < lines.length && TABLE_ROW.test(lines[i]) && !TABLE_SEP.test(lines[i])) {
+        rows.push(splitTableRow(lines[i]))
+        i++
+      }
+      blocks.push({ type: "table", header, rows })
+      continue
+    }
+
     if (CHECK_LINE.test(line)) {
       const items: string[] = []
       while (i < lines.length && CHECK_LINE.test(lines[i])) {
@@ -68,6 +97,16 @@ function parseStructured(text: string): DescriptionBlock[] {
         i++
       }
       blocks.push({ type: "checklist", items: items.filter(Boolean) })
+      continue
+    }
+
+    if (CROSS_LINE.test(line)) {
+      const items: string[] = []
+      while (i < lines.length && CROSS_LINE.test(lines[i])) {
+        items.push(lines[i].replace(CROSS_LINE, "").trim())
+        i++
+      }
+      blocks.push({ type: "crosslist", items: items.filter(Boolean) })
       continue
     }
 
@@ -98,8 +137,10 @@ function parseStructured(text: string): DescriptionBlock[] {
       lines[i].trim() &&
       !HEADING_LINE.test(lines[i]) &&
       !CHECK_LINE.test(lines[i]) &&
+      !CROSS_LINE.test(lines[i]) &&
       !BULLET_LINE.test(lines[i]) &&
-      !ORDERED_LINE.test(lines[i])
+      !ORDERED_LINE.test(lines[i]) &&
+      !TABLE_ROW.test(lines[i])
     ) {
       para.push(lines[i].trim())
       i++

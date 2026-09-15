@@ -1,5 +1,16 @@
 import { useEffect, useRef, useState } from "react"
-import { ChevronRight, Heart, Minus, Plus, ShoppingCart, Star, Truck } from "lucide-react"
+import {
+  ChevronRight,
+  FileText,
+  Heart,
+  MessageCircle,
+  Minus,
+  Phone,
+  Plus,
+  ShoppingCart,
+  Star,
+  Truck,
+} from "lucide-react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 
 import { ProductDescription } from "@/components/ProductDescription"
@@ -11,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useProduct, useRelatedProducts, useReviews } from "@/hooks/use-catalog"
 import { useSeo } from "@/hooks/use-seo"
 import { useWishlist } from "@/hooks/use-wishlist"
+import { COMPANY, telLink, whatsappLink } from "@/data/company"
 import { artForCategory, tintForCategory } from "@/lib/category-art"
 import { formatBDT } from "@/lib/utils"
 import { useCartStore } from "@/store/cart-store"
@@ -137,6 +149,30 @@ export default function ProductDetailPage() {
   const specs = Object.entries(product.specifications ?? {})
   const avgRating = product.rating_avg
 
+  // "Product at a glance" — pulls Model and Power/Capacity out of the free-form
+  // specifications map so the key commercial facts always appear together.
+  const findSpec = (pattern: RegExp) => specs.find(([k]) => pattern.test(k))?.[1]
+  const model = findSpec(/model/i) ?? product.sku ?? undefined
+  const capacity = findSpec(/power|capacity|watt|wattage|\bkw\b|\bva\b|\bah\b|output/i)
+  const keyFacts = [
+    { label: "Brand", value: product.brand?.name },
+    { label: "Model", value: model },
+    { label: "Power / Capacity", value: capacity },
+    {
+      label: "Warranty",
+      value:
+        product.warranty_months > 0
+          ? product.warranty_months >= 12
+            ? `${Math.floor(product.warranty_months / 12)} year${product.warranty_months >= 24 ? "s" : ""}`
+            : `${product.warranty_months} months`
+          : undefined,
+    },
+    { label: "Availability", value: inStock ? `In Stock (${product.stock_qty} ${product.unit})` : "Out of stock" },
+    { label: "Price", value: formatBDT(displayPrice) },
+  ].filter((f): f is { label: string; value: string } => !!f.value)
+
+  const enquiryMessage = `Hi, I'm interested in "${product.name}"${model ? ` (Model: ${model})` : ""}. Please share details.`
+
   return (
     <main className="mx-auto max-w-[1280px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
@@ -240,14 +276,19 @@ export default function ProductDetailPage() {
             </span>
           </div>
 
-          {specs.length > 0 && (
-            <div className="mt-5 grid grid-cols-1 gap-2 rounded-2xl border border-border bg-surface p-4 sm:grid-cols-2">
-              {specs.slice(0, 4).map(([k, v]) => (
-                <div key={k} className="flex items-center gap-2 text-[13px]">
-                  <span className="text-muted">{k}:</span>
-                  <span className="font-semibold text-text">{v}</span>
-                </div>
-              ))}
+          {keyFacts.length > 0 && (
+            <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-surface">
+              <div className="border-b border-border bg-surface-2 px-4 py-2.5 font-heading text-[13px] font-bold text-text">
+                Product at a glance
+              </div>
+              <dl className="divide-y divide-border">
+                {keyFacts.map((f) => (
+                  <div key={f.label} className="flex items-start gap-3 px-4 py-2.5 text-[13.5px]">
+                    <dt className="w-[42%] shrink-0 text-muted">{f.label}</dt>
+                    <dd className="font-semibold text-text">{f.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           )}
 
@@ -292,12 +333,33 @@ export default function ProductDetailPage() {
           >
             Buy Now
           </Button>
-          <div className="mt-3 text-[12.5px] text-muted">
-            💳 EMI available on cards ·{" "}
-            <b className="text-text">Need bulk pricing?</b>{" "}
-            <a href="https://wa.me/8801786896390" className="text-blue no-underline">
-              Ask on WhatsApp
+          {/* Direct enquiry actions */}
+          <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <a
+              href={telLink()}
+              className="flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-blue/40 bg-blue/10 text-sm font-bold text-blue no-underline transition-colors hover:bg-blue hover:text-white"
+            >
+              <Phone className="size-[17px]" /> Call {COMPANY.phone}
             </a>
+            <a
+              href={whatsappLink(enquiryMessage)}
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-[50px] items-center justify-center gap-2 rounded-2xl bg-[#25D366] text-sm font-bold text-[#053a1d] no-underline transition-transform hover:-translate-y-0.5"
+            >
+              <MessageCircle className="size-[17px]" /> WhatsApp
+            </a>
+          </div>
+          <Button asChild variant="outline" size="lg" className="mt-2.5 w-full">
+            <Link to="/get-quotation" state={{ product: product.name }}>
+              <FileText className="size-[17px]" /> Request for Quotation
+            </Link>
+          </Button>
+          <div className="mt-3 text-[12.5px] text-muted">
+            💳 EMI available on cards · Need bulk pricing?{" "}
+            <Link to="/wholesale" className="font-semibold text-blue no-underline">
+              See wholesale &amp; dealer pricing
+            </Link>
           </div>
 
           <div className="mt-4 rounded-2xl border border-border bg-surface p-4">

@@ -8,7 +8,9 @@ const links = [
   { to: "/products", label: "Products" },
   { to: "/solar-calculator", label: "Solar Calculator" },
   { to: "/solar-roi-calculator", label: "ROI Calculator" },
-  { to: "#", label: "Brands" },
+  { to: "/solar-assessment", label: "Free Solar Assessment" },
+  { to: "/wholesale", label: "Wholesale & Dealer" },
+  { to: "/blog", label: "Blog" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
 ]

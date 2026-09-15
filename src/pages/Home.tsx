@@ -1,5 +1,6 @@
 import { FloatingWhatsAppButton } from "@/components/layout/FloatingWhatsAppButton"
 import { Reveal } from "@/components/ui/reveal"
+import { SEO_KEYWORDS, SITE_DESCRIPTION } from "@/data/company"
 import { useProducts } from "@/hooks/use-catalog"
 import { useSeo } from "@/hooks/use-seo"
 import { BrandsStrip } from "@/pages/home/BrandsStrip"
@@ -17,8 +18,8 @@ import { WhyChooseUs } from "@/pages/home/WhyChooseUs"
 export default function Home() {
   useSeo({
     title: "Solar & Electrical Products in Bangladesh",
-    description:
-      "Genuine solar panels, inverters, batteries, MCB & MCCB and complete power solutions — delivered nationwide with COD, bKash & Nagad.",
+    description: SITE_DESCRIPTION,
+    keywords: SEO_KEYWORDS,
   })
 
   const bestSellers = useProducts({ sort: "rating", pageSize: 4 })

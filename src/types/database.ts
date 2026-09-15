@@ -232,7 +232,7 @@ export type OrderItem = OrderItemInsert & {
   order_id: string
 }
 
-export type LeadSource = "calculator" | "direct" | "roi_calculator"
+export type LeadSource = "calculator" | "direct" | "roi_calculator" | "assessment" | "wholesale"
 export type LeadStatus = "new" | "contacted" | "quoted" | "converted" | "lost"
 
 export type LeadInsert = {
@@ -240,8 +240,10 @@ export type LeadInsert = {
   name: string
   phone: string
   email: string | null
-  division: string
-  district: string
+  // The Solar Assessment form captures a single free-text `location` instead of
+  // a division/district pair, so both are nullable.
+  division: string | null
+  district: string | null
   load_watt: number | null
   backup_hours: number | null
   budget_range: string | null
@@ -250,6 +252,10 @@ export type LeadInsert = {
   notes: string | null
   source: LeadSource
   status: LeadStatus
+  customer_type?: string | null
+  system_type?: string | null
+  monthly_bill?: string | null
+  location?: string | null
 }
 
 export type Lead = LeadInsert & {

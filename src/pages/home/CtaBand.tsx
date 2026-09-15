@@ -1,4 +1,7 @@
 import { Phone } from "lucide-react"
+import { Link } from "react-router-dom"
+
+import { telLink, whatsappLink } from "@/data/company"
 
 export function CtaBand() {
   return (
@@ -19,14 +22,22 @@ export function CtaBand() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <Link
+              to="/solar-assessment"
+              className="flex h-[52px] items-center gap-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-400 px-6 text-[15px] font-bold text-white no-underline shadow-[0_10px_26px_rgba(244,158,9,.35)]"
+            >
+              Get Free Solar Assessment
+            </Link>
             <a
-              href="https://wa.me/8801786896390"
+              href={whatsappLink()}
+              target="_blank"
+              rel="noreferrer"
               className="flex h-[52px] items-center gap-2.5 rounded-2xl bg-[#25D366] px-6 text-[15px] font-bold text-[#053a1d] no-underline shadow-[0_10px_26px_rgba(37,211,102,.35)]"
             >
               WhatsApp us
             </a>
             <a
-              href="tel:+8801786896390"
+              href={telLink()}
               className="flex h-[52px] items-center gap-2.5 rounded-2xl border border-white/20 bg-white/15 px-6 text-[15px] font-bold text-white no-underline"
             >
               <Phone className="size-[18px]" />

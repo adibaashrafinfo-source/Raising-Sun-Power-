@@ -10,6 +10,14 @@ import { useAllLeads, useUpdateLead } from "@/hooks/use-admin"
 import type { Lead, LeadStatus } from "@/types/database"
 
 const STATUSES: LeadStatus[] = ["new", "contacted", "quoted", "converted", "lost"]
+
+// Assessment/wholesale leads carry a free-text `location`; calculator and
+// quotation leads carry a division/district pair instead.
+function formatLocation(lead: Lead): string {
+  if (lead.location) return lead.location
+  const parts = [lead.district, lead.division].filter(Boolean)
+  return parts.length ? parts.join(", ") : "—"
+}
 const STATUS_VARIANT: Record<LeadStatus, "blue" | "gold" | "green" | "neutral"> = {
   new: "blue",
   contacted: "gold",
@@ -69,9 +77,7 @@ export default function AdminLeadsPage() {
                 >
                   <td className="px-4 py-3 font-semibold text-text">{lead.name}</td>
                   <td className="px-4 py-3 text-muted">{lead.phone}</td>
-                  <td className="px-4 py-3 text-muted">
-                    {lead.district}, {lead.division}
-                  </td>
+                  <td className="px-4 py-3 text-muted">{formatLocation(lead)}</td>
                   <td className="px-4 py-3 text-text">
                     {lead.load_watt ? `${lead.load_watt}W` : "—"} / {lead.backup_hours ?? "—"}h
                   </td>
@@ -138,9 +144,12 @@ function LeadDetailDialog({ lead, onClose }: { lead: Lead | null; onClose: () =>
             <div className="flex flex-col gap-3 text-sm">
               <Row label="Phone" value={lead.phone} />
               {lead.email && <Row label="Email" value={lead.email} />}
-              <Row label="Location" value={`${lead.district}, ${lead.division}`} />
-              <Row label="Load" value={lead.load_watt ? `${lead.load_watt}W` : "—"} />
-              <Row label="Backup" value={lead.backup_hours ? `${lead.backup_hours}h` : "—"} />
+              <Row label="Location" value={formatLocation(lead)} />
+              {lead.customer_type && <Row label="Customer type" value={lead.customer_type} />}
+              {lead.system_type && <Row label="System required" value={lead.system_type} />}
+              {lead.monthly_bill && <Row label="Monthly bill" value={lead.monthly_bill} />}
+              {lead.load_watt != null && <Row label="Load" value={`${lead.load_watt}W`} />}
+              {lead.backup_hours != null && <Row label="Backup" value={`${lead.backup_hours}h`} />}
               {lead.budget_range && <Row label="Budget" value={lead.budget_range} />}
               {lead.roof_type && <Row label="Roof" value={lead.roof_type} />}
               {lead.timeline && <Row label="Timeline" value={lead.timeline} />}
