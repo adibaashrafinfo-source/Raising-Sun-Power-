@@ -49,6 +49,7 @@ export default function SolarROICalculatorPage() {
   const [monthlyUnits, setMonthlyUnits] = useState("")
   const [monthlyBill, setMonthlyBill] = useState("")
   const [customerType, setCustomerType] = useState<RoiCustomerType>("residential")
+  const [netMetering, setNetMetering] = useState(true)
   const [result, setResult] = useState<RoiCalculatorResult | null>(null)
 
   const rawValue = inputMode === "units" ? monthlyUnits : monthlyBill
@@ -61,6 +62,7 @@ export default function SolarROICalculatorPage() {
         monthlyUnitsKWh: inputMode === "units" ? Number(monthlyUnits) : undefined,
         monthlyBillBDT: inputMode === "bill" ? Number(monthlyBill) : undefined,
         customerType,
+        netMetering,
       },
       settings,
     )
@@ -150,6 +152,33 @@ export default function SolarROICalculatorPage() {
                 ))}
               </div>
             </div>
+
+            <div className="mt-5">
+              <span className="mb-1 block text-[13px] font-semibold text-muted">Net Metering</span>
+              <p className="mb-2.5 text-xs text-muted">
+                With net metering your daytime surplus is exported to the grid for credit. Without it, only
+                the units you use while the sun is up actually cut your bill — which changes the payback a lot.
+              </p>
+              <div className="flex flex-wrap gap-2.5">
+                {[
+                  { value: true, label: "With net metering" },
+                  { value: false, label: "Without net metering" },
+                ].map((o) => (
+                  <button
+                    key={String(o.value)}
+                    onClick={() => setNetMetering(o.value)}
+                    className={cn(
+                      "h-11 rounded-xl border-[1.5px] px-[18px] text-[13.5px] font-semibold transition-colors",
+                      netMetering === o.value
+                        ? "border-orange-500 bg-orange-500/10 text-orange-500"
+                        : "border-border text-text",
+                    )}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center justify-between gap-4 border-t border-border bg-surface-2 px-[18px] py-4 sm:px-7">
@@ -198,7 +227,10 @@ function RoiResults({ result, customerType }: { result: RoiCalculatorResult; cus
         <div className="mx-auto max-w-[420px] rounded-[18px] bg-[linear-gradient(160deg,#217CCA,#052C6E)] p-7 text-center text-white shadow-[0_14px_34px_rgba(5,44,110,.3)]">
           <span className="text-[13px] font-semibold text-[#B7D2F2]">Payback Period</span>
           <div className="mt-1.5 font-heading text-[44px] font-extrabold leading-none">
-            {result.paybackPeriodYears.toFixed(1)} <span className="text-2xl">years</span>
+            {Number.isFinite(result.paybackPeriodYears)
+              ? result.paybackPeriodYears.toFixed(1)
+              : "25+"}{" "}
+            <span className="text-2xl">years</span>
           </div>
         </div>
 
@@ -208,6 +240,25 @@ function RoiResults({ result, customerType }: { result: RoiCalculatorResult; cus
           <StatCard label="Monthly Savings (Yr 1)" value={formatBDT(result.monthlySavingsY1BDT)} />
           <StatCard label="25-Year Total Savings" value={formatBDT(result.totalLifetimeSavingsBDT)} />
           <StatCard label="Lifetime ROI" value={`${result.roiPercentLifetime.toFixed(0)}%`} icon={TrendingUp} />
+          <StatCard
+            label="Return Rate (IRR)"
+            value={result.irr == null ? "—" : `${(result.irr * 100).toFixed(1)}%`}
+            sub="Annual return over the system's life"
+          />
+          <StatCard
+            label="Your Cost per Unit"
+            value={`${result.lcoeBDTPerKWh.toFixed(2)} ৳/kWh`}
+            sub="Solar electricity vs your grid tariff"
+          />
+          <StatCard
+            label="Generation You Use"
+            value={`${(result.utilisationRatio * 100).toFixed(0)}%`}
+            sub={
+              result.utilisationRatio > 0.8
+                ? "Surplus exported to the grid for credit"
+                : "Surplus is lost without net metering"
+            }
+          />
           <StatCard
             label="CO₂ Offset / Year"
             value={`${Math.round(result.annualCO2OffsetKg).toLocaleString("en-US")} kg`}

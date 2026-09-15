@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   ArrowRight,
   Headphones,
@@ -156,9 +156,9 @@ function toFeaturedItem(p: Product): FeaturedItem {
 export function FeaturedProducts() {
   // Products the admin ticked as "Featured Product"; the curated demo content
   // stands in until at least one product is pinned.
-  const { data: pinned = [] } = useProductsByPlacement("is_featured", 5)
+  const { data: pinned = [] } = useProductsByPlacement("is_featured", 13)
   const featured: FeaturedItem = pinned.length ? toFeaturedItem(pinned[0]) : FEATURED
-  const products: MiniProduct[] = pinned.length > 1 ? pinned.slice(1, 5).map(toMiniProduct) : PRODUCTS
+  const products: MiniProduct[] = pinned.length > 1 ? pinned.slice(1).map(toMiniProduct) : PRODUCTS
 
   return (
     <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-12">
@@ -188,11 +188,7 @@ export function FeaturedProducts() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.12fr_1fr]">
         <FeaturedCard item={featured} />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {products.map((p) => (
-            <MiniCard key={p.name} product={p} />
-          ))}
-        </div>
+        <MiniCarousel products={products} />
       </div>
 
       {/* Trust strip */}
@@ -308,6 +304,92 @@ function MiniAssurance({ icon: Icon, title, sub }: { icon: typeof Settings; titl
   )
 }
 
+/** How many small cards fill the grid beside the featured card. */
+const PAGE_SIZE = 4
+const AUTO_ADVANCE_MS = 4500
+
+/**
+ * Shows the pinned products four at a time. With four or fewer it is just the
+ * static 2x2 grid; beyond that it slides through pages automatically, pausing
+ * while the pointer is over it so it never yanks a card away mid-click.
+ */
+function MiniCarousel({ products }: { products: MiniProduct[] }) {
+  const pages = useMemo(() => {
+    const out: MiniProduct[][] = []
+    for (let i = 0; i < products.length; i += PAGE_SIZE) out.push(products.slice(i, i + PAGE_SIZE))
+    return out
+  }, [products])
+
+  const [page, setPage] = useState(0)
+  const [paused, setPaused] = useState(false)
+
+  // Products can change under us (query resolves, admin re-pins) — never leave
+  // the track parked past the last page.
+  const safePage = page < pages.length ? page : 0
+
+  useEffect(() => {
+    if (pages.length <= 1 || paused) return
+    const id = setInterval(() => setPage((p) => (p + 1) % pages.length), AUTO_ADVANCE_MS)
+    return () => clearInterval(id)
+  }, [pages.length, paused])
+
+  if (pages.length <= 1) {
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {products.map((p) => (
+          <MiniCard key={p.name} product={p} />
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="flex flex-col"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+    >
+      <div className="flex-1 overflow-hidden">
+        <div
+          className="flex h-full transition-transform duration-500 ease-out motion-reduce:transition-none"
+          style={{ transform: `translateX(-${safePage * 100}%)` }}
+        >
+          {pages.map((group, i) => (
+            <div
+              key={i}
+              aria-hidden={i !== safePage}
+              className="grid w-full shrink-0 grid-cols-1 content-start gap-4 sm:grid-cols-2"
+            >
+              {group.map((p) => (
+                <MiniCard key={p.name} product={p} />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3.5 flex items-center justify-center gap-2">
+        {pages.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={`Show featured products ${i + 1} of ${pages.length}`}
+            aria-current={i === safePage}
+            onClick={() => setPage(i)}
+            className={
+              i === safePage
+                ? "h-2 w-6 rounded-full bg-green-600 transition-all"
+                : "size-2 rounded-full bg-green-600/25 transition-all hover:bg-green-600/50"
+            }
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function MiniCard({ product }: { product: MiniProduct }) {
   const [isWishlisted, setWishlisted] = useState(false)
 
@@ -372,8 +454,13 @@ function ShowcaseImage({
   className?: string
   fit?: "contain" | "cover"
 }) {
-  const [failed, setFailed] = useState(false)
-  if (failed) {
+  // Track WHICH src failed rather than a bare boolean: this card keeps the same
+  // component instance when the pinned-product query resolves and swaps the
+  // placeholder image for the real one, so a boolean would latch on the
+  // placeholder's 404 and hide the real photo forever.
+  const [failedSrc, setFailedSrc] = useState<string | null>(null)
+
+  if (!src || failedSrc === src) {
     return (
       <div
         className={`flex items-center justify-center rounded-2xl bg-[linear-gradient(150deg,#d8efe0,#eef7f1)] dark:bg-green-500/10 ${className ?? ""}`}
@@ -387,7 +474,7 @@ function ShowcaseImage({
       src={src}
       alt={alt}
       loading="lazy"
-      onError={() => setFailed(true)}
+      onError={() => setFailedSrc(src)}
       className={`${fit === "cover" ? "object-cover" : "object-contain"} ${className ?? ""}`}
     />
   )

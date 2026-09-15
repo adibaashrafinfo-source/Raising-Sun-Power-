@@ -34,19 +34,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let active = true
 
-    supabase.auth.getSession().then(({ data }) => {
+    // isLoading must stay true until the PROFILE (and therefore the role) is
+    // known, not just the session. Route guards read isAdmin/isInventoryStaff,
+    // so releasing early makes a signed-in admin look like a customer for a
+    // frame and bounces them out of /admin.
+    supabase.auth.getSession().then(async ({ data }) => {
       if (!active) return
       setSession(data.session)
-      if (data.session?.user) loadProfile(data.session.user.id)
+      if (data.session?.user) await loadProfile(data.session.user.id)
+      if (!active) return
       setIsLoading(false)
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession)
       if (newSession?.user) {
-        loadProfile(newSession.user.id)
+        setIsLoading(true)
+        // Supabase warns against calling its client from inside this callback;
+        // defer a tick so the auth lock is released first.
+        const userId = newSession.user.id
+        setTimeout(() => {
+          loadProfile(userId).finally(() => {
+            if (active) setIsLoading(false)
+          })
+        }, 0)
       } else {
         setProfile(null)
+        setIsLoading(false)
       }
     })
 
