@@ -25,13 +25,13 @@ export default function ContactPage() {
   const { data: cms } = useSiteContent()
   const createMessage = useCreateContactMessage()
 
-  const whatsappNumber = settings?.whatsapp_number || "8801786896390"
+  const whatsappNumber = settings?.whatsapp_number || COMPANY.whatsappIntl
   const phone = settings?.support_phone || COMPANY.phone
   const email = settings?.contact_email || COMPANY.email
   const businessHours = cms?.business_hours || "Sat–Thu, 10am–8pm"
   const showrooms = [
-    { name: cms?.showroom_1_name || "Dhaka Showroom", address: cms?.showroom_1_address || "Nawabpur Road, Electrical Market, Dhaka 1100" },
-    { name: cms?.showroom_2_name || "Chattogram Branch", address: cms?.showroom_2_address || "Reazuddin Bazar, Kotwali, Chattogram 4000" },
+    { name: cms?.showroom_1_name || COMPANY.headOffice.label, address: cms?.showroom_1_address || COMPANY.headOffice.address },
+    { name: cms?.showroom_2_name || COMPANY.localOffice.label, address: cms?.showroom_2_address || COMPANY.localOffice.address },
   ].filter((s) => s.name || s.address)
 
   const {

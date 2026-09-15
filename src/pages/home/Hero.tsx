@@ -1,16 +1,9 @@
-import { ArrowRight, CheckCircle2, Leaf, ShieldCheck, Truck, Wallet } from "lucide-react"
+import { ArrowRight, CheckCircle2, Leaf } from "lucide-react"
 import { Link } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { Typewriter } from "@/components/ui/typewriter"
 import { useSiteContent } from "@/hooks/use-site-content"
-
-const FEATURE_CARDS = [
-  { icon: Leaf, color: "#67A70E", title: "Genuine Products", body: "100% authentic & branded" },
-  { icon: ShieldCheck, color: "#4b9be6", title: "Warranty Support", body: "Peace of mind" },
-  { icon: Truck, color: "#F49E09", title: "Nationwide Delivery", body: "Fast & reliable" },
-  { icon: Wallet, color: "#b794f6", title: "Multiple Payment Options", body: "COD, bKash, Nagad" },
-]
 
 const SHOWCASE_POINTS = [
   { icon: Leaf, label: "Save Electricity Cost" },
@@ -112,23 +105,6 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Feature cards — glass row across the bottom of the hero */}
-        <div className="rsp-animate-fade-up mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4" style={{ animationDelay: "700ms" }}>
-          {FEATURE_CARDS.map((f) => (
-            <div
-              key={f.title}
-              className="flex items-center gap-3 rounded-2xl border border-white/12 bg-white/[0.08] p-3.5 backdrop-blur-md"
-            >
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/10">
-                <f.icon className="size-5" style={{ color: f.color }} />
-              </span>
-              <div className="min-w-0">
-                <div className="truncate font-heading text-[13.5px] font-bold text-white">{f.title}</div>
-                <div className="truncate text-xs text-white/65">{f.body}</div>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   )

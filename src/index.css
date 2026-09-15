@@ -43,6 +43,15 @@
   --radius-md: 1rem;
   --radius-lg: 1rem;
   --radius-pill: 999px;
+
+  /* Footer follows the active theme (light by default, deep navy in dark). */
+  --footer-bg: linear-gradient(180deg, #eef3fa 0%, #e7eef9 55%, #dfe9f6 100%);
+  --footer-heading: #0a1b33;
+  --footer-text: #3f5069;
+  --footer-muted: #5d6e88;
+  --footer-border: rgba(10, 27, 51, 0.12);
+  --footer-card: rgba(10, 27, 51, 0.035);
+  --footer-accent: #0b3f94;
 }
 
 [data-theme="dark"] {
@@ -58,6 +67,14 @@
   --blue-deep: #0b3f94;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  --footer-bg: linear-gradient(180deg, #052c6e 0%, #04214f 55%, #03163a 100%);
+  --footer-heading: #ffffff;
+  --footer-text: #d6e4f7;
+  --footer-muted: #9db6da;
+  --footer-border: rgba(255, 255, 255, 0.1);
+  --footer-card: rgba(255, 255, 255, 0.04);
+  --footer-accent: #f4d560;
 }
 
 @theme inline {

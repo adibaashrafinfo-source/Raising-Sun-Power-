@@ -20,7 +20,7 @@ const companyLinks = [
 export function Footer() {
   const { data: settings } = useSettings()
   const { data: cms } = useSiteContent()
-  const whatsappNumber = settings?.whatsapp_number || "8801786896390"
+  const whatsappNumber = settings?.whatsapp_number || COMPANY.whatsappIntl
   const phone = settings?.support_phone || COMPANY.phone
   const email = settings?.contact_email || COMPANY.email
   const logo = cms?.footer_logo_url || "/logo.jpg"
@@ -29,8 +29,14 @@ export function Footer() {
     "Genuine solar & electrical products with engineered reliability — powering homes and businesses across Bangladesh with clean, renewable energy."
   const designedBy = cms?.footer_designed_by || "Abrar IT"
   const showrooms = [
-    { name: cms?.showroom_1_name || "Dhaka Showroom", address: cms?.showroom_1_address || "Nawabpur Road, Electrical Market, Dhaka 1100" },
-    { name: cms?.showroom_2_name || "Chattogram Branch", address: cms?.showroom_2_address || "Reazuddin Bazar, Kotwali, Chattogram 4000" },
+    {
+      name: cms?.showroom_1_name || COMPANY.headOffice.label,
+      address: cms?.showroom_1_address || COMPANY.headOffice.address,
+    },
+    {
+      name: cms?.showroom_2_name || COMPANY.localOffice.label,
+      address: cms?.showroom_2_address || COMPANY.localOffice.address,
+    },
   ].filter((s) => s.name || s.address)
 
   const socialLinks = [
@@ -42,7 +48,7 @@ export function Footer() {
   ].filter((s): s is typeof s & { url: string } => !!s.url)
 
   return (
-    <footer className="relative overflow-hidden bg-[linear-gradient(180deg,#052C6E_0%,#04214f_55%,#03163a_100%)] text-[#D6E4F7]">
+    <footer className="relative overflow-hidden bg-[image:var(--footer-bg)] text-[var(--footer-text)] transition-colors">
       {/* top brand-gradient accent line */}
       <div className="h-1 w-full bg-[linear-gradient(90deg,#217CCA,#F49E09_50%,#67A70E)]" />
       {/* ambient glows */}
@@ -64,15 +70,15 @@ export function Footer() {
                 <img src={logo} alt="RSP" className="size-full object-cover" />
               </span>
               <span className="flex flex-col leading-tight">
-                <span className="font-heading text-[18px] font-extrabold tracking-wide text-white">
+                <span className="font-heading text-[18px] font-extrabold tracking-wide text-[var(--footer-heading)]">
                   Rising Sun Power
                 </span>
-                <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-gold-400">
+                <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-orange-500">
                   Solar &amp; Electrical
                 </span>
               </span>
             </div>
-            <p className="mt-4 max-w-[320px] text-[13.5px] leading-relaxed text-[#9DB6DA]">{description}</p>
+            <p className="mt-4 max-w-[320px] text-[13.5px] leading-relaxed text-[var(--footer-muted)]">{description}</p>
 
             <div className="mt-5 flex flex-col gap-2.5">
               <ContactChip icon={Phone} href={`tel:${phone.replace(/\s|-/g, "")}`} label={phone} />
@@ -95,7 +101,7 @@ export function Footer() {
                     target="_blank"
                     rel="noreferrer"
                     aria-label={s.label}
-                    className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-all duration-200 hover:-translate-y-0.5 hover:border-transparent hover:bg-orange-500 hover:shadow-[0_8px_20px_rgba(244,158,9,.4)]"
+                    className="flex size-9 items-center justify-center rounded-full border border-[var(--footer-border)] bg-[var(--footer-card)] text-[var(--footer-heading)] transition-all duration-200 hover:-translate-y-0.5 hover:border-transparent hover:bg-orange-500 hover:text-white hover:shadow-[0_8px_20px_rgba(244,158,9,.4)]"
                   >
                     <s.icon className="size-4" />
                   </a>
@@ -112,7 +118,7 @@ export function Footer() {
 
           {/* Showrooms */}
           <div className="lg:col-span-3">
-            <div className="mb-4 font-heading text-sm font-bold uppercase tracking-wide text-white">Our Shops</div>
+            <div className="mb-4 font-heading text-sm font-bold uppercase tracking-wide text-[var(--footer-heading)]">Our Offices</div>
             <div className="flex flex-col gap-4">
               {showrooms.map((s) => (
                 <ShopAddress key={s.name} name={s.name} address={s.address} />
@@ -122,8 +128,8 @@ export function Footer() {
         </div>
 
         {/* Payment strip */}
-        <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 sm:flex-row sm:justify-between">
-          <span className="text-[13px] font-semibold text-[#B7D2F2]">We accept</span>
+        <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-[var(--footer-border)] bg-[var(--footer-card)] px-5 py-4 sm:flex-row sm:justify-between">
+          <span className="text-[13px] font-semibold text-[var(--footer-text)]">We accept</span>
           <div className="flex flex-wrap items-center gap-2.5">
             <PaymentBadge bg="#E2136E" color="#fff">bKash</PaymentBadge>
             <PaymentBadge bg="#EE6123" color="#fff">Nagad</PaymentBadge>
@@ -132,13 +138,13 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-6">
-          <span className="text-[12.5px] text-[#7E98C2]">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--footer-border)] pt-6">
+          <span className="text-[12.5px] text-[var(--footer-muted)]">
             © {new Date().getFullYear()} Rising Sun Power BD. All rights reserved.
           </span>
           {designedBy && (
-            <span className="text-[12.5px] text-[#7E98C2]">
-              Designed by <b className="text-gold-400">{designedBy}</b>
+            <span className="text-[12.5px] text-[var(--footer-muted)]">
+              Designed by <b className="text-orange-500">{designedBy}</b>
             </span>
           )}
         </div>
@@ -165,13 +171,13 @@ function ContactChip({
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noreferrer" : undefined}
-      className="group inline-flex w-fit items-center gap-2.5 text-[13.5px] font-medium text-[#C4D6EF] no-underline transition-colors hover:text-white"
+      className="group inline-flex w-fit items-center gap-2.5 text-[13.5px] font-medium text-[var(--footer-text)] no-underline transition-colors hover:text-[var(--footer-heading)]"
     >
       <span
         className={
           accent
             ? "flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#25D366]/20 text-[#3ee27f]"
-            : "flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/8 text-gold-400"
+            : "flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--footer-card)] text-[var(--footer-accent)]"
         }
       >
         <Icon className="size-[15px]" />
@@ -190,13 +196,13 @@ function FooterCol({
 }) {
   return (
     <div>
-      <div className="mb-4 font-heading text-sm font-bold uppercase tracking-wide text-white">{title}</div>
+      <div className="mb-4 font-heading text-sm font-bold uppercase tracking-wide text-[var(--footer-heading)]">{title}</div>
       <div className="flex flex-col gap-2.5">
         {links.map((link) => (
           <Link
             key={link.label}
             to={link.to}
-            className="group inline-flex w-fit items-center gap-1 text-[13.5px] text-[#9DB6DA] no-underline transition-colors hover:text-orange-400"
+            className="group inline-flex w-fit items-center gap-1 text-[13.5px] text-[var(--footer-muted)] no-underline transition-colors hover:text-orange-500"
           >
             <ArrowUpRight className="size-0 opacity-0 transition-all duration-200 group-hover:size-3.5 group-hover:opacity-100" />
             {link.label}
@@ -209,10 +215,10 @@ function FooterCol({
 
 function ShopAddress({ name, address }: { name: string; address: string }) {
   return (
-    <div className="flex gap-3 rounded-xl border border-white/8 bg-white/[0.03] p-3 transition-colors hover:border-white/15">
-      <MapPin className="mt-0.5 size-[18px] shrink-0 text-gold-400" />
-      <div className="text-[13px] leading-relaxed text-[#9DB6DA]">
-        <b className="text-[#EAF1FB]">{name}</b>
+    <div className="flex gap-3 rounded-xl border border-[var(--footer-border)] bg-[var(--footer-card)] p-3 transition-colors">
+      <MapPin className="mt-0.5 size-[18px] shrink-0 text-orange-500" />
+      <div className="text-[13px] leading-relaxed text-[var(--footer-muted)]">
+        <b className="text-[var(--footer-heading)]">{name}</b>
         <br />
         {address}
       </div>

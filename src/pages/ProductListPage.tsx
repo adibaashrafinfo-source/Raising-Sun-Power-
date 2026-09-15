@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { ChevronRight, LayoutGrid, List, RefreshCw, SearchX, SlidersHorizontal } from "lucide-react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useParams, useSearchParams } from "react-router-dom"
 
 import { CatalogProductCard } from "@/components/product/CatalogProductCard"
 import { FilterPanel } from "@/components/product/FilterPanel"
@@ -38,6 +38,9 @@ export default function ProductListPage() {
   const [page, setPage] = useState(1)
   const [view, setView] = useState<"grid" | "list">("grid")
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+  // Search term supplied by the header search bar (?search=…).
+  const [searchParams] = useSearchParams()
+  const search = searchParams.get("search")?.trim() || undefined
 
   const { data, isLoading, isError, refetch } = useProducts({
     categorySlugs: categorySlugs.length ? categorySlugs : undefined,
@@ -47,6 +50,7 @@ export default function ProductListPage() {
     sort,
     page,
     pageSize: PAGE_SIZE,
+    search,
   })
 
   const products = data?.products ?? []
