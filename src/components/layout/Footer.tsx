@@ -2,6 +2,7 @@ import { ArrowUpRight, Mail, MapPin, MessageCircle, Phone } from "lucide-react"
 import { Link } from "react-router-dom"
 
 import { FacebookIcon, InstagramIcon, LinkedinIcon, TiktokIcon, YoutubeIcon } from "@/components/icons/SocialIcons"
+import { COMPANY } from "@/data/company"
 import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
 
@@ -10,7 +11,9 @@ const serviceLinks = ["Track order", "Returns", "Warranty", "FAQ"]
 const companyLinks = [
   { label: "About Us", to: "/about" },
   { label: "Contact", to: "/contact" },
-  { label: "Solar Calculator", to: "/solar-calculator" },
+  { label: "Blog", to: "/blog" },
+  { label: "Wholesale & Dealer", to: "/wholesale" },
+  { label: "Free Solar Assessment", to: "/solar-assessment" },
   { label: "Get Free Quotation", to: "/get-quotation" },
 ]
 
@@ -18,8 +21,8 @@ export function Footer() {
   const { data: settings } = useSettings()
   const { data: cms } = useSiteContent()
   const whatsappNumber = settings?.whatsapp_number || "8801786896390"
-  const phone = settings?.support_phone || "+8801786896390"
-  const email = settings?.contact_email || "info@risingsunpowerbd.com"
+  const phone = settings?.support_phone || COMPANY.phone
+  const email = settings?.contact_email || COMPANY.email
   const logo = cms?.footer_logo_url || "/logo.jpg"
   const description =
     cms?.footer_description ||

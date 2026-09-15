@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { COMPANY } from "@/data/company"
 import { useSettings } from "@/hooks/use-checkout"
 import { useCreateContactMessage } from "@/hooks/use-contact"
 import { useSeo } from "@/hooks/use-seo"
@@ -25,8 +26,8 @@ export default function ContactPage() {
   const createMessage = useCreateContactMessage()
 
   const whatsappNumber = settings?.whatsapp_number || "8801786896390"
-  const phone = settings?.support_phone || "+8801786896390"
-  const email = settings?.contact_email || "info@risingsunpowerbd.com"
+  const phone = settings?.support_phone || COMPANY.phone
+  const email = settings?.contact_email || COMPANY.email
   const businessHours = cms?.business_hours || "Sat–Thu, 10am–8pm"
   const showrooms = [
     { name: cms?.showroom_1_name || "Dhaka Showroom", address: cms?.showroom_1_address || "Nawabpur Road, Electrical Market, Dhaka 1100" },

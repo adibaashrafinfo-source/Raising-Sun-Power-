@@ -133,9 +133,18 @@ export function Header() {
             >
               ROI Calculator
             </Link>
-            <a className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm">
-              Brands
-            </a>
+            <Link
+              to="/wholesale"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+            >
+              Wholesale
+            </Link>
+            <Link
+              to="/blog"
+              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+            >
+              Blog
+            </Link>
             <Link
               to="/about"
               className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"

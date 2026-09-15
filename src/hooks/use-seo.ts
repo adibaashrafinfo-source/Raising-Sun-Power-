@@ -5,12 +5,16 @@ const SITE_NAME = "Rising Sun Power BD"
 export function useSeo({
   title,
   description,
+  keywords,
   noIndex,
 }: {
   title: string
   description?: string
+  keywords?: string[]
   noIndex?: boolean
 }) {
+  const keywordList = keywords?.join(", ")
+
   useEffect(() => {
     document.title = title ? `${title} | ${SITE_NAME}` : SITE_NAME
 
@@ -24,6 +28,16 @@ export function useSeo({
       tag.setAttribute("content", description)
     }
 
+    if (keywordList) {
+      let tag = document.querySelector('meta[name="keywords"]')
+      if (!tag) {
+        tag = document.createElement("meta")
+        tag.setAttribute("name", "keywords")
+        document.head.appendChild(tag)
+      }
+      tag.setAttribute("content", keywordList)
+    }
+
     let robots = document.querySelector('meta[name="robots"]')
     if (noIndex) {
       if (!robots) {
@@ -35,5 +49,5 @@ export function useSeo({
     } else if (robots) {
       robots.remove()
     }
-  }, [title, description, noIndex])
+  }, [title, description, keywordList, noIndex])
 }
