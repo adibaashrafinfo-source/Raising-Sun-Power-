@@ -170,6 +170,12 @@ export type RoiCalculatorSettings = {
   annual_degradation_rate: number
   annual_electricity_price_escalation: number
   annual_maintenance_cost_rate: number
+  first_year_degradation_rate: number
+  inverter_replacement_year: number
+  inverter_replacement_cost_ratio: number
+  self_consumption_ratio: number
+  export_credit_ratio: number
+  discount_rate: number
   updated_at: string
 }
 

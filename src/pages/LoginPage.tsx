@@ -8,14 +8,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useSeo } from "@/hooks/use-seo"
-import { signIn } from "@/lib/queries/auth"
+import { fetchLandingPath, signIn } from "@/lib/queries/auth"
 import { type LoginFormValues, loginSchema } from "@/lib/schemas/auth"
 
 export default function LoginPage() {
   useSeo({ title: "Sign In" })
   const navigate = useNavigate()
   const location = useLocation()
-  const from = (location.state as { from?: string } | null)?.from ?? "/account"
+  // Only set when a guard bounced the user here from a protected page.
+  const from = (location.state as { from?: string } | null)?.from
 
   const {
     register,
@@ -26,7 +27,7 @@ export default function LoginPage() {
   const onSubmit = async (values: LoginFormValues) => {
     try {
       await signIn(values)
-      navigate(from, { replace: true })
+      navigate(from ?? (await fetchLandingPath()), { replace: true })
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't sign in. Check your credentials.")
     }

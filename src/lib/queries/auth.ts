@@ -42,3 +42,22 @@ export async function requestPasswordReset(email: string) {
   })
   if (error) throw error
 }
+
+/**
+ * Where a user belongs immediately after signing in: staff go straight to the
+ * admin dashboard, everyone else to their account. Read directly rather than
+ * via AuthProvider so the decision never races the profile fetch.
+ */
+export async function fetchLandingPath(): Promise<string> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) return "/account"
+    const profile = await fetchProfile(user.id)
+    const role = profile?.role
+    return role === "admin" || role === "manager" || role === "staff" ? "/admin" : "/account"
+  } catch {
+    return "/account"
+  }
+}

@@ -37,11 +37,11 @@ export function CatalogProductCard({ product, view = "grid" }: { product: Produc
       <div className="flex gap-4 rounded-[18px] border border-border bg-surface p-4 shadow-[var(--shadow-sm)]">
         <Link
           to={`/product/${product.slug}`}
-          className="flex size-[110px] shrink-0 items-center justify-center overflow-hidden rounded-2xl"
+          className="relative flex size-[110px] shrink-0 items-center justify-center overflow-hidden rounded-2xl"
           style={image ? undefined : { background: tint }}
         >
           {image ? (
-            <img src={image} alt={product.name} className="size-full object-cover" />
+            <img src={image} alt={product.name} loading="lazy" className="absolute inset-0 size-full object-cover" />
           ) : (
             <ProductArt art={artForCategory(product.category?.slug)} className="size-16" />
           )}
@@ -93,7 +93,7 @@ export function CatalogProductCard({ product, view = "grid" }: { product: Produc
     <div className="group relative flex flex-col overflow-hidden rounded-[20px] border border-border bg-surface shadow-[var(--shadow-sm)] transition-[transform,box-shadow] duration-250 hover:-translate-y-1 hover:shadow-[var(--shadow)]">
       <Link
         to={`/product/${product.slug}`}
-        className="relative flex aspect-square items-center justify-center"
+        className="relative flex aspect-square items-center justify-center overflow-hidden"
         style={image ? undefined : { background: tint }}
       >
         <span className="absolute left-3 top-3 flex gap-1.5">
@@ -124,7 +124,14 @@ export function CatalogProductCard({ product, view = "grid" }: { product: Produc
           />
         </button>
         {image ? (
-          <img src={image} alt={product.name} className="size-full object-cover" />
+          // Absolutely positioned so a tall or wide photo can never stretch the
+          // card — every card in a row keeps the same square image box.
+          <img
+            src={image}
+            alt={product.name}
+            loading="lazy"
+            className="absolute inset-0 size-full object-cover"
+          />
         ) : (
           <ProductArt art={artForCategory(product.category?.slug)} />
         )}
@@ -153,7 +160,7 @@ export function CatalogProductCard({ product, view = "grid" }: { product: Produc
             {product.rating_avg} ({product.rating_count})
           </span>
         </div>
-        <div className="mt-0.5 flex items-baseline gap-2">
+        <div className="mt-0.5 flex min-h-[30px] items-baseline gap-2">
           <span className="font-heading text-xl font-extrabold tabular-nums text-orange-500">
             {formatBDT(displayPrice)}
           </span>
@@ -166,7 +173,7 @@ export function CatalogProductCard({ product, view = "grid" }: { product: Produc
         <button
           onClick={handleAdd}
           disabled={!inStock}
-          className="mt-1.5 flex h-11 items-center justify-center gap-2 rounded-[13px] bg-gradient-to-r from-orange-500 to-orange-400 text-sm font-bold text-white shadow-[0_6px_18px_rgba(244,158,9,.32)] transition-all hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-45"
+          className="mt-auto flex h-11 items-center justify-center gap-2 rounded-[13px] bg-gradient-to-r from-orange-500 to-orange-400 text-sm font-bold text-white shadow-[0_6px_18px_rgba(244,158,9,.32)] transition-all hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-45"
         >
           <ShoppingCart className="size-[17px]" />
           {inStock ? "Add to Cart" : "Out of stock"}
