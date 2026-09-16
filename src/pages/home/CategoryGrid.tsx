@@ -6,7 +6,9 @@ import { SectionHeader } from "@/pages/home/SectionHeader"
 
 export function CategoryGrid() {
   return (
-    <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-14">
+    // Desktop only: on mobile the categories live in the bottom-nav sheet
+    // (MobileCategorySheet), so the homepage can lead straight with products.
+    <section className="mx-auto hidden max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-14 lg:block">
       <SectionHeader
         kicker="Shop by category"
         kickerColor="#F49E09"

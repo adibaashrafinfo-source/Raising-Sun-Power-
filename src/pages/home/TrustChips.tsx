@@ -6,7 +6,9 @@ const ICONS = [BadgeCheck, ShieldCheck, Truck, Wallet]
 
 export function TrustChips() {
   return (
-    <section className="mx-auto max-w-[1280px] px-4 py-2 sm:px-6">
+    // Desktop only: on a phone these four cards push the products far down the
+    // page, and the same promises are repeated in the footer.
+    <section className="mx-auto hidden max-w-[1280px] px-4 py-2 sm:px-6 lg:block">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {trustChips.map((chip, i) => {
           const Icon = ICONS[i]
