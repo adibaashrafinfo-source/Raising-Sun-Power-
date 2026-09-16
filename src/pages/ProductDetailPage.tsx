@@ -177,17 +177,17 @@ export default function ProductDetailPage() {
     <main className="mx-auto max-w-[1280px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <div className="mb-3.5 flex items-center gap-2 text-[13px] text-muted">
-        <Link to="/" className="text-muted no-underline hover:text-blue">
+        <Link to="/" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Home
         </Link>
         <ChevronRight className="size-3.5" />
-        <Link to="/products" className="text-muted no-underline hover:text-blue">
+        <Link to="/products" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Products
         </Link>
         <ChevronRight className="size-3.5" />
         {product.category && (
           <>
-            <Link to={`/category/${product.category.slug}`} className="text-muted no-underline hover:text-blue">
+            <Link to={`/category/${product.category.slug}`} className="-my-1 py-1 text-muted no-underline hover:text-blue">
               {product.category.name}
             </Link>
             <ChevronRight className="size-3.5" />

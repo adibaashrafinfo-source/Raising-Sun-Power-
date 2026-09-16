@@ -73,7 +73,7 @@ export function Footer() {
                 <span className="font-heading text-[18px] font-extrabold tracking-wide text-[var(--footer-heading)]">
                   Rising Sun Power
                 </span>
-                <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-orange-500">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-orange-500">
                   Solar &amp; Electrical
                 </span>
               </span>
@@ -171,7 +171,7 @@ function ContactChip({
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noreferrer" : undefined}
-      className="group inline-flex w-fit items-center gap-2.5 text-[13.5px] font-medium text-[var(--footer-text)] no-underline transition-colors hover:text-[var(--footer-heading)]"
+      className="group inline-flex w-fit items-center gap-2.5 py-1 text-[13.5px] font-medium text-[var(--footer-text)] no-underline transition-colors hover:text-[var(--footer-heading)]"
     >
       <span
         className={
@@ -202,7 +202,7 @@ function FooterCol({
           <Link
             key={link.label}
             to={link.to}
-            className="group inline-flex w-fit items-center gap-1 text-[13.5px] text-[var(--footer-muted)] no-underline transition-colors hover:text-orange-500"
+            className="group inline-flex w-fit items-center gap-1 py-1.5 text-[13.5px] text-[var(--footer-muted)] no-underline transition-colors hover:text-orange-500"
           >
             <ArrowUpRight className="size-0 opacity-0 transition-all duration-200 group-hover:size-3.5 group-hover:opacity-100" />
             {link.label}
@@ -237,7 +237,7 @@ function PaymentBadge({
 }) {
   return (
     <span
-      className="rounded-lg px-3 py-1.5 text-[11px] font-extrabold shadow-[0_4px_12px_rgba(0,0,0,.25)]"
+      className="rounded-lg px-3 py-1.5 text-[11.5px] font-extrabold shadow-[0_4px_12px_rgba(0,0,0,.25)]"
       style={{ background: bg, color }}
     >
       {children}

@@ -77,7 +77,7 @@ export default function GetQuotationPage() {
   return (
     <main className="mx-auto max-w-[760px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
       <div className="mb-4 flex items-center gap-2 text-[13px] text-muted">
-        <Link to="/" className="text-muted no-underline hover:text-blue">
+        <Link to="/" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Home
         </Link>
         <ChevronRight className="size-3.5" />
@@ -125,7 +125,7 @@ export default function GetQuotationPage() {
           <Field label="Division *" error={errors.division?.message}>
             <select
               {...register("division")}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
             >
               <option value="">Select division</option>
               {bdDivisions.map((d) => (
@@ -139,7 +139,7 @@ export default function GetQuotationPage() {
             <select
               {...register("district")}
               disabled={!division}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none disabled:opacity-50"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm disabled:opacity-50"
             >
               <option value="">Select district</option>
               {districts.map((d) => (
@@ -194,7 +194,7 @@ export default function GetQuotationPage() {
           <Field label="Budget Range (optional)">
             <select
               {...register("budget")}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
             >
               <option value="">Select budget</option>
               {budgetOptions.map((b) => (
@@ -207,7 +207,7 @@ export default function GetQuotationPage() {
           <Field label="Roof / Installation (optional)">
             <select
               {...register("roof")}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
             >
               <option value="">Select type</option>
               {roofOptions.map((r) => (
@@ -220,7 +220,7 @@ export default function GetQuotationPage() {
           <Field label="Install Timeline (optional)">
             <select
               {...register("timeline")}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
             >
               <option value="">Select timeline</option>
               {timelineOptions.map((t) => (
@@ -236,7 +236,7 @@ export default function GetQuotationPage() {
           <textarea
             placeholder="Anything else we should know…"
             {...register("notes")}
-            className="min-h-[84px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-3 text-sm text-text outline-none"
+            className="min-h-[84px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-3 text-base text-text outline-none sm:text-sm"
           />
         </Field>
 

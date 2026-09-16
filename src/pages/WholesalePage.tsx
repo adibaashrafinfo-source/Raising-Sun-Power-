@@ -110,7 +110,7 @@ export default function WholesalePage() {
     <main>
       <div className="mx-auto max-w-[1280px] px-4 pt-5 sm:px-6 sm:pt-7">
         <div className="mb-4 flex items-center gap-2 text-[13px] text-muted">
-          <Link to="/" className="text-muted no-underline hover:text-blue">
+          <Link to="/" className="-my-1 py-1 text-muted no-underline hover:text-blue">
             Home
           </Link>
           <ChevronRight className="size-3.5" />
@@ -263,7 +263,7 @@ export default function WholesalePage() {
               <textarea
                 placeholder="Products and quantities you're interested in…"
                 {...register("message")}
-                className="min-h-[110px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-3 text-sm text-text outline-none"
+                className="min-h-[110px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-3 text-base text-text outline-none sm:text-sm"
               />
             </Field>
 

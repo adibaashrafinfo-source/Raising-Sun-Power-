@@ -60,7 +60,7 @@ export default function ContactPage() {
   return (
     <main className="mx-auto max-w-[1280px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
       <div className="mb-4 flex items-center gap-2 text-[13px] text-muted">
-        <Link to="/" className="text-muted no-underline hover:text-blue">
+        <Link to="/" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Home
         </Link>
         <ChevronRight className="size-3.5" />
@@ -121,7 +121,7 @@ export default function ContactPage() {
             <textarea
               placeholder="Tell us how we can help…"
               {...register("message")}
-              className="min-h-[130px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-3 text-sm text-text outline-none"
+              className="min-h-[130px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-3 text-base text-text outline-none sm:text-sm"
             />
           </Field>
           <Button size="lg" type="submit" disabled={createMessage.isPending} className="w-full">

@@ -74,7 +74,7 @@ export default function AdminSalesReturnsPage() {
               setOrderId(e.target.value)
               setReturnQty({})
             }}
-            className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+            className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
           >
             <option value="">Select an order</option>
             {orders.map((o) => (

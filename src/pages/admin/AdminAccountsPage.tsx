@@ -165,7 +165,7 @@ function AccountDialog({
             <select
               value={type}
               onChange={(e) => setType(e.target.value as CashAccountType)}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
             >
               <option value="cash">Cash</option>
               <option value="bank">Bank</option>

@@ -163,7 +163,7 @@ function CouponDialog({
               <select
                 value={discountType}
                 onChange={(e) => setDiscountType(e.target.value as "percent" | "flat")}
-                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
               >
                 <option value="percent">Percent</option>
                 <option value="flat">Flat (৳)</option>

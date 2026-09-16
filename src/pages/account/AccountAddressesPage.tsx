@@ -204,7 +204,7 @@ function AddressDialog({
             <Field label="Division *" error={errors.division?.message}>
               <select
                 {...register("division")}
-                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
               >
                 <option value="">Select division</option>
                 {bdDivisions.map((d) => (
@@ -217,7 +217,7 @@ function AddressDialog({
             <Field label="District *" error={errors.district?.message}>
               <select
                 {...register("district")}
-                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
               >
                 <option value="">Select district</option>
                 {districts.map((d) => (
@@ -230,7 +230,7 @@ function AddressDialog({
             <Field label="Upazila (optional)">
               <select
                 {...register("upazila")}
-                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
               >
                 <option value="">Select upazila</option>
                 {upazilas.map((u) => (
