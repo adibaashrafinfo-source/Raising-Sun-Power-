@@ -18,7 +18,7 @@ export function Hero() {
   const headlineHighlight = cms?.hero_headline_highlight || "renewable energy."
   const subheading =
     cms?.hero_subheading ||
-    "Genuine solar panels, inverters, batteries, MCB & MCCB and complete power solutions — delivered nationwide with Cash on Delivery, bKash & Nagad."
+    "Genuine solar panels, inverters, batteries, MCB & MCCB and complete power solutions."
 
   return (
     <section className="relative overflow-hidden">
@@ -51,17 +51,17 @@ export function Hero() {
         <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,var(--bg))]" />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-[1280px] px-4 py-11 sm:px-6 sm:py-14 lg:py-20">
-        <div className="max-w-[640px]">
+      <div className="relative z-10 mx-auto w-full max-w-[1280px] px-4 py-9 text-center sm:px-6 sm:py-14 lg:py-20">
+        <div className="mx-auto flex max-w-[760px] flex-col items-center">
           <span
-            className="rsp-animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-sm"
+            className="rsp-animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white/90 backdrop-blur-sm sm:px-3.5 sm:text-xs"
             style={{ animationDelay: "0ms" }}
           >
-            <span className="size-[7px] rounded-full bg-green-400 shadow-[0_0_0_4px_rgba(103,167,14,.25)]" />
+            <span className="size-[7px] shrink-0 rounded-full bg-green-400 shadow-[0_0_0_4px_rgba(103,167,14,.25)]" />
             {badge}
           </span>
 
-          <h1 className="mt-5 text-balance font-heading text-[clamp(28px,7vw,54px)] font-extrabold leading-[1.08] tracking-tight text-white">
+          <h1 className="mt-4 text-balance font-heading text-[clamp(25px,6vw,52px)] font-extrabold leading-[1.12] tracking-tight text-white sm:mt-5 sm:leading-[1.08]">
             <span className="rsp-animate-fade-up block" style={{ animationDelay: "120ms" }}>
               {headlinePrefix}
             </span>
@@ -70,7 +70,7 @@ export function Hero() {
                 {headlineHighlight}
                 <svg
                   viewBox="0 0 220 14"
-                  className="absolute -bottom-2 left-0 h-3 w-full text-orange-500"
+                  className="absolute -bottom-1.5 left-0 h-2.5 w-full text-orange-500 sm:-bottom-2 sm:h-3"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
@@ -80,12 +80,17 @@ export function Hero() {
             </span>
           </h1>
 
-          <p className="mt-5 min-h-[4.5em] max-w-[520px] text-[clamp(14.5px,3.6vw,18px)] sm:mt-6 sm:min-h-[3.5em] leading-relaxed text-[#C9DAF2] sm:min-h-[3em]">
+          {/* The min-height reserves the typewriter's final line count so the
+              buttons below never jump while the text types itself out. */}
+          <p className="mx-auto mt-4 min-h-[3.4em] max-w-[560px] text-[clamp(14px,3.4vw,17px)] leading-relaxed text-[#C9DAF2] sm:mt-5 sm:min-h-[2.6em]">
             <Typewriter text={subheading} />
           </p>
 
-          <div className="rsp-animate-fade-up mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-3.5" style={{ animationDelay: "420ms" }}>
-            <Button asChild size="lg" className="w-full sm:w-auto">
+          <div
+            className="rsp-animate-fade-up mt-5 flex w-full flex-row flex-nowrap justify-center gap-2.5 sm:mt-7 sm:flex-wrap sm:gap-3.5"
+            style={{ animationDelay: "420ms" }}
+          >
+            <Button asChild size="lg" className="min-w-0 flex-1 px-4 text-sm sm:flex-none sm:px-6 sm:text-base">
               <Link to="/products">
                 Shop Solar <ArrowRight className="size-[18px]" />
               </Link>
@@ -93,20 +98,28 @@ export function Hero() {
             <Button
               asChild
               size="lg"
-              className="w-full border border-white/25 bg-white/10 text-white hover:bg-white/20 sm:w-auto"
+              className="min-w-0 flex-1 border border-white/25 bg-white/10 px-4 text-sm text-white hover:bg-white/20 sm:flex-none sm:px-6 sm:text-base"
             >
               <Link to="/products">Explore Products</Link>
             </Button>
           </div>
 
-          <div className="rsp-animate-fade-up mt-8 grid max-w-[420px] grid-cols-2 gap-x-5 gap-y-4 sm:mt-9 sm:gap-x-6 sm:gap-y-5" style={{ animationDelay: "540ms" }}>
+          <div
+            className="rsp-animate-fade-up mx-auto mt-6 grid w-full max-w-[560px] grid-cols-4 gap-x-2 sm:mt-9 sm:gap-x-6"
+            style={{ animationDelay: "540ms" }}
+          >
             <Stat value="12,000+" label="Orders delivered" />
             <Stat value="500+" label="Products in stock" />
             <Stat value="5★" label="Rated service" color="#8fe36a" />
             <Stat value="24/7" label="Customer support" />
           </div>
 
-          <div className="rsp-animate-fade-up mt-8 flex flex-wrap gap-x-5 gap-y-2.5" style={{ animationDelay: "620ms" }}>
+          {/* Desktop only — on a phone these repeat the headline and only make
+              the hero taller before the products come into view. */}
+          <div
+            className="rsp-animate-fade-up mt-8 hidden flex-wrap justify-center gap-x-5 gap-y-2.5 sm:flex"
+            style={{ animationDelay: "620ms" }}
+          >
             {SHOWCASE_POINTS.map((p) => (
               <div key={p.label} className="flex items-center gap-2 text-[13px] font-semibold text-white/85">
                 <span className="flex size-6 items-center justify-center rounded-full bg-green-500/25">
@@ -117,7 +130,6 @@ export function Hero() {
             ))}
           </div>
         </div>
-
       </div>
     </section>
   )
@@ -127,12 +139,12 @@ function Stat({ value, label, color }: { value: string; label: string; color?: s
   return (
     <div>
       <div
-        className="font-heading text-[clamp(19px,5vw,26px)] font-extrabold tabular-nums text-white"
+        className="font-heading text-[clamp(15px,4.2vw,26px)] font-extrabold tabular-nums text-white"
         style={color ? { color } : undefined}
       >
         {value}
       </div>
-      <div className="text-[13px] font-medium text-white/70">{label}</div>
+      <div className="text-[11px] font-medium leading-tight text-white/70 sm:text-[13px]">{label}</div>
     </div>
   )
 }
