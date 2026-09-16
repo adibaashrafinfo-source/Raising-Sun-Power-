@@ -3,15 +3,13 @@ import { Reveal } from "@/components/ui/reveal"
 import { SEO_KEYWORDS, SITE_DESCRIPTION } from "@/data/company"
 import { useProducts, useProductsByPlacement } from "@/hooks/use-catalog"
 import { useSeo } from "@/hooks/use-seo"
+import { AllProductsSection } from "@/pages/home/AllProductsSection"
 import { BrandsStrip } from "@/pages/home/BrandsStrip"
 import { CategoryGrid } from "@/pages/home/CategoryGrid"
 import { CtaBand } from "@/pages/home/CtaBand"
-import { DealsBand } from "@/pages/home/DealsBand"
 import { FeaturedProducts } from "@/pages/home/FeaturedProducts"
 import { Hero } from "@/pages/home/Hero"
 import { ProductGridSection } from "@/pages/home/ProductGridSection"
-import { ShopBySolution } from "@/pages/home/ShopBySolution"
-import { Testimonials } from "@/pages/home/Testimonials"
 import { TrustChips } from "@/pages/home/TrustChips"
 import { WhyChooseUs } from "@/pages/home/WhyChooseUs"
 
@@ -52,8 +50,6 @@ export default function Home() {
         />
       </Reveal>
       <Reveal><FeaturedProducts /></Reveal>
-      <Reveal><DealsBand /></Reveal>
-      <Reveal><ShopBySolution /></Reveal>
       <Reveal>
         <ProductGridSection
           kicker="Just landed"
@@ -64,9 +60,9 @@ export default function Home() {
           isLoading={pinnedNewArrivals.isLoading || autoNewArrivals.isLoading}
         />
       </Reveal>
+      <Reveal><AllProductsSection /></Reveal>
       <Reveal><BrandsStrip /></Reveal>
       <Reveal><WhyChooseUs /></Reveal>
-      <Reveal><Testimonials /></Reveal>
       <Reveal><CtaBand /></Reveal>
       <FloatingWhatsAppButton />
     </main>
