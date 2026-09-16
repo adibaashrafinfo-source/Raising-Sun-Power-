@@ -100,7 +100,7 @@ export default function SolarAssessmentPage() {
   return (
     <main className="mx-auto max-w-[1280px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
       <div className="mb-4 flex items-center gap-2 text-[13px] text-muted">
-        <Link to="/" className="text-muted no-underline hover:text-blue">
+        <Link to="/" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Home
         </Link>
         <ChevronRight className="size-3.5" />
@@ -209,7 +209,7 @@ export default function SolarAssessmentPage() {
             <Field label="Average Monthly Electricity Bill">
               <select
                 {...register("monthlyBill")}
-                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
               >
                 <option value="">Select a range</option>
                 {monthlyBillOptions.map((o) => (
@@ -222,7 +222,7 @@ export default function SolarAssessmentPage() {
             <Field label="Roof Type">
               <select
                 {...register("roofType")}
-                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
               >
                 <option value="">Select roof type</option>
                 {roofOptions.map((o) => (
@@ -238,7 +238,7 @@ export default function SolarAssessmentPage() {
             <textarea
               placeholder="Anything else we should know — load details, timeline, site conditions…"
               {...register("message")}
-              className="min-h-[110px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-3 text-sm text-text outline-none"
+              className="min-h-[110px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-3 text-base text-text outline-none sm:text-sm"
             />
           </Field>
 

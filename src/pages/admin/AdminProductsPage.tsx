@@ -393,7 +393,7 @@ function ProductDialog({
               <Input {...register("slug")} />
             </Field>
             <Field label="Category">
-              <select {...register("categoryId")} className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none">
+              <select {...register("categoryId")} className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm">
                 <option value="">None</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -403,7 +403,7 @@ function ProductDialog({
               </select>
             </Field>
             <Field label="Brand">
-              <select {...register("brandId")} className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none">
+              <select {...register("brandId")} className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm">
                 <option value="">None</option>
                 {brands.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -416,7 +416,7 @@ function ProductDialog({
               <Input {...register("sku")} />
             </Field>
             <Field label="Status">
-              <select {...register("status")} className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none">
+              <select {...register("status")} className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm">
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
                 <option value="archived">Archived</option>
@@ -486,7 +486,7 @@ function ProductDialog({
               {...register("shortDescription")}
               rows={2}
               placeholder="One or two lines shown right under the product name."
-              className="w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-2.5 text-sm text-text outline-none"
+              className="w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-2.5 text-base text-text outline-none sm:text-sm"
             />
           </Field>
 

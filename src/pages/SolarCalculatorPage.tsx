@@ -60,7 +60,7 @@ export default function SolarCalculatorPage() {
   return (
     <main className="mx-auto max-w-[900px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
       <div className="mb-4 flex items-center gap-2 text-[13px] text-muted">
-        <Link to="/" className="text-muted no-underline hover:text-blue">
+        <Link to="/" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Home
         </Link>
         <ChevronRight className="size-3.5" />
@@ -150,16 +150,16 @@ export default function SolarCalculatorPage() {
                       <div className="flex h-[38px] items-center overflow-hidden rounded-[11px] border border-border">
                         <button
                           onClick={() => updateAppliance(idx, { qty: Math.max(0, a.qty - 1) })}
-                          className="flex h-full w-[34px] items-center justify-center text-text"
+                          className="flex h-full w-[42px] items-center justify-center text-text"
                         >
                           −
                         </button>
-                        <span className="min-w-[34px] text-center text-sm font-bold tabular-nums text-text">
+                        <span className="min-w-[38px] text-center text-sm font-bold tabular-nums text-text">
                           {a.qty}
                         </span>
                         <button
                           onClick={() => updateAppliance(idx, { qty: a.qty + 1 })}
-                          className="flex h-full w-[34px] items-center justify-center text-text"
+                          className="flex h-full w-[42px] items-center justify-center text-text"
                         >
                           +
                         </button>

@@ -101,8 +101,7 @@ export default function AdminCmsPage() {
         </Section>
 
         {/* Hero */}
-        <Section title="Homepage Hero" subtitle="The full-width background image, headline and subheading at the top of the homepage.">
-          <ImageField label="Hero background image (wide landscape scene)" value={form.hero_image_url} onChange={(v) => set("hero_image_url", v)} wide />
+        <Section title="Homepage Hero" subtitle="The headline and subheading at the top of the homepage. The hero uses a brand gradient background — no image needed.">
           <TextField label="Badge text" value={form.hero_badge} onChange={(v) => set("hero_badge", v)} />
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
             <TextField label="Headline — first part" value={form.hero_headline_prefix} onChange={(v) => set("hero_headline_prefix", v)} />
@@ -189,7 +188,7 @@ function TextArea({
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
-        className="w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-2.5 text-sm text-text outline-none"
+        className="w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-2.5 text-base text-text outline-none sm:text-sm"
       />
     </div>
   )

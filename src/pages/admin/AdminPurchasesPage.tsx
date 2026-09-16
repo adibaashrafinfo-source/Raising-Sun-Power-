@@ -203,7 +203,7 @@ function NewPurchaseDialog({ open, onOpenChange }: { open: boolean; onOpenChange
               <select
                 value={supplierId}
                 onChange={(e) => setSupplierId(e.target.value)}
-                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
               >
                 <option value="">Select supplier</option>
                 {suppliers.map((s) => (
@@ -218,7 +218,7 @@ function NewPurchaseDialog({ open, onOpenChange }: { open: boolean; onOpenChange
               <select
                 value={locationId}
                 onChange={(e) => setLocationId(e.target.value)}
-                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
               >
                 <option value="">Select location</option>
                 {locations.map((l) => (
@@ -374,7 +374,7 @@ function RecordPaymentDialog({ purchase, onClose }: { purchase: Purchase; onClos
             <select
               value={method}
               onChange={(e) => setMethod(e.target.value as FinancePaymentMethod)}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
             >
               <option value="cash">Cash</option>
               <option value="bkash">bKash</option>

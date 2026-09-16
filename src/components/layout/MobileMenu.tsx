@@ -39,7 +39,7 @@ export function MobileMenu() {
           <Search className="size-[17px] text-muted" />
           <input
             placeholder="Search products…"
-            className="flex-1 bg-transparent px-2.5 text-sm text-text outline-none placeholder:text-muted"
+            className="flex-1 bg-transparent px-2.5 text-base text-text outline-none sm:text-sm placeholder:text-muted"
           />
         </div>
         {links.map((link) => (

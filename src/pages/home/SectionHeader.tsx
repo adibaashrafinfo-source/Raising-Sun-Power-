@@ -27,7 +27,7 @@ export function SectionHeader({
         </h2>
       </div>
       {linkTo && (
-        <Link to={linkTo} className="whitespace-nowrap text-sm font-semibold text-blue no-underline">
+        <Link to={linkTo} className="-my-1.5 whitespace-nowrap py-1.5 text-sm font-semibold text-blue no-underline">
           {linkLabel} →
         </Link>
       )}

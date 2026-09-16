@@ -58,7 +58,7 @@ export default function AdminExpensesPage() {
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="h-10 rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3 text-sm text-text outline-none"
+          className="h-10 rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3 text-base text-text outline-none sm:text-sm"
         >
           <option value="">All categories</option>
           {categories.map((c) => (
@@ -186,7 +186,7 @@ function AddExpenseDialog({
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
             >
               <option value="">Select category</option>
               {categories.map((c) => (
@@ -209,7 +209,7 @@ function AddExpenseDialog({
             <select
               value={method}
               onChange={(e) => setMethod(e.target.value as FinancePaymentMethod)}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
             >
               <option value="cash">Cash</option>
               <option value="bkash">bKash</option>

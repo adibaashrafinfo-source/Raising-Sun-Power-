@@ -68,7 +68,7 @@ export default function CartPage() {
   return (
     <main className="mx-auto max-w-[1180px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
       <div className="mb-4 flex items-center gap-2 text-[13px] text-muted">
-        <Link to="/" className="text-muted no-underline hover:text-blue">
+        <Link to="/" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Home
         </Link>
         <ChevronRight className="size-3.5" />

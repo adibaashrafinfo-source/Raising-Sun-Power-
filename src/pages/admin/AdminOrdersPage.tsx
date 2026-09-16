@@ -71,7 +71,7 @@ export default function AdminOrdersPage() {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as OrderStatus | "")}
-            className="h-11 rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+            className="h-11 rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
           >
             <option value="">All statuses</option>
             {STATUSES.map((s) => (
@@ -302,7 +302,7 @@ function RecordOrderPaymentDialog({ order, onClose }: { order: Order; onClose: (
             <select
               value={method}
               onChange={(e) => setMethod(e.target.value as FinancePaymentMethod)}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
             >
               <option value="cash">Cash</option>
               <option value="bkash">bKash</option>

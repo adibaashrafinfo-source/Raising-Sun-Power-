@@ -144,7 +144,7 @@ export default function CheckoutPage() {
   return (
     <main className="mx-auto max-w-[1180px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
       <div className="mb-4 flex items-center gap-2 text-[13px] text-muted">
-        <Link to="/cart" className="text-muted no-underline hover:text-blue">
+        <Link to="/cart" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Cart
         </Link>
         <ChevronRight className="size-3.5" />
@@ -178,7 +178,7 @@ export default function CheckoutPage() {
               <Field label="Division *" error={errors.division?.message}>
                 <select
                   {...register("division")}
-                  className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+                  className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
                 >
                   <option value="">Select division</option>
                   {bdDivisions.map((d) => (
@@ -192,7 +192,7 @@ export default function CheckoutPage() {
                 <select
                   {...register("district")}
                   disabled={!division}
-                  className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none disabled:opacity-50"
+                  className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm disabled:opacity-50"
                 >
                   <option value="">Select district</option>
                   {districts.map((d) => (
@@ -206,7 +206,7 @@ export default function CheckoutPage() {
                 <select
                   {...register("upazila")}
                   disabled={!district}
-                  className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none disabled:opacity-50"
+                  className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm disabled:opacity-50"
                 >
                   <option value="">Select upazila</option>
                   {upazilas.map((u) => (
@@ -292,7 +292,7 @@ export default function CheckoutPage() {
             <textarea
               placeholder="Delivery instructions, preferred time…"
               {...register("notes")}
-              className="min-h-[80px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-3 text-sm text-text outline-none"
+              className="min-h-[80px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-3 text-base text-text outline-none sm:text-sm"
             />
           </Section>
         </div>

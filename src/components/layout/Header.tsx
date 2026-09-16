@@ -96,7 +96,7 @@ export function Header() {
             <span className="font-heading text-lg font-extrabold tracking-wide text-text">
               Rising Sun Power
             </span>
-            <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-orange-500">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-orange-500">
               Solar &amp; Electrical
             </span>
           </span>
@@ -139,7 +139,7 @@ export function Header() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search MCB, solar panel, inverter…"
-              className="min-w-0 flex-1 bg-transparent px-3.5 text-sm text-text outline-none placeholder:text-muted"
+              className="min-w-0 flex-1 bg-transparent px-3.5 text-base text-text outline-none sm:text-sm placeholder:text-muted"
             />
           </div>
         </form>

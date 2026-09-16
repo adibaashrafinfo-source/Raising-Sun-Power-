@@ -49,7 +49,7 @@ export default function AdminStockPage() {
         <select
           value={locationFilter}
           onChange={(e) => setLocationFilter(e.target.value)}
-          className="h-10 rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3 text-sm text-text outline-none"
+          className="h-10 rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3 text-base text-text outline-none sm:text-sm"
         >
           <option value="">All locations</option>
           {locations.map((l) => (
@@ -61,7 +61,7 @@ export default function AdminStockPage() {
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="h-10 rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3 text-sm text-text outline-none"
+          className="h-10 rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3 text-base text-text outline-none sm:text-sm"
         >
           <option value="">All categories</option>
           {categories.map((c) => (
@@ -254,7 +254,7 @@ function TransferStockDialog({
             <select
               value={toLocationId}
               onChange={(e) => setToLocationId(e.target.value)}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
             >
               <option value="">Select location</option>
               {destinations.map((l) => (

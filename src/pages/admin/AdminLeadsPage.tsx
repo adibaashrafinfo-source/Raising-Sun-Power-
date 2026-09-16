@@ -38,7 +38,7 @@ export default function AdminLeadsPage() {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value as LeadStatus | "")}
-          className="h-11 rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-sm text-text outline-none"
+          className="h-11 rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
         >
           <option value="">All statuses</option>
           {STATUSES.map((s) => (
@@ -177,7 +177,7 @@ function LeadDetailDialog({ lead, onClose }: { lead: Lead | null; onClose: () =>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="min-h-[80px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-2.5 text-sm text-text outline-none"
+                  className="min-h-[80px] w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-2.5 text-base text-text outline-none sm:text-sm"
                 />
                 <Button size="sm" className="mt-2" onClick={handleSaveNotes}>
                   Save Notes

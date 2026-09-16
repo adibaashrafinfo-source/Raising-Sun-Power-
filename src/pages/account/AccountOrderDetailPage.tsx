@@ -40,7 +40,7 @@ export default function AccountOrderDetailPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center gap-2 text-[13px] text-muted">
-        <Link to="/account/orders" className="text-muted no-underline hover:text-blue">
+        <Link to="/account/orders" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Orders
         </Link>
         <ChevronRight className="size-3.5" />

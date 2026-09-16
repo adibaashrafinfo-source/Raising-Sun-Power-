@@ -39,11 +39,11 @@ export default function BlogPostPage() {
   return (
     <main className="mx-auto max-w-[1280px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
       <div className="mb-4 flex flex-wrap items-center gap-2 text-[13px] text-muted">
-        <Link to="/" className="text-muted no-underline hover:text-blue">
+        <Link to="/" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Home
         </Link>
         <ChevronRight className="size-3.5" />
-        <Link to="/blog" className="text-muted no-underline hover:text-blue">
+        <Link to="/blog" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Blog
         </Link>
         <ChevronRight className="size-3.5" />
@@ -98,7 +98,7 @@ export default function BlogPostPage() {
 
           <Link
             to="/blog"
-            className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-blue no-underline"
+            className="mt-8 inline-flex items-center gap-2 py-2 text-sm font-bold text-blue no-underline"
           >
             <ArrowLeft className="size-4" /> Back to all articles
           </Link>

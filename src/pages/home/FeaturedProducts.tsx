@@ -298,7 +298,7 @@ function MiniAssurance({ icon: Icon, title, sub }: { icon: typeof Settings; titl
       <Icon className="size-5 shrink-0 text-green-700 dark:text-green-500" />
       <div className="leading-tight">
         <div className="text-[12.5px] font-extrabold text-text">{title}</div>
-        <div className="text-[11px] text-muted">{sub}</div>
+        <div className="text-[11.5px] text-muted">{sub}</div>
       </div>
     </div>
   )
@@ -395,7 +395,7 @@ function MiniCard({ product }: { product: MiniProduct }) {
 
   return (
     <div className="group relative flex flex-col rounded-[18px] border border-border bg-surface p-3.5 shadow-[var(--shadow-sm)] transition-[transform,box-shadow] duration-250 hover:-translate-y-1 hover:shadow-[var(--shadow)]">
-      <span className="absolute left-3 top-3 z-10 rounded-md bg-red-500 px-2 py-1 text-[10.5px] font-extrabold text-white">
+      <span className="absolute left-3 top-3 z-10 rounded-md bg-red-500 px-2 py-1 text-[11px] font-extrabold text-white">
         {product.offPct}% OFF
       </span>
       <button

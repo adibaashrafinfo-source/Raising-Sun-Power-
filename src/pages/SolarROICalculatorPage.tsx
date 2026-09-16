@@ -72,7 +72,7 @@ export default function SolarROICalculatorPage() {
   return (
     <main className="mx-auto max-w-[900px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
       <div className="mb-4 flex items-center gap-2 text-[13px] text-muted">
-        <Link to="/" className="text-muted no-underline hover:text-blue">
+        <Link to="/" className="-my-1 py-1 text-muted no-underline hover:text-blue">
           Home
         </Link>
         <ChevronRight className="size-3.5" />
@@ -440,7 +440,7 @@ function RoiLeadForm({
           <Field label="Division *" error={errors.division?.message}>
             <select
               {...register("division")}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface px-3.5 text-sm text-text outline-none"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface px-3.5 text-base text-text outline-none sm:text-sm"
             >
               <option value="">Select division</option>
               {bdDivisions.map((d) => (
@@ -454,7 +454,7 @@ function RoiLeadForm({
             <select
               {...register("district")}
               disabled={!division}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface px-3.5 text-sm text-text outline-none disabled:opacity-50"
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface px-3.5 text-base text-text outline-none sm:text-sm disabled:opacity-50"
             >
               <option value="">Select district</option>
               {districts.map((d) => (
