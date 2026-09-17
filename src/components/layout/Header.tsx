@@ -91,19 +91,7 @@ export function Header() {
           <Menu className="size-5" />
         </button>
 
-        <Link to="/" className="flex shrink-0 items-center gap-2.5 no-underline">
-          <span className="flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)]">
-            <img src={headerLogo} alt="RSP" className="size-full object-cover" />
-          </span>
-          <span className="hidden flex-col leading-tight sm:flex">
-            <span className="font-heading text-lg font-extrabold tracking-wide text-text">
-              Rising Sun Power
-            </span>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-orange-500">
-              Solar &amp; Electrical
-            </span>
-          </span>
-        </Link>
+        <BrandLogo src={headerLogo} />
 
         {/* Search — grows to fill row one */}
         <form onSubmit={submitSearch} className="hidden min-w-0 flex-1 lg:flex">
@@ -303,5 +291,52 @@ export function Header() {
         {categoryOpen && <CategoryMenu onClose={() => setCategoryOpen(false)} />}
       </div>
     </header>
+  )
+}
+
+/**
+ * The header brand. A wide lockup (icon + wordmark, like the full Rising Sun
+ * Power BD logo) is shown whole and replaces the typed name, while a square
+ * icon keeps its rounded tile with the name beside it. Which one we have is
+ * decided from the image's own aspect ratio once it loads, so uploading a new
+ * logo from the admin CMS is all it takes to switch between the two.
+ */
+function BrandLogo({ src }: { src: string }) {
+  const [isWide, setIsWide] = useState(false)
+
+  return (
+    <Link to="/" className="flex shrink-0 items-center gap-2.5 no-underline">
+      <span
+        className={
+          isWide
+            ? "flex items-center"
+            : "flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)]"
+        }
+      >
+        <img
+          src={src}
+          alt="Rising Sun Power BD"
+          onLoad={(e) => {
+            const img = e.currentTarget
+            setIsWide(img.naturalHeight > 0 && img.naturalWidth / img.naturalHeight >= 1.8)
+          }}
+          className={
+            isWide
+              ? "h-10 w-auto max-w-[190px] object-contain sm:h-12 sm:max-w-[260px] lg:max-w-[300px]"
+              : "size-full object-cover"
+          }
+        />
+      </span>
+      {!isWide && (
+        <span className="hidden flex-col leading-tight sm:flex">
+          <span className="font-heading text-lg font-extrabold tracking-wide text-text">
+            Rising Sun Power
+          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-orange-500">
+            Solar &amp; Electrical
+          </span>
+        </span>
+      )}
+    </Link>
   )
 }
