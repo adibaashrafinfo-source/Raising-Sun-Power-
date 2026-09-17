@@ -305,12 +305,12 @@ function BrandLogo({ src }: { src: string }) {
   const [isWide, setIsWide] = useState(false)
 
   return (
-    <Link to="/" className="flex shrink-0 items-center gap-2.5 no-underline">
+    <Link to="/" className="flex min-w-0 items-center gap-2.5 no-underline">
       <span
         className={
           isWide
             ? "flex items-center"
-            : "flex size-12 items-center justify-center overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)] sm:size-14"
+            : "flex size-[144px] items-center justify-center overflow-hidden rounded-2xl bg-white shadow-[var(--shadow-sm)] sm:size-[168px]"
         }
       >
         <img
@@ -322,7 +322,7 @@ function BrandLogo({ src }: { src: string }) {
           }}
           className={
             isWide
-              ? "h-12 w-auto max-w-[210px] object-contain sm:h-14 sm:max-w-[300px] lg:h-16 lg:max-w-[380px]"
+              ? "max-h-[144px] w-auto max-w-full object-contain sm:max-h-[168px] lg:max-h-[192px]"
               : "size-full object-cover"
           }
         />
