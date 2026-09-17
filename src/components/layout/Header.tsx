@@ -1,5 +1,5 @@
-import { useRef, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useEffect, useRef, useState } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
   ChevronDown,
   Heart,
@@ -39,6 +39,8 @@ export function Header() {
   const { theme, toggleTheme } = useTheme()
   const { session, profile, isAdmin } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [isHidden, setIsHidden] = useState(false)
   const [megaOpen, setMegaOpen] = useState(false)
   const [categoryOpen, setCategoryOpen] = useState(false)
   const megaCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -52,6 +54,22 @@ export function Header() {
     if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current)
     megaCloseTimer.current = setTimeout(() => setMegaOpen(false), 200)
   }
+  // The bar slides away once the hero is behind you and comes back as soon as
+  // you scroll up into it again. Pages without a hero keep it visible.
+  useEffect(() => {
+    const evaluate = () => {
+      const hero = document.querySelector<HTMLElement>("[data-hero]")
+      setIsHidden(hero ? window.scrollY > hero.offsetTop + hero.offsetHeight : false)
+    }
+    // Deferred so the first run is not a synchronous setState inside the effect.
+    const raf = requestAnimationFrame(evaluate)
+    window.addEventListener("scroll", evaluate, { passive: true })
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener("scroll", evaluate)
+    }
+  }, [location.pathname])
+
   const openCart = useCartStore((s) => s.openCart)
   const openMobileMenu = useCartStore((s) => s.openMobileMenu)
   const cartCount = useCartStore((s) => s.cartCount())
@@ -81,8 +99,12 @@ export function Header() {
   }
 
   return (
-    <header className="rsp-topbar sticky top-0 z-[60] border-b border-border">
-      <div className="mx-auto flex max-w-[1280px] items-center gap-4 px-4 py-3 sm:px-6">
+    <header
+      className={`rsp-topbar sticky top-0 z-[60] border-b border-border transition-transform duration-300 ${
+        isHidden ? "-translate-y-full" : "translate-y-0"
+      }`}
+    >
+      <div className="mx-auto flex max-w-[1280px] items-center gap-4 px-4 py-1.5 sm:px-6 sm:py-2">
         <button
           onClick={openMobileMenu}
           aria-label="Menu"
@@ -310,20 +332,23 @@ function BrandLogo({ src }: { src: string }) {
         className={
           isWide
             ? "flex items-center"
-            : "flex size-[144px] items-center justify-center overflow-hidden rounded-2xl bg-white shadow-[var(--shadow-sm)] sm:size-[168px]"
+            : "flex size-[100px] shrink-0 items-center justify-center overflow-hidden rounded-2xl"
         }
       >
         <img
           src={src}
           alt="Rising Sun Power BD"
+          // The artwork ships on a white background; multiply against the white
+          // bar drops it, so the logo reads as if it were transparent.
+          style={{ mixBlendMode: "multiply" }}
           onLoad={(e) => {
             const img = e.currentTarget
             setIsWide(img.naturalHeight > 0 && img.naturalWidth / img.naturalHeight >= 1.8)
           }}
           className={
             isWide
-              ? "max-h-[144px] w-auto max-w-full object-contain sm:max-h-[168px] lg:max-h-[192px]"
-              : "size-full object-cover"
+              ? "max-h-[100px] w-auto max-w-full object-contain"
+              : "size-full object-contain"
           }
         />
       </span>
