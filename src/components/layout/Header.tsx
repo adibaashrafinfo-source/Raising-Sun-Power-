@@ -81,7 +81,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-[60] border-b border-border bg-[var(--surface)]/85 backdrop-blur-xl transition-colors">
+    <header className="rsp-topbar sticky top-0 z-[60] border-b border-border">
       <div className="mx-auto flex max-w-[1280px] items-center gap-4 px-4 py-3 sm:px-6">
         <button
           onClick={openMobileMenu}
@@ -310,7 +310,7 @@ function BrandLogo({ src }: { src: string }) {
         className={
           isWide
             ? "flex items-center"
-            : "flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)]"
+            : "flex size-12 items-center justify-center overflow-hidden rounded-xl bg-white shadow-[var(--shadow-sm)] sm:size-14"
         }
       >
         <img
@@ -322,7 +322,7 @@ function BrandLogo({ src }: { src: string }) {
           }}
           className={
             isWide
-              ? "h-10 w-auto max-w-[190px] object-contain sm:h-12 sm:max-w-[260px] lg:max-w-[300px]"
+              ? "h-12 w-auto max-w-[210px] object-contain sm:h-14 sm:max-w-[300px] lg:h-16 lg:max-w-[380px]"
               : "size-full object-cover"
           }
         />

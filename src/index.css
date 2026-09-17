@@ -77,6 +77,23 @@
   --footer-accent: #f4d560;
 }
 
+/* The header keeps light surfaces in both themes: the brand logo is artwork on
+   a white background, so a tinted or dark bar shows a white block behind it.
+   Redefining the tokens here means every child of the bar follows along. */
+.rsp-topbar {
+  --surface: #ffffff;
+  --surface-2: #f2f6fc;
+  --surface-3: #e5edf8;
+  --text: #0a1b33;
+  --muted: #566379;
+  --border: #e1e8f2;
+  --blue: #217cca;
+  --blue-strong: #0b3f94;
+  --shadow-sm: 0 1px 2px rgba(10, 27, 51, 0.06);
+  --shadow: 0 8px 24px rgba(10, 27, 51, 0.1);
+  background: #ffffff;
+}
+
 @theme inline {
   --font-heading: "Poppins", sans-serif;
   --font-body: "Inter", sans-serif;
