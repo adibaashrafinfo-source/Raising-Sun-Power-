@@ -5,7 +5,6 @@ import { useProducts, useProductsByPlacement } from "@/hooks/use-catalog"
 import { useSeo } from "@/hooks/use-seo"
 import { AllProductsSection } from "@/pages/home/AllProductsSection"
 import { BrandsStrip } from "@/pages/home/BrandsStrip"
-import { CategoryGrid } from "@/pages/home/CategoryGrid"
 import { CtaBand } from "@/pages/home/CtaBand"
 import { FeaturedProducts } from "@/pages/home/FeaturedProducts"
 import { Hero } from "@/pages/home/Hero"
@@ -38,7 +37,6 @@ export default function Home() {
     <main>
       <Hero />
       <Reveal><TrustChips /></Reveal>
-      <Reveal><CategoryGrid /></Reveal>
       <Reveal>
         <ProductGridSection
           kicker="Loved by installers"

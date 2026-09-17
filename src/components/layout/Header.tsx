@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+import { CategoryMenu } from "@/components/layout/CategoryMenu"
 import { MegaMenu } from "@/components/layout/MegaMenu"
 import {
   DropdownMenu,
@@ -39,10 +40,12 @@ export function Header() {
   const { session, profile, isAdmin } = useAuth()
   const navigate = useNavigate()
   const [megaOpen, setMegaOpen] = useState(false)
+  const [categoryOpen, setCategoryOpen] = useState(false)
   const megaCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const openMega = () => {
     if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current)
+    setCategoryOpen(false)
     setMegaOpen(true)
   }
   const scheduleCloseMega = () => {
@@ -226,6 +229,22 @@ export function Header() {
       <div className="hidden border-t border-border lg:block">
         <div className="mx-auto max-w-[1280px] px-4 sm:px-6">
           <nav className="flex flex-wrap items-center gap-0.5 py-1.5 xl:gap-1">
+            {/* Three-line button — the categories used to sit on the homepage,
+                they now open from here. */}
+            <button
+              onClick={() => {
+                setMegaOpen(false)
+                setCategoryOpen((v) => !v)
+              }}
+              aria-expanded={categoryOpen}
+              className="mr-1.5 inline-flex items-center gap-2 whitespace-nowrap rounded-[10px] border border-border bg-surface-2 px-3 py-2 text-[13px] font-bold text-text transition-colors hover:bg-surface-3 xl:text-sm"
+            >
+              <Menu className="size-[17px]" />
+              All Categories
+              <ChevronDown
+                className={`size-[13px] transition-transform duration-200 ${categoryOpen ? "rotate-180" : ""}`}
+              />
+            </button>
             <Link
               to="/"
               className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
@@ -281,6 +300,7 @@ export function Header() {
             </Link>
           </nav>
         </div>
+        {categoryOpen && <CategoryMenu onClose={() => setCategoryOpen(false)} />}
       </div>
     </header>
   )
