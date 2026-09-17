@@ -52,6 +52,20 @@
   --footer-border: rgba(10, 27, 51, 0.12);
   --footer-card: rgba(10, 27, 51, 0.035);
   --footer-accent: #0b3f94;
+
+  /* Hero surface — light by default so the section follows the theme. */
+  --hero-bg: linear-gradient(160deg, #ffffff 0%, #f4f8fd 55%, #e9f0fa 100%);
+  --hero-text: #0a1b33;
+  --hero-muted: #45566e;
+  --hero-accent: #2a6b08;
+  --hero-highlight: linear-gradient(120deg, #2a6b08, #d98700);
+  --hero-chip-bg: rgba(10, 27, 51, 0.05);
+  --hero-chip-border: rgba(10, 27, 51, 0.12);
+  --hero-ghost-bg: rgba(10, 27, 51, 0.04);
+  --hero-ghost-border: rgba(10, 27, 51, 0.16);
+  --hero-grid: rgba(10, 27, 51, 0.6);
+  --hero-grid-opacity: 0.05;
+  --hero-glow-opacity: 0.2;
 }
 
 [data-theme="dark"] {
@@ -75,6 +89,19 @@
   --footer-border: rgba(255, 255, 255, 0.1);
   --footer-card: rgba(255, 255, 255, 0.04);
   --footer-accent: #f4d560;
+
+  --hero-bg: linear-gradient(160deg, #052c6e 0%, #04214f 55%, #03163a 100%);
+  --hero-text: #ffffff;
+  --hero-muted: #c9daf2;
+  --hero-accent: #8fe36a;
+  --hero-highlight: linear-gradient(120deg, #8fe36a, #f4d560);
+  --hero-chip-bg: rgba(255, 255, 255, 0.1);
+  --hero-chip-border: rgba(255, 255, 255, 0.15);
+  --hero-ghost-bg: rgba(255, 255, 255, 0.1);
+  --hero-ghost-border: rgba(255, 255, 255, 0.25);
+  --hero-grid: rgba(255, 255, 255, 0.7);
+  --hero-grid-opacity: 0.06;
+  --hero-glow-opacity: 0.3;
 }
 
 /* The header keeps light surfaces in both themes: the brand logo is artwork on

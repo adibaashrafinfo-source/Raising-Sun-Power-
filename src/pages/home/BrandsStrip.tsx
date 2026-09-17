@@ -11,7 +11,7 @@ export function BrandsStrip() {
         </span>
       </div>
       <div className="overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]">
-        <div className="flex w-max animate-[rsp-marquee_26s_linear_infinite] gap-11">
+        <div className="flex w-max animate-[rsp-marquee_55s_linear_infinite] gap-11">
           {loop.map((brand, i) => (
             <span
               key={`${brand}-${i}`}

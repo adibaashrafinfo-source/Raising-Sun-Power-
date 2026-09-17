@@ -21,30 +21,43 @@ export function Hero() {
     "Genuine solar panels, inverters, batteries, MCB & MCCB and complete power solutions."
 
   return (
-    <section className="relative overflow-hidden">
-      {/* Brand gradient backdrop — no photograph, so the copy always stays crisp
-          and the section costs nothing to load on a phone. */}
+    // data-hero lets the header find this section so it can hide itself once
+    // the visitor scrolls past it.
+    <section data-hero className="relative overflow-hidden">
+      {/* Gradient backdrop — no photograph, so the copy always stays crisp and
+          the section costs nothing to load on a phone. Every colour comes from
+          a --hero-* token, which is how the section follows light/dark mode. */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-[linear-gradient(160deg,#052C6E_0%,#04214f_55%,#03163a_100%)]" />
+        <div className="absolute inset-0" style={{ background: "var(--hero-bg)" }} />
         <div
-          className="pointer-events-none absolute -left-[10%] -top-[15%] size-[420px] rounded-full opacity-30 blur-[70px] sm:size-[560px]"
-          style={{ background: "radial-gradient(circle,#217CCA 0%,transparent 70%)" }}
+          className="pointer-events-none absolute -left-[10%] -top-[15%] size-[420px] rounded-full blur-[70px] sm:size-[560px]"
+          style={{
+            background: "radial-gradient(circle,#217CCA 0%,transparent 70%)",
+            opacity: "var(--hero-glow-opacity)",
+          }}
         />
         <div
-          className="pointer-events-none absolute -right-[12%] top-[35%] size-[380px] rounded-full opacity-25 blur-[70px] sm:size-[520px]"
-          style={{ background: "radial-gradient(circle,#67A70E 0%,transparent 70%)" }}
+          className="pointer-events-none absolute -right-[12%] top-[35%] size-[380px] rounded-full blur-[70px] sm:size-[520px]"
+          style={{
+            background: "radial-gradient(circle,#67A70E 0%,transparent 70%)",
+            opacity: "var(--hero-glow-opacity)",
+          }}
         />
         <div
-          className="pointer-events-none absolute right-[18%] -top-[10%] size-[260px] rounded-full opacity-20 blur-[60px] sm:size-[340px]"
-          style={{ background: "radial-gradient(circle,#F49E09 0%,transparent 70%)" }}
+          className="pointer-events-none absolute right-[18%] -top-[10%] size-[260px] rounded-full blur-[60px] sm:size-[340px]"
+          style={{
+            background: "radial-gradient(circle,#F49E09 0%,transparent 70%)",
+            opacity: "var(--hero-glow-opacity)",
+          }}
         />
         {/* faint grid for texture */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(255,255,255,.7) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.7) 1px,transparent 1px)",
+              "linear-gradient(var(--hero-grid) 1px,transparent 1px),linear-gradient(90deg,var(--hero-grid) 1px,transparent 1px)",
             backgroundSize: "56px 56px",
+            opacity: "var(--hero-grid-opacity)",
           }}
         />
         {/* fade into the page below */}
@@ -54,19 +67,26 @@ export function Hero() {
       <div className="relative z-10 mx-auto w-full max-w-[1280px] px-4 py-9 text-center sm:px-6 sm:py-14 lg:py-20">
         <div className="mx-auto flex max-w-[760px] flex-col items-center">
           <span
-            className="rsp-animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white/90 backdrop-blur-sm sm:px-3.5 sm:text-xs"
-            style={{ animationDelay: "0ms" }}
+            className="rsp-animate-fade-up inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold text-[var(--hero-text)] backdrop-blur-sm sm:px-3.5 sm:text-xs"
+            style={{
+              animationDelay: "0ms",
+              background: "var(--hero-chip-bg)",
+              borderColor: "var(--hero-chip-border)",
+            }}
           >
             <span className="size-[7px] shrink-0 rounded-full bg-green-400 shadow-[0_0_0_4px_rgba(103,167,14,.25)]" />
             {badge}
           </span>
 
-          <h1 className="mt-4 text-balance font-heading text-[clamp(25px,6vw,52px)] font-extrabold leading-[1.12] tracking-tight text-white sm:mt-5 sm:leading-[1.08]">
+          <h1 className="mt-4 text-balance font-heading text-[clamp(25px,6vw,52px)] font-extrabold leading-[1.12] tracking-tight text-[var(--hero-text)] sm:mt-5 sm:leading-[1.08]">
             <span className="rsp-animate-fade-up block" style={{ animationDelay: "120ms" }}>
               {headlinePrefix}
             </span>
             <span className="rsp-animate-fade-up block" style={{ animationDelay: "260ms" }}>
-              <span className="relative inline-block bg-[linear-gradient(120deg,#8fe36a,#F4D560)] bg-clip-text text-transparent">
+              <span
+                className="relative inline-block bg-clip-text text-transparent"
+                style={{ backgroundImage: "var(--hero-highlight)" }}
+              >
                 {headlineHighlight}
                 <svg
                   viewBox="0 0 220 14"
@@ -82,7 +102,7 @@ export function Hero() {
 
           {/* The min-height reserves the typewriter's final line count so the
               buttons below never jump while the text types itself out. */}
-          <p className="mx-auto mt-4 min-h-[3.4em] max-w-[560px] text-[clamp(14px,3.4vw,17px)] leading-relaxed text-[#C9DAF2] sm:mt-5 sm:min-h-[2.6em]">
+          <p className="mx-auto mt-4 min-h-[3.4em] max-w-[560px] text-[clamp(14px,3.4vw,17px)] leading-relaxed text-[var(--hero-muted)] sm:mt-5 sm:min-h-[2.6em]">
             <Typewriter text={subheading} />
           </p>
 
@@ -98,7 +118,8 @@ export function Hero() {
             <Button
               asChild
               size="lg"
-              className="min-w-0 flex-1 border border-white/25 bg-white/10 px-4 text-sm text-white hover:bg-white/20 sm:flex-none sm:px-6 sm:text-base"
+              className="min-w-0 flex-1 border bg-[var(--hero-ghost-bg)] px-4 text-sm text-[var(--hero-text)] hover:brightness-95 sm:flex-none sm:px-6 sm:text-base"
+            style={{ borderColor: "var(--hero-ghost-border)" }}
             >
               <Link to="/products">Explore Products</Link>
             </Button>
@@ -110,7 +131,7 @@ export function Hero() {
           >
             <Stat value="12,000+" label="Orders delivered" />
             <Stat value="500+" label="Products in stock" />
-            <Stat value="5★" label="Rated service" color="#8fe36a" />
+            <Stat value="5★" label="Rated service" accent />
             <Stat value="24/7" label="Customer support" />
           </div>
 
@@ -121,9 +142,9 @@ export function Hero() {
             style={{ animationDelay: "620ms" }}
           >
             {SHOWCASE_POINTS.map((p) => (
-              <div key={p.label} className="flex items-center gap-2 text-[13px] font-semibold text-white/85">
+              <div key={p.label} className="flex items-center gap-2 text-[13px] font-semibold text-[var(--hero-muted)]">
                 <span className="flex size-6 items-center justify-center rounded-full bg-green-500/25">
-                  <p.icon className="size-[13px] text-green-300" />
+                  <p.icon className="size-[13px] text-[var(--hero-accent)]" />
                 </span>
                 {p.label}
               </div>
@@ -135,16 +156,18 @@ export function Hero() {
   )
 }
 
-function Stat({ value, label, color }: { value: string; label: string; color?: string }) {
+function Stat({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
   return (
     <div>
       <div
-        className="font-heading text-[clamp(15px,4.2vw,26px)] font-extrabold tabular-nums text-white"
-        style={color ? { color } : undefined}
+        className="font-heading text-[clamp(15px,4.2vw,26px)] font-extrabold tabular-nums"
+        style={{ color: accent ? "var(--hero-accent)" : "var(--hero-text)" }}
       >
         {value}
       </div>
-      <div className="text-[11px] font-medium leading-tight text-white/70 sm:text-[13px]">{label}</div>
+      <div className="text-[11px] font-medium leading-tight text-[var(--hero-muted)] sm:text-[13px]">
+        {label}
+      </div>
     </div>
   )
 }
