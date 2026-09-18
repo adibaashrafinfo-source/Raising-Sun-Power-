@@ -1,6 +1,7 @@
-import { Search, X } from "lucide-react"
+import { X } from "lucide-react"
 import { Link } from "react-router-dom"
 
+import { SearchSuggest } from "@/components/search/SearchSuggest"
 import { useCartStore } from "@/store/cart-store"
 
 const links = [
@@ -35,12 +36,8 @@ export function MobileMenu() {
             <X className="size-[18px]" />
           </button>
         </div>
-        <div className="mb-4 flex h-11 items-center rounded-xl border border-border bg-surface-2 px-3">
-          <Search className="size-[17px] text-muted" />
-          <input
-            placeholder="Search products…"
-            className="flex-1 bg-transparent px-2.5 text-base text-text outline-none sm:text-sm placeholder:text-muted"
-          />
+        <div className="mb-4">
+          <SearchSuggest variant="plain" onNavigate={close} />
         </div>
         {links.map((link) => (
           <Link

@@ -20,11 +20,12 @@ export function useBrands() {
   return useQuery({ queryKey: ["brands"], queryFn: fetchBrands })
 }
 
-export function useProducts(filters: ProductFilters) {
+export function useProducts(filters: ProductFilters, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["products", filters],
     queryFn: () => fetchProducts(filters),
     placeholderData: (prev) => prev,
+    enabled: options?.enabled ?? true,
   })
 }
 

@@ -6,11 +6,9 @@ import {
   LayoutDashboard,
   LogOut,
   MapPin,
-  LayoutGrid,
   Menu,
   Moon,
   Package,
-  Search,
   Settings,
   ShoppingCart,
   Sun,
@@ -20,6 +18,7 @@ import { toast } from "sonner"
 
 import { CategoryMenu } from "@/components/layout/CategoryMenu"
 import { MegaMenu } from "@/components/layout/MegaMenu"
+import { SearchSuggest } from "@/components/search/SearchSuggest"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +28,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/lib/auth-provider"
-import { useCategories } from "@/hooks/use-catalog"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { signOut } from "@/lib/queries/auth"
 import { useTheme } from "@/lib/theme-provider"
@@ -73,22 +71,6 @@ export function Header() {
   const openCart = useCartStore((s) => s.openCart)
   const openMobileMenu = useCartStore((s) => s.openMobileMenu)
   const cartCount = useCartStore((s) => s.cartCount())
-  const { data: categories = [] } = useCategories()
-  const [searchCat, setSearchCat] = useState<{ label: string; slug: string | null }>({
-    label: "All",
-    slug: null,
-  })
-  const [searchTerm, setSearchTerm] = useState("")
-
-  const submitSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    const q = searchTerm.trim()
-    if (searchCat.slug) {
-      navigate(q ? `/category/${searchCat.slug}?search=${encodeURIComponent(q)}` : `/category/${searchCat.slug}`)
-    } else {
-      navigate(q ? `/products?search=${encodeURIComponent(q)}` : "/products")
-    }
-  }
   const { data: siteContent } = useSiteContent()
   const headerLogo = siteContent?.header_logo_url || "/logo.jpg"
 
@@ -116,46 +98,9 @@ export function Header() {
         <BrandLogo src={headerLogo} />
 
         {/* Search — grows to fill row one */}
-        <form onSubmit={submitSearch} className="hidden min-w-0 flex-1 lg:flex">
-          <div className="flex h-11 min-w-0 w-full items-center rounded-xl border border-border bg-surface-2 transition-shadow focus-within:shadow-[0_0_0_3px_color-mix(in_srgb,var(--blue)_35%,transparent)]">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="group flex h-full shrink-0 items-center gap-1.5 rounded-l-xl border-r border-border px-3.5 text-[13px] font-semibold text-muted outline-none transition-colors hover:bg-surface-3 hover:text-text data-[state=open]:bg-surface-3 data-[state=open]:text-text">
-                <LayoutGrid className="size-[15px]" />
-                <span className="max-w-[110px] truncate">{searchCat.label}</span>
-                <ChevronDown className="size-[13px] transition-transform duration-200 group-data-[state=open]:rotate-180" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="max-h-[320px] w-60 overflow-y-auto p-1.5">
-                <DropdownMenuLabel className="px-2 pb-1 text-[11px] uppercase tracking-wide text-muted">
-                  Shop by category
-                </DropdownMenuLabel>
-                <DropdownMenuItem
-                  onSelect={() => setSearchCat({ label: "All", slug: null })}
-                  className="rounded-lg text-[13.5px] font-semibold"
-                >
-                  <LayoutGrid className="size-4 text-blue" /> All Categories
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {categories.map((c) => (
-                  <DropdownMenuItem
-                    key={c.id}
-                    onSelect={() => setSearchCat({ label: c.name, slug: c.slug })}
-                    className="rounded-lg text-[13.5px]"
-                  >
-                    <span className="size-1.5 rounded-full bg-orange-500" />
-                    {c.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Search className="ml-3 size-[17px] shrink-0 text-muted" />
-            <input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search MCB, solar panel, inverter…"
-              className="min-w-0 flex-1 bg-transparent px-3.5 text-base text-text outline-none sm:text-sm placeholder:text-muted"
-            />
-          </div>
-        </form>
+        <div className="hidden min-w-0 flex-1 lg:flex">
+          <SearchSuggest />
+        </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <button
