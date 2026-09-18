@@ -15,10 +15,10 @@ export function TrustChips() {
           return (
             <div
               key={chip.title}
-              className="flex items-center gap-3 rounded-2xl border border-border bg-surface px-[18px] py-4 shadow-[var(--shadow-sm)]"
+              className="group flex items-center gap-3 rounded-2xl border border-border bg-surface px-[18px] py-4 shadow-[var(--shadow-sm)] transition-[transform,box-shadow,border-color] duration-250 hover:-translate-y-0.5 hover:border-blue-500/35 hover:shadow-[var(--shadow)]"
             >
               <span
-                className="flex size-10 shrink-0 items-center justify-center rounded-[11px]"
+                className="flex size-10 shrink-0 items-center justify-center rounded-[11px] transition-transform duration-250 group-hover:scale-105"
                 style={{ background: chip.tint }}
               >
                 <Icon className="size-5" style={{ color: chip.color }} />
