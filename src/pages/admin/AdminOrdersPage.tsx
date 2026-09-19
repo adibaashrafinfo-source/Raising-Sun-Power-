@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Eye, Pencil, Search, Trash2, Wallet, X } from "lucide-react"
+import { Download, Eye, Pencil, Search, Trash2, Wallet, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -15,7 +15,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAllOrders, useDeleteOrder, useRecordCustomerPayment, useUpdateOrderStatus } from "@/hooks/use-admin"
-import { useOrderItems } from "@/hooks/use-checkout"
+import { COMPANY } from "@/data/company"
+import { useOrderItems, useSettings } from "@/hooks/use-checkout"
+import { useSiteContent } from "@/hooks/use-site-content"
+import { printInvoice } from "@/lib/invoice"
+import { officesFrom } from "@/lib/offices"
 import { formatBDT, getErrorMessage } from "@/lib/utils"
 import type { FinancePaymentMethod, Order, OrderStatus } from "@/types/database"
 
@@ -175,18 +179,37 @@ export default function AdminOrdersPage() {
 
 function OrderDetailDialog({ order, onClose }: { order: Order | null; onClose: () => void }) {
   const { data: items = [] } = useOrderItems(order?.id)
+  const { data: settings } = useSettings()
+  const { data: cms } = useSiteContent()
   const [payOpen, setPayOpen] = useState(false)
+
+  const downloadInvoice = () => {
+    if (!order) return
+    printInvoice(order, items, {
+      offices: officesFrom(cms),
+      phone: settings?.support_phone || COMPANY.phone,
+      whatsapp: settings?.whatsapp_number || COMPANY.whatsapp,
+      email: settings?.contact_email || COMPANY.email,
+      logoUrl: cms?.header_logo_url || undefined,
+    })
+  }
 
   return (
     <Dialog open={!!order} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[85vh] overflow-y-auto" showClose={false}>
         {order && (
           <>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <DialogTitle>{order.order_number}</DialogTitle>
-              <button onClick={onClose} className="text-muted hover:text-text">
-                <X className="size-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={downloadInvoice}>
+                  <Download className="size-[15px]" />
+                  Invoice
+                </Button>
+                <button onClick={onClose} className="text-muted hover:text-text">
+                  <X className="size-5" />
+                </button>
+              </div>
             </div>
             <div className="flex flex-col gap-3 text-sm">
               <div>
