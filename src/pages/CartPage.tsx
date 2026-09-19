@@ -27,9 +27,8 @@ export default function CartPage() {
   const [couponMsg, setCouponMsg] = useState<{ text: string; ok: boolean } | null>(null)
   const [applying, setApplying] = useState(false)
 
-  const freeThreshold = settings?.free_delivery_threshold ?? 5000
   const flatDelivery = settings?.delivery_charge_outside_dhaka ?? 120
-  const delivery = items.length === 0 ? 0 : subtotal >= freeThreshold ? 0 : flatDelivery
+  const delivery = items.length === 0 ? 0 : flatDelivery
 
   const discount = coupon
     ? coupon.discount_type === "percent"
@@ -169,9 +168,7 @@ export default function CartPage() {
             </div>
             <div className="mb-2.5 flex justify-between text-sm text-muted">
               <span>Delivery</span>
-              <span className={`font-bold tabular-nums ${delivery === 0 ? "text-green-600" : "text-text"}`}>
-                {delivery === 0 ? "Free" : formatBDT(delivery)}
-              </span>
+              <span className="font-bold tabular-nums text-text">{formatBDT(delivery)}</span>
             </div>
             {discount > 0 && (
               <div className="mb-2.5 flex justify-between text-sm font-semibold text-green-600">

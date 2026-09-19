@@ -59,15 +59,9 @@ export default function CheckoutPage() {
   const inside = isInsideDhaka(district)
   const insideCharge = settings?.delivery_charge_inside_dhaka ?? 60
   const outsideCharge = settings?.delivery_charge_outside_dhaka ?? 120
-  const freeThreshold = settings?.free_delivery_threshold ?? 5000
-  const deliveryCharge =
-    deliveryMethod === "pickup"
-      ? 0
-      : subtotal >= freeThreshold
-        ? 0
-        : inside
-          ? insideCharge
-          : outsideCharge
+  // Delivery is always charged; only picking the order up at a shop is free of
+  // a delivery fee, and that is shown as ৳0 rather than "Free".
+  const deliveryCharge = deliveryMethod === "pickup" ? 0 : inside ? insideCharge : outsideCharge
   const total = Math.max(0, subtotal + deliveryCharge)
 
   const availablePayments = PAYMENT_OPTIONS.filter((opt) => {
@@ -250,7 +244,7 @@ export default function CheckoutPage() {
                     onClick={() => field.onChange("pickup")}
                     icon={<Store className="size-5" />}
                     title="Pickup from shop"
-                    note="Free · collect from Dhaka or Chattogram shop"
+                    note="No delivery charge · collect from one of our offices"
                   />
                 </div>
               )}
@@ -319,9 +313,7 @@ export default function CheckoutPage() {
             <span className="flex items-center gap-1">
               <MapPin className="size-3.5" /> Delivery
             </span>
-            <span className={cn("font-bold tabular-nums", deliveryCharge === 0 ? "text-green-600" : "text-text")}>
-              {deliveryCharge === 0 ? "Free" : formatBDT(deliveryCharge)}
-            </span>
+            <span className="font-bold tabular-nums text-text">{formatBDT(deliveryCharge)}</span>
           </div>
           <div className="mt-4 flex items-baseline justify-between border-t border-border pt-4">
             <span className="text-[15px] font-bold text-text">Total</span>

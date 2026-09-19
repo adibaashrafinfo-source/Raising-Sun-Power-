@@ -116,7 +116,7 @@ export default function AccountOrderDetailPage() {
           <div className="flex justify-between text-muted">
             <span>Delivery</span>
             <span className="font-semibold tabular-nums text-text">
-              {order.delivery_charge === 0 ? "Free" : formatBDT(order.delivery_charge)}
+              {formatBDT(order.delivery_charge)}
             </span>
           </div>
           {order.discount > 0 && (

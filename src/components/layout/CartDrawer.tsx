@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button"
 import { formatBDT } from "@/lib/utils"
 import { useCartStore } from "@/store/cart-store"
 
-const FREE_DELIVERY_THRESHOLD = 5000
-
 export function CartDrawer() {
   const isOpen = useCartStore((s) => s.isCartOpen)
   const closeCart = useCartStore((s) => s.closeCart)
@@ -18,9 +16,6 @@ export function CartDrawer() {
   const subtotal = useCartStore((s) => s.subtotal())
 
   if (!isOpen) return null
-
-  const remaining = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal)
-  const pct = Math.min(100, Math.round((subtotal / FREE_DELIVERY_THRESHOLD) * 100))
 
   return (
     <>
@@ -43,23 +38,6 @@ export function CartDrawer() {
           >
             <X className="size-[18px]" />
           </button>
-        </div>
-
-        <div className="border-b border-border px-5 py-4">
-          <div className="mb-2 flex justify-between text-[12.5px] text-muted">
-            <span>
-              {remaining > 0
-                ? `Add ${formatBDT(remaining)} more for free delivery`
-                : "You've unlocked free delivery! 🎉"}
-            </span>
-            <span className="font-semibold text-text">৳5,000</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-surface-2">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500 transition-[width] duration-400"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-3">
