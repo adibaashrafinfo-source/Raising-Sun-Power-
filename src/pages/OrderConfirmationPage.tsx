@@ -1,10 +1,14 @@
-import { Check, MapPin, MessageCircle, Package, RefreshCw } from "lucide-react"
+import { Check, Download, MapPin, MessageCircle, Package, RefreshCw } from "lucide-react"
 import { Link, useLocation, useParams } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useOrder, useOrderItems } from "@/hooks/use-checkout"
+import { COMPANY } from "@/data/company"
+import { useOrder, useOrderItems, useSettings } from "@/hooks/use-checkout"
 import { useSeo } from "@/hooks/use-seo"
+import { useSiteContent } from "@/hooks/use-site-content"
+import { printInvoice } from "@/lib/invoice"
+import { officesFrom } from "@/lib/offices"
 import { formatBDT } from "@/lib/utils"
 import type { Order, OrderItem } from "@/types/database"
 
@@ -24,6 +28,20 @@ export default function OrderConfirmationPage() {
 
   const order = navState?.order ?? fetchedOrder
   const items = navState?.items ?? fetchedItems
+
+  const { data: settings } = useSettings()
+  const { data: cms } = useSiteContent()
+
+  const downloadInvoice = () => {
+    if (!order) return
+    printInvoice(order, items, {
+      offices: officesFrom(cms),
+      phone: settings?.support_phone || COMPANY.phone,
+      whatsapp: settings?.whatsapp_number || COMPANY.whatsapp,
+      email: settings?.contact_email || COMPANY.email,
+      logoUrl: cms?.header_logo_url || undefined,
+    })
+  }
 
   if (shouldFetch && isLoading) {
     return (
@@ -143,6 +161,10 @@ export default function OrderConfirmationPage() {
       </div>
 
       <div className="mt-6 flex flex-wrap justify-center gap-3">
+        <Button size="lg" variant="outline" onClick={downloadInvoice}>
+          <Download className="size-[18px]" />
+          Download Invoice
+        </Button>
         <Button asChild variant="secondary" size="lg">
           <Link to="/products">Continue Shopping</Link>
         </Button>
@@ -153,6 +175,9 @@ export default function OrderConfirmationPage() {
           </a>
         </Button>
       </div>
+      <p className="mt-2.5 text-center text-xs text-muted">
+        The invoice opens in your browser's print window — choose “Save as PDF” to keep a copy.
+      </p>
     </main>
   )
 }
