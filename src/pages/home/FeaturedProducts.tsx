@@ -111,7 +111,7 @@ const PRODUCTS: MiniProduct[] = [
 const FEATURE_ICONS = [Zap, ShieldCheck, Settings, Leaf] as const
 
 const TRUST = [
-  { icon: Truck, title: "Free Shipping", sub: "On orders over ৳5,000" },
+  { icon: Truck, title: "Nationwide Delivery", sub: "Anywhere in Bangladesh" },
   { icon: ShieldCheck, title: "Secure Payment", sub: "100% safe & trusted" },
   { icon: Headphones, title: "Expert Support", sub: "We're always here" },
   { icon: Leaf, title: "Clean Energy", sub: "A Greener Future" },

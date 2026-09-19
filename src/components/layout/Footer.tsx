@@ -37,6 +37,8 @@ export function Footer() {
       name: cms?.showroom_2_name || COMPANY.localOffice.label,
       address: cms?.showroom_2_address || COMPANY.localOffice.address,
     },
+    // Not CMS-backed: the third office is a fixed entry.
+    { name: COMPANY.office2.label, address: COMPANY.office2.address },
   ].filter((s) => s.name || s.address)
 
   const socialLinks = [

@@ -32,6 +32,7 @@ export default function ContactPage() {
   const showrooms = [
     { name: cms?.showroom_1_name || COMPANY.headOffice.label, address: cms?.showroom_1_address || COMPANY.headOffice.address },
     { name: cms?.showroom_2_name || COMPANY.localOffice.label, address: cms?.showroom_2_address || COMPANY.localOffice.address },
+    { name: COMPANY.office2.label, address: COMPANY.office2.address },
   ].filter((s) => s.name || s.address)
 
   const {

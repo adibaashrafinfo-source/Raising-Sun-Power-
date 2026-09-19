@@ -16,7 +16,6 @@ export default function AdminSettingsPage() {
   const [form, setForm] = useState({
     delivery_charge_inside_dhaka: 60,
     delivery_charge_outside_dhaka: 120,
-    free_delivery_threshold: 5000,
     cod_enabled: true,
     bkash_enabled: true,
     nagad_enabled: true,
@@ -78,14 +77,6 @@ export default function AdminSettingsPage() {
                 type="number"
                 value={form.delivery_charge_outside_dhaka}
                 onChange={(e) => setForm((f) => ({ ...f, delivery_charge_outside_dhaka: Number(e.target.value) }))}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Label className="mb-1.5 block">Free delivery threshold (৳)</Label>
-              <Input
-                type="number"
-                value={form.free_delivery_threshold}
-                onChange={(e) => setForm((f) => ({ ...f, free_delivery_threshold: Number(e.target.value) }))}
               />
             </div>
           </div>

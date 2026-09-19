@@ -102,7 +102,7 @@ export default function OrderConfirmationPage() {
         <div className="mt-2.5 flex justify-between text-sm text-muted">
           <span>Delivery</span>
           <span className="font-semibold tabular-nums text-text">
-            {order.delivery_charge === 0 ? "Free" : formatBDT(order.delivery_charge)}
+            {formatBDT(order.delivery_charge)}
           </span>
         </div>
         {order.discount > 0 && (
