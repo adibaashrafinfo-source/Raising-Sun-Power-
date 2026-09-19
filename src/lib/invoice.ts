@@ -19,6 +19,10 @@ const PAYMENT_LABELS: Record<string, string> = {
   card: "Card",
 }
 
+function titleCase(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
 function esc(value: unknown): string {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -81,10 +85,11 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta): strin
   td { padding: 9px 10px; border-bottom: 1px solid #e8edf5; vertical-align: top; }
   .num { text-align: right; white-space: nowrap; }
   th.num { text-align: right; }
-  .totals { margin-top: 14px; margin-left: auto; width: 270px; }
-  .totals div { display: flex; justify-content: space-between; padding: 5px 0; }
-  .totals .grand { border-top: 2px solid #14213a; margin-top: 6px; padding-top: 9px;
-                   font-size: 17px; font-weight: 800; color: #F49E09; }
+  tfoot td { border-bottom: none; padding: 5px 10px; }
+  tfoot tr:first-child td { padding-top: 12px; }
+  .sum-label { text-align: right; color: #5a6b85; }
+  tfoot .grand td { border-top: 2px solid #14213a; padding-top: 9px; font-size: 17px;
+                    font-weight: 800; color: #F49E09; }
   .note { margin-top: 20px; background: #fff7e8; border: 1px solid #f6dfae; border-radius: 8px;
           padding: 10px 12px; font-size: 12px; }
   footer { margin-top: 26px; border-top: 1px solid #e8edf5; padding-top: 12px; font-size: 11.5px; }
@@ -122,7 +127,7 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta): strin
       <div class="label">Order details</div>
       <div>Payment: <b>${esc(PAYMENT_LABELS[order.payment_method] ?? order.payment_method)}</b></div>
       <div>Delivery: <b>By Courier</b></div>
-      <div>Status: <b>${esc(order.status)}</b></div>
+      <div>Status: <b>${esc(titleCase(order.status))}</b></div>
       ${order.payment_reference ? `<div class="muted">Ref: ${esc(order.payment_reference)}</div>` : ""}
     </div>
   </div>
@@ -138,14 +143,28 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta): strin
       </tr>
     </thead>
     <tbody>${rows}</tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3" rowspan="${2 + (order.discount > 0 ? 1 : 0) + (order.delivery_charge > 0 ? 1 : 0)}"></td>
+        <td class="sum-label">Subtotal</td>
+        <td class="num">${esc(formatBDT(order.subtotal))}</td>
+      </tr>
+      ${
+        order.discount > 0
+          ? `<tr><td class="sum-label">Discount</td><td class="num">-${esc(formatBDT(order.discount))}</td></tr>`
+          : ""
+      }
+      ${
+        order.delivery_charge > 0
+          ? `<tr><td class="sum-label">Delivery</td><td class="num">${esc(formatBDT(order.delivery_charge))}</td></tr>`
+          : ""
+      }
+      <tr class="grand">
+        <td class="sum-label">Total</td>
+        <td class="num">${esc(formatBDT(order.total))}</td>
+      </tr>
+    </tfoot>
   </table>
-
-  <div class="totals">
-    <div><span>Subtotal</span><span>${esc(formatBDT(order.subtotal))}</span></div>
-    ${order.discount > 0 ? `<div><span>Discount</span><span>-${esc(formatBDT(order.discount))}</span></div>` : ""}
-    ${order.delivery_charge > 0 ? `<div><span>Delivery</span><span>${esc(formatBDT(order.delivery_charge))}</span></div>` : ""}
-    <div class="grand"><span>Total</span><span>${esc(formatBDT(order.total))}</span></div>
-  </div>
 
   <div class="note">
     Delivery charge is not included in this invoice. It is calculated for your address and
