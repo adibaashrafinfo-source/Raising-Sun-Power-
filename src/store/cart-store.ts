@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { toast } from "sonner"
 
+import type { Coupon } from "@/types/database"
 import type { ProductCardData } from "@/types/product"
 
 export type CartThumbnail =
@@ -25,6 +26,9 @@ export type AddToCartInput = {
 
 type CartState = {
   items: CartItem[]
+  /** Validated on the cart page; the checkout reads it back so the discount
+      actually reaches the order. */
+  coupon: Coupon | null
   isCartOpen: boolean
   isMobileMenuOpen: boolean
   openCart: () => void
@@ -37,12 +41,16 @@ type CartState = {
   removeItem: (id: string) => void
   cartCount: () => number
   subtotal: () => number
+  setCoupon: (coupon: Coupon | null) => void
+  discount: () => number
+  clearCart: () => void
 }
 
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      coupon: null,
       isCartOpen: false,
       isMobileMenuOpen: false,
       openCart: () => set({ isCartOpen: true }),
@@ -90,10 +98,20 @@ export const useCartStore = create<CartState>()(
         set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
       cartCount: () => get().items.reduce((a, i) => a + i.qty, 0),
       subtotal: () => get().items.reduce((a, i) => a + i.qty * i.price, 0),
+      setCoupon: (coupon) => set({ coupon }),
+      discount: () => {
+        const { coupon } = get()
+        if (!coupon) return 0
+        const subtotal = get().items.reduce((a, i) => a + i.qty * i.price, 0)
+        return coupon.discount_type === "percent"
+          ? Math.round((subtotal * coupon.discount_value) / 100)
+          : Math.min(coupon.discount_value, subtotal)
+      },
+      clearCart: () => set({ items: [], coupon: null }),
     }),
     {
       name: "rsp-cart",
-      partialize: (state) => ({ items: state.items }),
+      partialize: (state) => ({ items: state.items, coupon: state.coupon }),
     },
   ),
 )

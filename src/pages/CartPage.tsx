@@ -9,7 +9,6 @@ import { useSeo } from "@/hooks/use-seo"
 import { fetchCouponByCode } from "@/lib/queries/checkout"
 import { formatBDT } from "@/lib/utils"
 import { useCartStore } from "@/store/cart-store"
-import type { Coupon } from "@/types/database"
 
 export default function CartPage() {
   useSeo({ title: "Shopping Cart", noIndex: true })
@@ -20,17 +19,15 @@ export default function CartPage() {
   const removeItem = useCartStore((s) => s.removeItem)
   const subtotal = useCartStore((s) => s.subtotal())
 
+  const coupon = useCartStore((s) => s.coupon)
+  const setCoupon = useCartStore((s) => s.setCoupon)
+  const discount = useCartStore((s) => s.discount())
+
   const [couponInput, setCouponInput] = useState("")
-  const [coupon, setCoupon] = useState<Coupon | null>(null)
   const [couponMsg, setCouponMsg] = useState<{ text: string; ok: boolean } | null>(null)
   const [applying, setApplying] = useState(false)
 
 
-  const discount = coupon
-    ? coupon.discount_type === "percent"
-      ? Math.round((subtotal * coupon.discount_value) / 100)
-      : Math.min(coupon.discount_value, subtotal)
-    : 0
   const total = Math.max(0, subtotal - discount)
 
   const applyCoupon = async () => {
@@ -164,7 +161,7 @@ export default function CartPage() {
             </div>
             {discount > 0 && (
               <div className="mb-2.5 flex justify-between text-sm font-semibold text-green-600">
-                <span>Discount</span>
+                <span>Discount{coupon ? ` (${coupon.code})` : ""}</span>
                 <span className="tabular-nums">-{formatBDT(discount)}</span>
               </div>
             )}
