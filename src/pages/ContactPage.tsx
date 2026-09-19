@@ -12,6 +12,7 @@ import { useSettings } from "@/hooks/use-checkout"
 import { useCreateContactMessage } from "@/hooks/use-contact"
 import { useSeo } from "@/hooks/use-seo"
 import { useSiteContent } from "@/hooks/use-site-content"
+import { officesFrom } from "@/lib/offices"
 import { type ContactFormValues, contactSchema } from "@/lib/schemas/contact"
 import { cn } from "@/lib/utils"
 
@@ -29,11 +30,7 @@ export default function ContactPage() {
   const phone = settings?.support_phone || COMPANY.phone
   const email = settings?.contact_email || COMPANY.email
   const businessHours = cms?.business_hours || "Sat–Thu, 10am–8pm"
-  const showrooms = [
-    { name: cms?.showroom_1_name || COMPANY.headOffice.label, address: cms?.showroom_1_address || COMPANY.headOffice.address },
-    { name: cms?.showroom_2_name || COMPANY.localOffice.label, address: cms?.showroom_2_address || COMPANY.localOffice.address },
-    { name: COMPANY.office2.label, address: COMPANY.office2.address },
-  ].filter((s) => s.name || s.address)
+  const showrooms = officesFrom(cms)
 
   const {
     register,

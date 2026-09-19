@@ -28,7 +28,7 @@ export default function BlogPostPage() {
         <h1 className="font-heading text-2xl font-extrabold text-text">Article not found</h1>
         <p className="mt-3 text-muted">The article you're looking for doesn't exist or has been moved.</p>
         <Button asChild className="mt-6">
-          <Link to="/blog">Back to Blog</Link>
+          <Link to="/blog">Back to Articles</Link>
         </Button>
       </main>
     )
@@ -44,7 +44,7 @@ export default function BlogPostPage() {
         </Link>
         <ChevronRight className="size-3.5" />
         <Link to="/blog" className="-my-1 py-1 text-muted no-underline hover:text-blue">
-          Blog
+          Article
         </Link>
         <ChevronRight className="size-3.5" />
         <span className="line-clamp-1 font-semibold text-text">{post.title}</span>

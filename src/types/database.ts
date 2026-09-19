@@ -136,6 +136,9 @@ export type SiteContent = {
   showroom_1_address: string | null
   showroom_2_name: string | null
   showroom_2_address: string | null
+  /** Optional: present once the showroom_3_* columns exist on the row. */
+  showroom_3_name?: string | null
+  showroom_3_address?: string | null
   business_hours: string | null
   updated_at: string
 }

@@ -16,12 +16,12 @@ export const COMPANY = {
     address:
       "House No-125/4, Hosen Ali Road, Baganbari, North Vashantek, Near to CMH, Dhaka Cantonment, Dhaka-1206",
   },
-  localOffice: {
-    label: "Local Office",
+  localOffice1: {
+    label: "Local Office-1",
     address: "Lotra Bazar, Saharasti, Chandpur-3620",
   },
-  office2: {
-    label: "Office-2",
+  localOffice2: {
+    label: "Local Office-2",
     address: "Paniwala Bazar, Ramgonj, Laximpur.",
   },
 } as const

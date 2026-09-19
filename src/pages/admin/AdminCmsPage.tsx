@@ -14,7 +14,10 @@ import { uploadSiteAsset } from "@/lib/queries/site-content"
 import { getErrorMessage } from "@/lib/utils"
 import type { SiteContent } from "@/types/database"
 
-type FormState = Omit<SiteContent, "id" | "updated_at">
+type FormState = Omit<SiteContent, "id" | "updated_at" | "showroom_3_name" | "showroom_3_address"> & {
+  showroom_3_name: string | null
+  showroom_3_address: string | null
+}
 
 const EMPTY: FormState = {
   header_logo_url: "",
@@ -35,6 +38,8 @@ const EMPTY: FormState = {
   showroom_1_address: "",
   showroom_2_name: "",
   showroom_2_address: "",
+  showroom_3_name: "",
+  showroom_3_address: "",
   business_hours: "",
 }
 
@@ -71,6 +76,8 @@ export default function AdminCmsPage() {
       showroom_1_address: content.showroom_1_address ?? "",
       showroom_2_name: content.showroom_2_name ?? "",
       showroom_2_address: content.showroom_2_address ?? "",
+      showroom_3_name: content.showroom_3_name ?? "",
+      showroom_3_address: content.showroom_3_address ?? "",
       business_hours: content.business_hours ?? "",
     })
   }, [content])
@@ -84,6 +91,11 @@ export default function AdminCmsPage() {
     })
   }, [settings])
 
+  // The third office only exists once its columns have been added to the
+  // site_content row; without them the fields are hidden and left out of the
+  // save so the rest of the page keeps working.
+  const hasOffice3 = !!content && "showroom_3_name" in content
+
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
 
@@ -91,7 +103,10 @@ export default function AdminCmsPage() {
     e.preventDefault()
     try {
       // Both rows are saved together so one Save button covers the page.
-      await updateContent.mutateAsync(form)
+      const { showroom_3_name, showroom_3_address, ...rest } = form
+      await updateContent.mutateAsync(
+        hasOffice3 ? { ...rest, showroom_3_name, showroom_3_address } : rest,
+      )
       await updateSettings.mutateAsync(contact)
       toast.success("Site content saved")
     } catch (err) {
@@ -159,6 +174,12 @@ export default function AdminCmsPage() {
             <TextField label="Office 1 — address" value={form.showroom_1_address} onChange={(v) => set("showroom_1_address", v)} />
             <TextField label="Office 2 — name" value={form.showroom_2_name} onChange={(v) => set("showroom_2_name", v)} />
             <TextField label="Office 2 — address" value={form.showroom_2_address} onChange={(v) => set("showroom_2_address", v)} />
+            {hasOffice3 && (
+              <>
+                <TextField label="Office 3 — name" value={form.showroom_3_name} onChange={(v) => set("showroom_3_name", v)} />
+                <TextField label="Office 3 — address" value={form.showroom_3_address} onChange={(v) => set("showroom_3_address", v)} />
+              </>
+            )}
           </div>
           <TextField label="Business hours" value={form.business_hours} onChange={(v) => set("business_hours", v)} />
         </Section>
