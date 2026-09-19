@@ -17,7 +17,7 @@ const shopLinks = [
 // Every one of these used to point at /products, which sent people looking for
 // their order to the catalogue.
 const serviceLinks = [
-  { label: "Track order", to: "/account/orders" },
+  { label: "Track order", to: "/track-order" },
   { label: "Returns", to: "/contact" },
   { label: "Warranty", to: "/contact" },
   { label: "FAQ", to: "/contact" },

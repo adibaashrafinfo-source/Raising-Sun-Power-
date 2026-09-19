@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase"
-import type { Coupon, Order, OrderInsert, OrderItemInsert, Settings } from "@/types/database"
+import type { Coupon, Order, OrderInsert, OrderItem, OrderItemInsert, Settings } from "@/types/database"
 
 export async function fetchSettings(): Promise<Settings> {
   const { data, error } = await supabase.from("settings").select("*").eq("id", 1).single()
@@ -74,4 +74,29 @@ export async function fetchOrderItems(orderId: string) {
   const { data, error } = await supabase.from("order_items").select("*").eq("order_id", orderId)
   if (error) throw error
   return data ?? []
+}
+
+export type TrackedOrder = { order: Order; items: OrderItem[] }
+
+/** Raised when fn_track_order has not been installed on the database yet. */
+export class TrackingUnavailableError extends Error {}
+
+/**
+ * Looks one order up by its number plus the phone it was placed with. Guest
+ * orders are invisible to RLS, so this goes through the fn_track_order
+ * SECURITY DEFINER function (see rsp_order_tracking.sql).
+ */
+export async function trackOrder(orderNumber: string, phone: string): Promise<TrackedOrder | null> {
+  const { data, error } = await supabase.rpc("fn_track_order", {
+    p_order_number: orderNumber,
+    p_phone: phone,
+  })
+  if (error) {
+    // PostgREST reports an absent function as PGRST202 / 404.
+    if (error.code === "PGRST202" || /does not exist|not find the function/i.test(error.message)) {
+      throw new TrackingUnavailableError(error.message)
+    }
+    throw error
+  }
+  return (data as TrackedOrder | null) ?? null
 }
