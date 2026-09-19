@@ -18,6 +18,7 @@ import { CtaBand } from "@/pages/home/CtaBand"
 import { SEO_KEYWORDS, SITE_DESCRIPTION } from "@/data/company"
 import { useSeo } from "@/hooks/use-seo"
 import { useSiteContent } from "@/hooks/use-site-content"
+import { officesFrom } from "@/lib/offices"
 
 const STATS = [
   { value: "12,000+", label: "Orders delivered" },
@@ -95,18 +96,7 @@ export default function AboutPage() {
     .split(/\n\s*\n/)
     .map((p) => p.trim())
     .filter(Boolean)
-  const offices = [
-    {
-      name: cms?.showroom_1_name || "Head Office",
-      address:
-        cms?.showroom_1_address ||
-        "House No-125/4, Hosen Ali Road, Baganbari, North Vashantek, Near to CMH, Dhaka Cantonment-1206",
-    },
-    {
-      name: cms?.showroom_2_name || "Local Office",
-      address: cms?.showroom_2_address || "Lotra Bazar, Saharasti, Chandpur-3620",
-    },
-  ].filter((s) => s.name || s.address)
+  const offices = officesFrom(cms)
 
   return (
     <main>

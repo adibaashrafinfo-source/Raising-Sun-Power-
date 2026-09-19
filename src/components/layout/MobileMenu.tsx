@@ -11,7 +11,7 @@ const links = [
   { to: "/solar-roi-calculator", label: "ROI Calculator" },
   { to: "/solar-assessment", label: "Free Solar Assessment" },
   { to: "/wholesale", label: "Wholesale & Dealer" },
-  { to: "/blog", label: "Blog" },
+  { to: "/blog", label: "Article" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
 ]

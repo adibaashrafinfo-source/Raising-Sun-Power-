@@ -21,7 +21,7 @@ function formatDate(date: string) {
 
 export default function BlogPage() {
   useSeo({
-    title: "Solar Knowledge Base & Blog",
+    title: "Solar Knowledge Base & Articles",
     description:
       "Guides on solar systems, net metering, inverters, batteries and electrical safety in Bangladesh — from Rising Sun Power BD.",
     keywords: SEO_KEYWORDS,
@@ -37,7 +37,7 @@ export default function BlogPage() {
           Home
         </Link>
         <ChevronRight className="size-3.5" />
-        <span className="font-semibold text-text">Blog</span>
+        <span className="font-semibold text-text">Article</span>
       </div>
 
       <div className="mx-auto mb-8 max-w-[720px] text-center">

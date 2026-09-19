@@ -5,13 +5,14 @@ import { FacebookIcon, InstagramIcon, LinkedinIcon, TiktokIcon, YoutubeIcon } fr
 import { COMPANY } from "@/data/company"
 import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
+import { officesFrom } from "@/lib/offices"
 
 const shopLinks = ["Solar Panels", "Inverters", "Batteries", "MCB & MCCB", "Cables & Switchgear"]
 const serviceLinks = ["Track order", "Returns", "Warranty", "FAQ"]
 const companyLinks = [
   { label: "About Us", to: "/about" },
   { label: "Contact", to: "/contact" },
-  { label: "Blog", to: "/blog" },
+  { label: "Article", to: "/blog" },
   { label: "Wholesale & Dealer", to: "/wholesale" },
   { label: "Free Solar Assessment", to: "/solar-assessment" },
   { label: "Get Free Quotation", to: "/get-quotation" },
@@ -28,18 +29,7 @@ export function Footer() {
     cms?.footer_description ||
     "Genuine solar & electrical products with engineered reliability — powering homes and businesses across Bangladesh with clean, renewable energy."
   const designedBy = cms?.footer_designed_by || "Abrar IT"
-  const showrooms = [
-    {
-      name: cms?.showroom_1_name || COMPANY.headOffice.label,
-      address: cms?.showroom_1_address || COMPANY.headOffice.address,
-    },
-    {
-      name: cms?.showroom_2_name || COMPANY.localOffice.label,
-      address: cms?.showroom_2_address || COMPANY.localOffice.address,
-    },
-    // Not CMS-backed: the third office is a fixed entry.
-    { name: COMPANY.office2.label, address: COMPANY.office2.address },
-  ].filter((s) => s.name || s.address)
+  const showrooms = officesFrom(cms)
 
   const socialLinks = [
     { url: settings?.facebook_url, icon: FacebookIcon, label: "Facebook" },

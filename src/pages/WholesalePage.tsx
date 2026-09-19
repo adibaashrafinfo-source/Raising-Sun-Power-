@@ -21,7 +21,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { COMPANY, SEO_KEYWORDS, telLink, whatsappLink } from "@/data/company"
 import { useCreateLead } from "@/hooks/use-leads"
+import { useSiteContent } from "@/hooks/use-site-content"
 import { useSeo } from "@/hooks/use-seo"
+import { officesFrom } from "@/lib/offices"
 import { generateRefId } from "@/lib/queries/leads"
 import {
   type WholesaleFormValues,
@@ -54,6 +56,8 @@ export default function WholesalePage() {
   })
   const formRef = useRef<HTMLDivElement>(null)
   const createLead = useCreateLead()
+  const { data: cms } = useSiteContent()
+  const offices = officesFrom(cms)
 
   const {
     register,
@@ -296,12 +300,11 @@ export default function WholesalePage() {
 
             <div className="rounded-[22px] border border-border bg-surface p-6 shadow-[var(--shadow-sm)]">
               <div className="mb-2 font-heading text-base font-extrabold text-text">Our offices</div>
-              <p className="text-[13px] leading-relaxed text-muted">
-                <b className="text-text">{COMPANY.headOffice.label}:</b> {COMPANY.headOffice.address}
-              </p>
-              <p className="mt-3 text-[13px] leading-relaxed text-muted">
-                <b className="text-text">{COMPANY.localOffice.label}:</b> {COMPANY.localOffice.address}
-              </p>
+              {offices.map((office) => (
+                <p key={office.name} className="mt-3 text-[13px] leading-relaxed text-muted first:mt-0">
+                  <b className="text-text">{office.name}:</b> {office.address}
+                </p>
+              ))}
             </div>
           </div>
         </div>
