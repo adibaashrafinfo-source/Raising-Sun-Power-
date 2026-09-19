@@ -7,8 +7,21 @@ import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { officesFrom } from "@/lib/offices"
 
-const shopLinks = ["Solar Panels", "Inverters", "Batteries", "MCB & MCCB", "Cables & Switchgear"]
-const serviceLinks = ["Track order", "Returns", "Warranty", "FAQ"]
+const shopLinks = [
+  { label: "Solar Panels", to: "/category/solar-panels" },
+  { label: "Inverters", to: "/category/inverters" },
+  { label: "Batteries", to: "/category/batteries" },
+  { label: "MCB & MCCB", to: "/category/mcb-mccb" },
+  { label: "Cables & Switchgear", to: "/category/cables-wires" },
+]
+// Every one of these used to point at /products, which sent people looking for
+// their order to the catalogue.
+const serviceLinks = [
+  { label: "Track order", to: "/account/orders" },
+  { label: "Returns", to: "/contact" },
+  { label: "Warranty", to: "/contact" },
+  { label: "FAQ", to: "/contact" },
+]
 const companyLinks = [
   { label: "About Us", to: "/about" },
   { label: "Contact", to: "/contact" },
@@ -103,8 +116,8 @@ export function Footer() {
           </div>
 
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-5">
-            <FooterCol title="Shop" links={shopLinks.map((l) => ({ label: l, to: "/products" }))} />
-            <FooterCol title="Customer Service" links={serviceLinks.map((l) => ({ label: l, to: "/products" }))} />
+            <FooterCol title="Shop" links={shopLinks} />
+            <FooterCol title="Customer Service" links={serviceLinks} />
             <FooterCol title="Company" links={companyLinks} />
           </div>
 

@@ -31,6 +31,8 @@ export default function CheckoutPage() {
   const { user } = useAuth()
   const items = useCartStore((s) => s.items)
   const subtotal = useCartStore((s) => s.subtotal())
+  const coupon = useCartStore((s) => s.coupon)
+  const discount = useCartStore((s) => s.discount())
   const { data: settings } = useSettings()
   const createOrder = useCreateOrder()
 
@@ -58,7 +60,7 @@ export default function CheckoutPage() {
   // The site never quotes a delivery charge — it is worked out per order and
   // added to the quotation we send back, so orders are stored with 0.
   const deliveryCharge = 0
-  const total = Math.max(0, subtotal)
+  const total = Math.max(0, subtotal - discount)
 
   const availablePayments = PAYMENT_OPTIONS.filter((opt) => {
     if (opt.value === "cod") return settings?.cod_enabled ?? true
@@ -90,8 +92,8 @@ export default function CheckoutPage() {
       delivery_method: values.deliveryMethod,
       subtotal,
       delivery_charge: deliveryCharge,
-      discount: 0,
-      coupon_id: null,
+      discount,
+      coupon_id: coupon?.id ?? null,
       total,
       notes: values.notes || null,
     }
@@ -107,7 +109,7 @@ export default function CheckoutPage() {
       const created = await createOrder.mutateAsync({ order, items: orderItems })
       sendSms(values.phone, `Thanks ${values.name}! Your RSP order ${created.order_number} is confirmed.`)
       toast.success(`Order ${created.order_number} placed!`)
-      useCartStore.setState({ items: [] })
+      useCartStore.getState().clearCart()
       navigate(`/order-confirmation/${created.id}`, {
         state: {
           order: created,
@@ -294,6 +296,12 @@ export default function CheckoutPage() {
             <span>Subtotal</span>
             <span className="font-semibold tabular-nums text-text">{formatBDT(subtotal)}</span>
           </div>
+          {discount > 0 && (
+            <div className="mt-2.5 flex justify-between text-sm font-semibold text-green-600">
+              <span>Discount{coupon ? ` (${coupon.code})` : ""}</span>
+              <span className="tabular-nums">-{formatBDT(discount)}</span>
+            </div>
+          )}
           <p className="mt-2.5 flex items-start gap-1.5 rounded-xl bg-surface-2 px-3 py-2.5 text-[12.5px] text-muted">
             <MapPin className="mt-px size-3.5 shrink-0" />
             Delivery charge is not included here — we add it to the quotation we send
