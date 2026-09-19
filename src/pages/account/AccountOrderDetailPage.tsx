@@ -1,9 +1,13 @@
-import { Check, ChevronRight, X } from "lucide-react"
+import { Check, ChevronRight, Download, X } from "lucide-react"
 import { Link, useParams } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useOrder, useOrderItems } from "@/hooks/use-checkout"
+import { COMPANY } from "@/data/company"
+import { useOrder, useOrderItems, useSettings } from "@/hooks/use-checkout"
+import { useSiteContent } from "@/hooks/use-site-content"
+import { printInvoice } from "@/lib/invoice"
+import { officesFrom } from "@/lib/offices"
 import { cn, formatBDT } from "@/lib/utils"
 import type { OrderStatus } from "@/types/database"
 
@@ -18,6 +22,19 @@ export default function AccountOrderDetailPage() {
   const { orderId } = useParams<{ orderId: string }>()
   const { data: order, isLoading, isError, refetch } = useOrder(orderId)
   const { data: items = [] } = useOrderItems(orderId)
+  const { data: settings } = useSettings()
+  const { data: cms } = useSiteContent()
+
+  const downloadInvoice = () => {
+    if (!order) return
+    printInvoice(order, items, {
+      offices: officesFrom(cms),
+      phone: settings?.support_phone || COMPANY.phone,
+      whatsapp: settings?.whatsapp_number || COMPANY.whatsapp,
+      email: settings?.contact_email || COMPANY.email,
+      logoUrl: cms?.header_logo_url || undefined,
+    })
+  }
 
   if (isLoading) {
     return <Skeleton className="h-64 w-full rounded-2xl" />
@@ -60,9 +77,15 @@ export default function AccountOrderDetailPage() {
               })}
             </div>
           </div>
-          <span className="font-heading text-xl font-extrabold tabular-nums text-orange-500">
-            {formatBDT(order.total)}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="font-heading text-xl font-extrabold tabular-nums text-orange-500">
+              {formatBDT(order.total)}
+            </span>
+            <Button variant="outline" size="sm" onClick={downloadInvoice}>
+              <Download className="size-[15px]" />
+              Invoice
+            </Button>
+          </div>
         </div>
 
         {isCancelled ? (
