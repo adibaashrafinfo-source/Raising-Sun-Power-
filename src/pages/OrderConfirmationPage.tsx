@@ -99,12 +99,14 @@ export default function OrderConfirmationPage() {
           <span>Subtotal</span>
           <span className="font-semibold tabular-nums text-text">{formatBDT(order.subtotal)}</span>
         </div>
-        <div className="mt-2.5 flex justify-between text-sm text-muted">
-          <span>Delivery</span>
-          <span className="font-semibold tabular-nums text-text">
-            {formatBDT(order.delivery_charge)}
-          </span>
-        </div>
+        {order.delivery_charge > 0 && (
+          <div className="mt-2.5 flex justify-between text-sm text-muted">
+            <span>Delivery</span>
+            <span className="font-semibold tabular-nums text-text">
+              {formatBDT(order.delivery_charge)}
+            </span>
+          </div>
+        )}
         {order.discount > 0 && (
           <div className="mt-2.5 flex justify-between text-sm font-semibold text-green-600">
             <span>Discount</span>

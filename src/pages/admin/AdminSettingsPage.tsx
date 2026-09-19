@@ -14,8 +14,6 @@ export default function AdminSettingsPage() {
   const updateSettings = useUpdateSettings()
 
   const [form, setForm] = useState({
-    delivery_charge_inside_dhaka: 60,
-    delivery_charge_outside_dhaka: 120,
     cod_enabled: true,
     bkash_enabled: true,
     nagad_enabled: true,
@@ -60,28 +58,6 @@ export default function AdminSettingsPage() {
       <h1 className="font-heading text-2xl font-extrabold text-text">Settings</h1>
 
       <form onSubmit={handleSubmit} className="flex max-w-[560px] flex-col gap-5">
-        <div className="rounded-2xl border border-border bg-surface p-5">
-          <div className="mb-4 font-heading text-base font-extrabold text-text">Delivery charges</div>
-          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-            <div>
-              <Label className="mb-1.5 block">Inside Dhaka (৳)</Label>
-              <Input
-                type="number"
-                value={form.delivery_charge_inside_dhaka}
-                onChange={(e) => setForm((f) => ({ ...f, delivery_charge_inside_dhaka: Number(e.target.value) }))}
-              />
-            </div>
-            <div>
-              <Label className="mb-1.5 block">Outside Dhaka (৳)</Label>
-              <Input
-                type="number"
-                value={form.delivery_charge_outside_dhaka}
-                onChange={(e) => setForm((f) => ({ ...f, delivery_charge_outside_dhaka: Number(e.target.value) }))}
-              />
-            </div>
-          </div>
-        </div>
-
         <div className="rounded-2xl border border-border bg-surface p-5">
           <div className="mb-4 font-heading text-base font-extrabold text-text">Payment methods</div>
           <div className="flex flex-col gap-3">

@@ -113,12 +113,14 @@ export default function AccountOrderDetailPage() {
             <span>Subtotal</span>
             <span className="font-semibold tabular-nums text-text">{formatBDT(order.subtotal)}</span>
           </div>
-          <div className="flex justify-between text-muted">
-            <span>Delivery</span>
-            <span className="font-semibold tabular-nums text-text">
-              {formatBDT(order.delivery_charge)}
-            </span>
-          </div>
+          {order.delivery_charge > 0 && (
+            <div className="flex justify-between text-muted">
+              <span>Delivery</span>
+              <span className="font-semibold tabular-nums text-text">
+                {formatBDT(order.delivery_charge)}
+              </span>
+            </div>
+          )}
           {order.discount > 0 && (
             <div className="flex justify-between font-semibold text-green-600">
               <span>Discount</span>

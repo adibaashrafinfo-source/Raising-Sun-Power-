@@ -369,7 +369,7 @@ export default function ProductDetailPage() {
             </div>
             <div className="text-[13px] text-muted">
               Charge <b className="text-text">৳60 (Dhaka) / ৳120 (outside Dhaka)</b> · arrives in{" "}
-              <b className="text-text">2–4 days</b> via Steadfast Courier
+              <b className="text-text">2–4 days</b> by courier
             </div>
           </div>
         </div>
@@ -391,7 +391,7 @@ export default function ProductDetailPage() {
                     {`The ${product.name} is sourced from authorized channels and shipped with genuine warranty documentation. Built for the Bangladeshi climate and grid conditions, it delivers dependable performance for home backup, commercial supply, or a full solar installation.`}
                   </p>
                   <p className="text-[15px] leading-relaxed text-muted">
-                    Every unit is inspected before dispatch and delivered nationwide through Steadfast Courier with
+                    Every unit is inspected before dispatch and delivered nationwide by courier with
                     Cash on Delivery available.
                   </p>
                 </div>

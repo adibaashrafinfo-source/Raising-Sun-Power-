@@ -40,6 +40,9 @@ export function Header() {
   const location = useLocation()
   const [isHidden, setIsHidden] = useState(false)
   const [megaOpen, setMegaOpen] = useState(false)
+  // The product page is dense enough without a full-width panel dropping over
+  // it, so the mega menu is switched off there.
+  const hasMegaMenu = !location.pathname.startsWith("/product/")
   const [categoryOpen, setCategoryOpen] = useState(false)
   const megaCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -206,14 +209,18 @@ export function Header() {
             >
               Home
             </Link>
-            <div onMouseEnter={openMega} onMouseLeave={scheduleCloseMega}>
+            <div
+              onMouseEnter={hasMegaMenu ? openMega : undefined}
+              onMouseLeave={hasMegaMenu ? scheduleCloseMega : undefined}
+            >
               <Link
                 to="/products"
                 className="inline-flex items-center gap-1 whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
               >
-                Products <ChevronDown className="size-[13px]" />
+                Products
+                {hasMegaMenu && <ChevronDown className="size-[13px]" />}
               </Link>
-              {megaOpen && (
+              {hasMegaMenu && megaOpen && (
                 <MegaMenu onClose={() => setMegaOpen(false)} onMouseEnter={openMega} onMouseLeave={scheduleCloseMega} />
               )}
             </div>
