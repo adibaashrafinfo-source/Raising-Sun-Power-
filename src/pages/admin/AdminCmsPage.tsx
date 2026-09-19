@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useUpdateSettings } from "@/hooks/use-admin"
+import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent, useUpdateSiteContent } from "@/hooks/use-site-content"
 import { formatBytes } from "@/lib/compress-image"
 import { uploadSiteAsset } from "@/lib/queries/site-content"
@@ -36,10 +38,17 @@ const EMPTY: FormState = {
   business_hours: "",
 }
 
+/** Phone, WhatsApp and email live on the settings row, not site_content. */
+type ContactState = { support_phone: string; whatsapp_number: string; contact_email: string }
+const EMPTY_CONTACT: ContactState = { support_phone: "", whatsapp_number: "", contact_email: "" }
+
 export default function AdminCmsPage() {
   const { data: content, isLoading } = useSiteContent()
+  const { data: settings } = useSettings()
   const updateContent = useUpdateSiteContent()
+  const updateSettings = useUpdateSettings()
   const [form, setForm] = useState<FormState>(EMPTY)
+  const [contact, setContact] = useState<ContactState>(EMPTY_CONTACT)
 
   useEffect(() => {
     if (!content) return
@@ -66,13 +75,24 @@ export default function AdminCmsPage() {
     })
   }, [content])
 
+  useEffect(() => {
+    if (!settings) return
+    setContact({
+      support_phone: settings.support_phone ?? "",
+      whatsapp_number: settings.whatsapp_number ?? "",
+      contact_email: settings.contact_email ?? "",
+    })
+  }, [settings])
+
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      // Both rows are saved together so one Save button covers the page.
       await updateContent.mutateAsync(form)
+      await updateSettings.mutateAsync(contact)
       toast.success("Site content saved")
     } catch (err) {
       toast.error(getErrorMessage(err, "Couldn't save content"))
@@ -86,8 +106,8 @@ export default function AdminCmsPage() {
       <div>
         <h1 className="font-heading text-2xl font-extrabold text-text">Site Content (CMS)</h1>
         <p className="mt-1 text-sm text-muted">
-          Edit logos, hero, footer, About page and contact/showroom details shown across the public site — no
-          code deploy needed.
+          Edit logos, hero, footer, About page, office addresses and contact numbers shown across the public
+          site — no code deploy needed.
         </p>
       </div>
 
@@ -132,19 +152,41 @@ export default function AdminCmsPage() {
           <TextField label='"Designed by" credit' value={form.footer_designed_by} onChange={(v) => set("footer_designed_by", v)} />
         </Section>
 
-        {/* Showrooms + hours */}
-        <Section title="Showrooms & Contact" subtitle="Addresses and hours shown on the footer, About and Contact pages. (Phone, WhatsApp and email are managed under Settings.)">
+        {/* Offices + hours */}
+        <Section title="Office Addresses" subtitle="Shown in the footer and on the About and Contact pages.">
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-            <TextField label="Showroom 1 — name" value={form.showroom_1_name} onChange={(v) => set("showroom_1_name", v)} />
-            <TextField label="Showroom 1 — address" value={form.showroom_1_address} onChange={(v) => set("showroom_1_address", v)} />
-            <TextField label="Showroom 2 — name" value={form.showroom_2_name} onChange={(v) => set("showroom_2_name", v)} />
-            <TextField label="Showroom 2 — address" value={form.showroom_2_address} onChange={(v) => set("showroom_2_address", v)} />
+            <TextField label="Office 1 — name" value={form.showroom_1_name} onChange={(v) => set("showroom_1_name", v)} />
+            <TextField label="Office 1 — address" value={form.showroom_1_address} onChange={(v) => set("showroom_1_address", v)} />
+            <TextField label="Office 2 — name" value={form.showroom_2_name} onChange={(v) => set("showroom_2_name", v)} />
+            <TextField label="Office 2 — address" value={form.showroom_2_address} onChange={(v) => set("showroom_2_address", v)} />
           </div>
           <TextField label="Business hours" value={form.business_hours} onChange={(v) => set("business_hours", v)} />
         </Section>
 
+        {/* Contact numbers — these live on the settings row but belong with the
+            addresses for whoever is editing the site's contact details. */}
+        <Section title="Contact Details" subtitle="The call number, WhatsApp number and email used across the site — header, footer, Contact page and every Call/WhatsApp button.">
+          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+            <TextField
+              label="Call number"
+              value={contact.support_phone}
+              onChange={(v) => setContact((c) => ({ ...c, support_phone: v }))}
+            />
+            <TextField
+              label="WhatsApp number (with country code, e.g. 8801786896390)"
+              value={contact.whatsapp_number}
+              onChange={(v) => setContact((c) => ({ ...c, whatsapp_number: v }))}
+            />
+          </div>
+          <TextField
+            label="Email address"
+            value={contact.contact_email}
+            onChange={(v) => setContact((c) => ({ ...c, contact_email: v }))}
+          />
+        </Section>
+
         <Button type="submit" size="lg" className="self-start" disabled={updateContent.isPending}>
-          {updateContent.isPending ? "Saving…" : "Save Content"}
+          {updateContent.isPending || updateSettings.isPending ? "Saving…" : "Save Content"}
         </Button>
       </form>
     </div>

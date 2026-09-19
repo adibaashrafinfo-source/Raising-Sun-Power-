@@ -96,7 +96,7 @@ export const whyRsp = [
   },
   {
     title: "Fast Nationwide Delivery",
-    body: "Steadfast courier to all 64 districts, 2–4 days with COD.",
+    body: "Courier delivery to all 64 districts, 2–4 days with COD.",
     tint: "rgba(244,158,9,.16)",
     color: "#F49E09",
   },
@@ -111,7 +111,7 @@ export const whyRsp = [
 export const testimonials = [
   {
     quote:
-      "Ordered a full solar kit for our village home. Genuine products, real warranty papers, and Steadfast delivered in 3 days with COD. Highly recommended.",
+      "Ordered a full solar kit for our village home. Genuine products, real warranty papers, and it was delivered in 3 days with COD. Highly recommended.",
     name: "Rakibul Hasan",
     role: "Homeowner · Rangpur",
     initials: "RH",

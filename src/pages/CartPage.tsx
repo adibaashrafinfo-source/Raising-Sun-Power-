@@ -5,7 +5,6 @@ import { Link, useNavigate } from "react-router-dom"
 import { ProductArt } from "@/components/product/ProductArt"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useSettings } from "@/hooks/use-checkout"
 import { useSeo } from "@/hooks/use-seo"
 import { fetchCouponByCode } from "@/lib/queries/checkout"
 import { formatBDT } from "@/lib/utils"
@@ -20,22 +19,19 @@ export default function CartPage() {
   const decrement = useCartStore((s) => s.decrementItem)
   const removeItem = useCartStore((s) => s.removeItem)
   const subtotal = useCartStore((s) => s.subtotal())
-  const { data: settings } = useSettings()
 
   const [couponInput, setCouponInput] = useState("")
   const [coupon, setCoupon] = useState<Coupon | null>(null)
   const [couponMsg, setCouponMsg] = useState<{ text: string; ok: boolean } | null>(null)
   const [applying, setApplying] = useState(false)
 
-  const flatDelivery = settings?.delivery_charge_outside_dhaka ?? 120
-  const delivery = items.length === 0 ? 0 : flatDelivery
 
   const discount = coupon
     ? coupon.discount_type === "percent"
       ? Math.round((subtotal * coupon.discount_value) / 100)
       : Math.min(coupon.discount_value, subtotal)
     : 0
-  const total = Math.max(0, subtotal - discount + delivery)
+  const total = Math.max(0, subtotal - discount)
 
   const applyCoupon = async () => {
     if (!couponInput.trim()) return
@@ -165,10 +161,6 @@ export default function CartPage() {
             <div className="mb-2.5 flex justify-between text-sm text-muted">
               <span>Subtotal</span>
               <span className="font-semibold tabular-nums text-text">{formatBDT(subtotal)}</span>
-            </div>
-            <div className="mb-2.5 flex justify-between text-sm text-muted">
-              <span>Delivery</span>
-              <span className="font-bold tabular-nums text-text">{formatBDT(delivery)}</span>
             </div>
             {discount > 0 && (
               <div className="mb-2.5 flex justify-between text-sm font-semibold text-green-600">

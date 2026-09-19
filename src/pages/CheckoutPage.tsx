@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Check, ChevronRight, MapPin, Store, Truck } from "lucide-react"
+import { Check, ChevronRight, MapPin, Truck } from "lucide-react"
 import { Controller, useForm } from "react-hook-form"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
@@ -8,7 +8,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { bdDivisions, districtsFor, isInsideDhaka, upazilasFor } from "@/data/bd-geo"
+import { bdDivisions, districtsFor, upazilasFor } from "@/data/bd-geo"
 import { useCreateOrder, useSettings } from "@/hooks/use-checkout"
 import { useSeo } from "@/hooks/use-seo"
 import { useAuth } from "@/lib/auth-provider"
@@ -50,19 +50,15 @@ export default function CheckoutPage() {
 
   const division = watch("division")
   const district = watch("district")
-  const deliveryMethod = watch("deliveryMethod")
   const paymentMethod = watch("paymentMethod")
 
   const districts = useMemo(() => districtsFor(division), [division])
   const upazilas = useMemo(() => upazilasFor(division, district), [division, district])
 
-  const inside = isInsideDhaka(district)
-  const insideCharge = settings?.delivery_charge_inside_dhaka ?? 60
-  const outsideCharge = settings?.delivery_charge_outside_dhaka ?? 120
-  // Delivery is always charged; only picking the order up at a shop is free of
-  // a delivery fee, and that is shown as ৳0 rather than "Free".
-  const deliveryCharge = deliveryMethod === "pickup" ? 0 : inside ? insideCharge : outsideCharge
-  const total = Math.max(0, subtotal + deliveryCharge)
+  // The site never quotes a delivery charge — it is worked out per order and
+  // added to the quotation we send back, so orders are stored with 0.
+  const deliveryCharge = 0
+  const total = Math.max(0, subtotal)
 
   const availablePayments = PAYMENT_OPTIONS.filter((opt) => {
     if (opt.value === "cod") return settings?.cod_enabled ?? true
@@ -227,24 +223,13 @@ export default function CheckoutPage() {
               control={control}
               name="deliveryMethod"
               render={({ field }) => (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-1">
                   <OptionCard
                     active={field.value === "courier"}
                     onClick={() => field.onChange("courier")}
                     icon={<Truck className="size-5" />}
-                    title="Steadfast Courier"
-                    note={
-                      district
-                        ? `${inside ? "Inside" : "Outside"} Dhaka · ${formatBDT(inside ? insideCharge : outsideCharge)} · ${inside ? "1–2" : "2–4"} days`
-                        : "Charge shown after district · 2–4 days"
-                    }
-                  />
-                  <OptionCard
-                    active={field.value === "pickup"}
-                    onClick={() => field.onChange("pickup")}
-                    icon={<Store className="size-5" />}
-                    title="Pickup from shop"
-                    note="No delivery charge · collect from one of our offices"
+                    title="By Courier"
+                    note="Nationwide · 2–4 days"
                   />
                 </div>
               )}
@@ -309,12 +294,11 @@ export default function CheckoutPage() {
             <span>Subtotal</span>
             <span className="font-semibold tabular-nums text-text">{formatBDT(subtotal)}</span>
           </div>
-          <div className="mt-2.5 flex justify-between text-sm text-muted">
-            <span className="flex items-center gap-1">
-              <MapPin className="size-3.5" /> Delivery
-            </span>
-            <span className="font-bold tabular-nums text-text">{formatBDT(deliveryCharge)}</span>
-          </div>
+          <p className="mt-2.5 flex items-start gap-1.5 rounded-xl bg-surface-2 px-3 py-2.5 text-[12.5px] text-muted">
+            <MapPin className="mt-px size-3.5 shrink-0" />
+            Delivery charge is not included here — we add it to the quotation we send
+            you after the order.
+          </p>
           <div className="mt-4 flex items-baseline justify-between border-t border-border pt-4">
             <span className="text-[15px] font-bold text-text">Total</span>
             <span className="font-heading text-2xl font-extrabold tabular-nums text-orange-500">
