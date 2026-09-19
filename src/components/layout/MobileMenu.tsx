@@ -12,6 +12,7 @@ const links = [
   { to: "/solar-assessment", label: "Free Solar Assessment" },
   { to: "/wholesale", label: "Wholesale & Dealer" },
   { to: "/blog", label: "Article" },
+  { to: "/track-order", label: "Track Order" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
 ]

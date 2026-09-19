@@ -30,6 +30,7 @@ const SolarROICalculatorPage = lazy(() => import("@/pages/SolarROICalculatorPage
 const SolarAssessmentPage = lazy(() => import("@/pages/SolarAssessmentPage"))
 const WholesalePage = lazy(() => import("@/pages/WholesalePage"))
 const BlogPage = lazy(() => import("@/pages/BlogPage"))
+const TrackOrderPage = lazy(() => import("@/pages/TrackOrderPage"))
 const BlogPostPage = lazy(() => import("@/pages/BlogPostPage"))
 
 const AdminLayout = lazy(() =>
@@ -112,6 +113,7 @@ export default function App() {
             </Suspense>
           }
         />
+        <Route path="track-order" element={<TrackOrderPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
         <Route path="login" element={<LoginPage />} />
