@@ -2,7 +2,7 @@ import { createPortal } from "react-dom"
 import { ArrowRight } from "lucide-react"
 import { Link } from "react-router-dom"
 
-import { categories } from "@/data/home-content"
+import { useNavCategories } from "@/lib/category-nav"
 import { CategoryIcon } from "@/pages/home/CategoryIcon"
 
 /**
@@ -11,6 +11,8 @@ import { CategoryIcon } from "@/pages/home/CategoryIcon"
  * MobileCategorySheet on phones — is where categories are browsed.
  */
 export function CategoryMenu({ onClose }: { onClose: () => void }) {
+  const categories = useNavCategories()
+
   return (
     <>
       {/* Click-away layer. It is portalled to the body because the header's
@@ -54,11 +56,8 @@ export function CategoryMenu({ onClose }: { onClose: () => void }) {
                 >
                   <CategoryIcon slug={cat.slug} />
                 </span>
-                <span className="min-w-0">
-                  <span className="block font-heading text-[13px] font-bold leading-tight text-text">
-                    {cat.name}
-                  </span>
-                  <span className="block text-[11.5px] text-muted">{cat.count}</span>
+                <span className="min-w-0 truncate font-heading text-[13px] font-bold leading-tight text-text">
+                  {cat.name}
                 </span>
               </Link>
             ))}

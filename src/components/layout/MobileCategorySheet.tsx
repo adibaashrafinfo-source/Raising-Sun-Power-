@@ -1,7 +1,7 @@
 import { ArrowRight, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { categories } from "@/data/home-content";
+import { useNavCategories } from "@/lib/category-nav";
 import { cn } from "@/lib/utils";
 import { CategoryIcon } from "@/pages/home/CategoryIcon";
 
@@ -18,6 +18,8 @@ export function MobileCategorySheet({
   open: boolean;
   onClose: () => void;
 }) {
+  const categories = useNavCategories();
+
   return (
     <>
       <div

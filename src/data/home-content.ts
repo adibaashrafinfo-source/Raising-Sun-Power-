@@ -143,37 +143,3 @@ export const testimonials = [
   },
 ]
 
-export const megaCols = [
-  {
-    title: "Solar",
-    color: "#217CCA",
-    items: ["Solar Panels", "Mounting Structure", "Charge Controllers", "Solar Cables", "Combo Kits"],
-  },
-  {
-    title: "Circuit Breakers",
-    color: "#F49E09",
-    items: ["MCB", "MCCB", "RCCB", "Distribution Boards", "Fuses"],
-  },
-  {
-    title: "Inverters & Batteries",
-    color: "#67A70E",
-    items: [
-      "Off-Grid Hybrid Inverter",
-      "On-Grid Hybrid Inverter",
-      "On-Grid Inverter",
-      "Tubular Batteries",
-      "Lithium Batteries",
-      "IPS/UPS",
-    ],
-  },
-  {
-    title: "Cables & Accessories",
-    color: "#217CCA",
-    items: ["Copper Cables", "Wires", "Connectors", "Switches & Sockets", "Grounding/Earthing Cable"],
-  },
-  {
-    title: "Switchgear & Protection",
-    color: "#F49E09",
-    items: ["Thunder/Surge Arrester", "DC SPD", "AC SPD", "AC AFDD", "Contactors", "Relays"],
-  },
-]
