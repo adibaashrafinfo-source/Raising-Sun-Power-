@@ -75,7 +75,7 @@ export function Header() {
   const openMobileMenu = useCartStore((s) => s.openMobileMenu)
   const cartCount = useCartStore((s) => s.cartCount())
   const { data: siteContent } = useSiteContent()
-  const headerLogo = siteContent?.header_logo_url || "/logo.jpg"
+  const headerLogo = siteContent?.header_logo_url || "/logo.png"
 
   const handleSignOut = async () => {
     await signOut()
@@ -101,8 +101,10 @@ export function Header() {
         <BrandLogo src={headerLogo} />
 
         {/* Search — grows to fill row one */}
-        <div className="hidden min-w-0 flex-1 lg:flex">
-          <SearchSuggest />
+        <div className="hidden min-w-0 flex-1 justify-center lg:flex">
+          <div className="w-full max-w-[520px]">
+            <SearchSuggest />
+          </div>
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -284,7 +286,7 @@ function BrandLogo({ src }: { src: string }) {
         className={
           isWide
             ? "flex items-center"
-            : "flex size-[100px] shrink-0 items-center justify-center overflow-hidden rounded-2xl"
+            : "flex size-[116px] shrink-0 items-center justify-center overflow-hidden rounded-2xl"
         }
       >
         <img
@@ -299,7 +301,7 @@ function BrandLogo({ src }: { src: string }) {
           }}
           className={
             isWide
-              ? "max-h-[100px] w-auto max-w-full object-contain"
+              ? "max-h-[116px] w-auto max-w-full object-contain"
               : "size-full object-contain"
           }
         />

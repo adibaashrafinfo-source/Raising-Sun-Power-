@@ -89,10 +89,8 @@ export function AdminLayout() {
         <div className="flex h-16 items-center justify-between border-b border-border px-4">
           {!collapsed && (
             <Link to="/" className="flex items-center gap-2 no-underline">
-              <span className="flex size-9 items-center justify-center overflow-hidden rounded-lg bg-white">
-                <img src="/logo.jpg" alt="RSP" className="size-full object-cover" />
-              </span>
-              <span className="font-heading text-sm font-extrabold text-text">RSP Admin</span>
+              <img src="/logo.png" alt="Rising Sun Power BD" className="h-8 w-auto max-w-[130px] object-contain" />
+              <span className="font-heading text-sm font-extrabold text-text">Admin</span>
             </Link>
           )}
           <button
