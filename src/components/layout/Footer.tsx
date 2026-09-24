@@ -37,7 +37,7 @@ export function Footer() {
   const whatsappNumber = settings?.whatsapp_number || COMPANY.whatsappIntl
   const phone = settings?.support_phone || COMPANY.phone
   const email = settings?.contact_email || COMPANY.email
-  const logo = cms?.footer_logo_url || "/logo.jpg"
+  const logo = cms?.footer_logo_url || "/logo.png"
   const description =
     cms?.footer_description ||
     "Genuine solar & electrical products with engineered reliability — powering homes and businesses across Bangladesh with clean, renewable energy."
@@ -70,19 +70,8 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
           {/* Brand + contact + social */}
           <div className="lg:col-span-4">
-            <div className="flex items-center gap-3">
-              <span className="flex size-[52px] items-center justify-center overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,.25)]">
-                <img src={logo} alt="RSP" className="size-full object-cover" />
-              </span>
-              <span className="flex flex-col leading-tight">
-                <span className="font-heading text-[18px] font-extrabold tracking-wide text-[var(--footer-heading)]">
-                  Rising Sun Power
-                </span>
-                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-orange-500">
-                  Solar &amp; Electrical
-                </span>
-              </span>
-            </div>
+            {/* The lockup already carries the name, so no typed wordmark beside it. */}
+            <img src={logo} alt="Rising Sun Power BD" className="h-[64px] w-auto max-w-[260px] object-contain" />
             <p className="mt-4 max-w-[320px] text-[13.5px] leading-relaxed text-[var(--footer-muted)]">{description}</p>
 
             <div className="mt-5 flex flex-col gap-2.5">

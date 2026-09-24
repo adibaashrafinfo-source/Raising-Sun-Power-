@@ -104,7 +104,7 @@ export function SearchSuggest({
       <form onSubmit={submit} className="w-full">
         <div
           className={cn(
-            "flex h-12 min-w-0 w-full items-center rounded-2xl border bg-surface-2 transition-[box-shadow,border-color] duration-200",
+            "flex h-11 min-w-0 w-full items-center rounded-2xl border bg-surface-2 transition-[box-shadow,border-color] duration-200",
             isOpen
               ? "border-blue-500/60 shadow-[0_0_0_4px_color-mix(in_srgb,var(--blue)_18%,transparent)]"
               : "border-border hover:border-blue-500/40",
@@ -177,7 +177,7 @@ export function SearchSuggest({
           )}
           <button
             type="submit"
-            className="m-1 hidden h-10 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-400 px-4 text-[13px] font-bold text-white shadow-[0_6px_16px_rgba(244,158,9,.3)] transition-transform active:scale-95 sm:flex"
+            className="m-1 hidden h-9 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-400 px-4 text-[13px] font-bold text-white shadow-[0_6px_16px_rgba(244,158,9,.3)] transition-transform active:scale-95 sm:flex"
           >
             Search
           </button>

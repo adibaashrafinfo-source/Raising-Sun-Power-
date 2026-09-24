@@ -39,7 +39,7 @@ export default function OrderConfirmationPage() {
       phone: settings?.support_phone || COMPANY.phone,
       whatsapp: settings?.whatsapp_number || COMPANY.whatsapp,
       email: settings?.contact_email || COMPANY.email,
-      logoUrl: cms?.header_logo_url || undefined,
+      logoUrl: cms?.header_logo_url || `${window.location.origin}/logo.png`,
     })
   }
 
