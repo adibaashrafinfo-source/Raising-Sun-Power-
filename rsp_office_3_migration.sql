@@ -3,6 +3,7 @@
 -- Run this once in the Supabase SQL editor. Until it is run, the admin CMS
 -- hides the "Office 3" fields and the site falls back to the address in
 -- src/data/company.ts, so nothing breaks either way.
+-- APPLIED 2026-09-25 as migration site_content_third_office.
 -- ============================================================================
 
 alter table site_content add column if not exists showroom_3_name text;
