@@ -33,6 +33,9 @@ export type Product = {
   specifications: Record<string, string>
   badges: string[]
   images: string[]
+  /** Optional: present once the datasheet columns exist (rsp_product_datasheet.sql). */
+  datasheet_url?: string | null
+  datasheet_filename?: string | null
   status: ProductStatus
   rating_avg: number
   rating_count: number

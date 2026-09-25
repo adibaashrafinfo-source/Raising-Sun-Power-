@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Bold,
   Eye,
+  FileText,
   Heading,
   ImageIcon,
   Italic,
@@ -40,6 +41,11 @@ import {
   useUpsertProduct,
 } from "@/hooks/use-admin"
 import { uploadProductImage } from "@/lib/queries/admin"
+import {
+  DatasheetRejectedError,
+  deleteDatasheet,
+  uploadDatasheet,
+} from "@/lib/upload-datasheet"
 import { type ProductFormValues, productSchema, slugify } from "@/lib/schemas/product"
 import { formatBytes } from "@/lib/compress-image"
 import { formatBDT, getErrorMessage } from "@/lib/utils"
@@ -217,6 +223,19 @@ function ProductDialog({
   const [images, setImages] = useState<string[]>(product?.images ?? [])
   const [uploading, setUploading] = useState(false)
 
+  // The datasheet columns only exist once rsp_product_datasheet.sql has been
+  // run. Until then the field is hidden and never written, so saving a product
+  // keeps working exactly as before.
+  const hasDatasheetSupport = !!product && "datasheet_url" in product
+  const [datasheet, setDatasheet] = useState<{ url: string; filename: string } | null>(
+    product?.datasheet_url ? { url: product.datasheet_url, filename: product.datasheet_filename ?? "datasheet.pdf" } : null,
+  )
+  // Storage objects are only removed once the row that pointed at them is
+  // saved, so cancelling the dialog can never orphan a file or a reference.
+  const [staleDatasheetUrls, setStaleDatasheetUrls] = useState<string[]>([])
+  const [datasheetError, setDatasheetError] = useState<string | null>(null)
+  const [uploadingDatasheet, setUploadingDatasheet] = useState(false)
+
   const {
     register,
     handleSubmit,
@@ -340,6 +359,36 @@ function ProductDialog({
     }
   }
 
+  const handleDatasheetUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingDatasheet(true)
+    setDatasheetError(null)
+    try {
+      const uploaded = await uploadDatasheet(file)
+      if (datasheet) setStaleDatasheetUrls((prev) => [...prev, datasheet.url])
+      setDatasheet({ url: uploaded.url, filename: uploaded.filename })
+      toast.success("Datasheet uploaded")
+    } catch (err) {
+      const message =
+        err instanceof DatasheetRejectedError
+          ? err.message
+          : getErrorMessage(err, "Couldn't upload the datasheet")
+      setDatasheetError(message)
+      toast.error(message)
+    } finally {
+      setUploadingDatasheet(false)
+      e.target.value = ""
+    }
+  }
+
+  const handleDatasheetRemove = () => {
+    if (!datasheet) return
+    setStaleDatasheetUrls((prev) => [...prev, datasheet.url])
+    setDatasheet(null)
+    setDatasheetError(null)
+  }
+
   const onSubmit = async (values: ProductFormValues) => {
     const specifications = Object.fromEntries(
       specs.filter((s) => s.key.trim()).map((s) => [s.key.trim(), s.value]),
@@ -369,8 +418,17 @@ function ProductDialog({
         specifications,
         badges: values.badges ? values.badges.split(",").map((b) => b.trim()).filter(Boolean) : [],
         images,
+        ...(hasDatasheetSupport || datasheet
+          ? {
+              datasheet_url: datasheet?.url ?? null,
+              datasheet_filename: datasheet?.filename ?? null,
+            }
+          : {}),
         status: values.status,
       })
+      // Only now that the row no longer points at them.
+      await Promise.all(staleDatasheetUrls.map((url) => deleteDatasheet(url).catch(() => {})))
+      setStaleDatasheetUrls([])
       toast.success(product ? "Product updated" : "Product created")
       onOpenChange(false)
     } catch {
@@ -590,6 +648,64 @@ function ProductDialog({
               </label>
             </div>
           </div>
+
+          {(hasDatasheetSupport || !product) && (
+            <div>
+              <Label className="mb-1 block">Product Datasheet (PDF)</Label>
+              <p className="mb-2.5 text-xs text-muted">
+                Optional. PDF only, up to 10&nbsp;MB — customers get a download button on the
+                product page.
+              </p>
+              {datasheet ? (
+                <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-border bg-surface-2 px-3.5 py-2.5">
+                  <FileText className="size-[18px] shrink-0 text-blue" />
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-text">
+                    {datasheet.filename}
+                  </span>
+                  <a
+                    href={datasheet.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[13px] font-bold text-blue no-underline"
+                  >
+                    View
+                  </a>
+                  <label className="cursor-pointer text-[13px] font-bold text-blue">
+                    {uploadingDatasheet ? "Uploading…" : "Replace"}
+                    <input
+                      type="file"
+                      accept="application/pdf,.pdf"
+                      className="hidden"
+                      onChange={handleDatasheetUpload}
+                      disabled={uploadingDatasheet}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleDatasheetRemove}
+                    className="text-[13px] font-bold text-red-500"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-border px-3.5 py-3 text-[13px] font-semibold text-muted hover:bg-surface-2">
+                  <Upload className="size-4" />
+                  {uploadingDatasheet ? "Uploading…" : "Upload PDF datasheet"}
+                  <input
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    className="hidden"
+                    onChange={handleDatasheetUpload}
+                    disabled={uploadingDatasheet}
+                  />
+                </label>
+              )}
+              {datasheetError && (
+                <p className="mt-2 text-[12.5px] font-semibold text-red-500">{datasheetError}</p>
+              )}
+            </div>
+          )}
 
           <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>

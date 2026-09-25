@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import {
   ChevronRight,
+  Download,
   FileText,
   Heart,
   MessageCircle,
@@ -355,6 +356,13 @@ export default function ProductDetailPage() {
               <FileText className="size-[17px]" /> Request for Quotation
             </Link>
           </Button>
+          {product.datasheet_url && (
+            <Button asChild variant="outline" size="lg" className="mt-2.5 w-full">
+              <a href={product.datasheet_url} target="_blank" rel="noreferrer" download>
+                <Download className="size-[17px]" /> Download Datasheet (PDF)
+              </a>
+            </Button>
+          )}
           <div className="mt-3 text-[12.5px] text-muted">
             💳 EMI available on cards · Need bulk pricing?{" "}
             <Link to="/wholesale" className="font-semibold text-blue no-underline">
@@ -368,8 +376,8 @@ export default function ProductDetailPage() {
               Delivery estimate
             </div>
             <div className="text-[13px] text-muted">
-              Charge <b className="text-text">৳60 (Dhaka) / ৳120 (outside Dhaka)</b> · arrives in{" "}
-              <b className="text-text">2–4 days</b> by courier
+              Arrives in <b className="text-text">2–4 days</b> by courier. The delivery charge is
+              worked out for your address and added to the quotation we send after your order.
             </div>
           </div>
         </div>
@@ -399,6 +407,14 @@ export default function ProductDetailPage() {
             />
           </TabsContent>
           <TabsContent value="specifications">
+            {product.datasheet_url && (
+              <Button asChild variant="outline" className="mb-4">
+                <a href={product.datasheet_url} target="_blank" rel="noreferrer" download>
+                  <Download className="size-[17px]" />
+                  Download Datasheet (PDF)
+                </a>
+              </Button>
+            )}
             {specs.length === 0 ? (
               <p className="text-sm text-muted">No specifications listed for this product yet.</p>
             ) : (
