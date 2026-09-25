@@ -1,11 +1,12 @@
 -- ============================================================================
 -- Guest order tracking
--- Run once in the Supabase SQL editor.
+-- Applied already — kept here as the record of what ran.
 --
 -- Guest orders have no user_id, so RLS never lets the browser read them back.
 -- This SECURITY DEFINER function returns one order plus its items, but only
 -- when the caller supplies BOTH the order number and the phone number that
 -- was used to place it — so nobody can enumerate other people's orders.
+-- APPLIED 2026-09-25 as migration guest_order_tracking.
 -- ============================================================================
 
 create or replace function public.fn_track_order(
