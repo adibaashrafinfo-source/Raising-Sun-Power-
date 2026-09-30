@@ -92,14 +92,29 @@ function CategoryDialog({
   category: Category | null
 }) {
   const upsertCategory = useUpsertCategory()
+  const { data: allCategories = [] } = useAllCategoriesAdmin()
   const [name, setName] = useState(category?.name ?? "")
   const [slug, setSlug] = useState(category?.slug ?? "")
   const [sortOrder, setSortOrder] = useState(category?.sort_order ?? 0)
+  const [parentId, setParentId] = useState(category?.parent_id ?? "")
+  const [badge, setBadge] = useState(category?.badge ?? "")
+  const [tagline, setTagline] = useState(category?.tagline ?? "")
+
+  // A category can't be filed under itself, and the menu is only two deep.
+  const parentOptions = allCategories.filter((c) => c.id !== category?.id && !c.parent_id)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await upsertCategory.mutateAsync({ id: category?.id, name, slug, sort_order: sortOrder })
+      await upsertCategory.mutateAsync({
+        id: category?.id,
+        name,
+        slug,
+        sort_order: sortOrder,
+        parent_id: parentId || null,
+        badge: badge.trim() || null,
+        tagline: tagline.trim() || null,
+      })
       toast.success(category ? "Category updated" : "Category created")
       onOpenChange(false)
     } catch {
@@ -130,8 +145,41 @@ function CategoryDialog({
             <Input value={slug} onChange={(e) => setSlug(e.target.value)} required />
           </div>
           <div>
-            <Label className="mb-1.5 block">Sort order</Label>
-            <Input type="number" value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} />
+            <Label className="mb-1.5 block">Menu group (parent)</Label>
+            <select
+              value={parentId}
+              onChange={(e) => setParentId(e.target.value)}
+              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
+            >
+              <option value="">None — this is a top-level menu</option>
+              {parentOptions.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1.5 text-xs text-muted">
+              Top-level categories become header menus; the ones filed under them are that menu's
+              items.
+            </p>
+          </div>
+          <div>
+            <Label className="mb-1.5 block">Tagline (small line in the menu)</Label>
+            <Input
+              value={tagline}
+              onChange={(e) => setTagline(e.target.value)}
+              placeholder="On-grid, off-grid and hybrid"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3.5">
+            <div>
+              <Label className="mb-1.5 block">Badge</Label>
+              <Input value={badge} onChange={(e) => setBadge(e.target.value)} placeholder="HOT / NEW" />
+            </div>
+            <div>
+              <Label className="mb-1.5 block">Sort order</Label>
+              <Input type="number" value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} />
+            </div>
           </div>
           <DialogFooter>
             <Button type="submit">Save</Button>

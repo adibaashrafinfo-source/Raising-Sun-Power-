@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner"
 
 import { CategoryMenu } from "@/components/layout/CategoryMenu"
-import { MegaMenu } from "@/components/layout/MegaMenu"
+import { MegaMenu, MenuBadge } from "@/components/layout/MegaMenu"
 import { SearchSuggest } from "@/components/search/SearchSuggest"
 import {
   DropdownMenu,
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/lib/auth-provider"
 import { useSiteContent } from "@/hooks/use-site-content"
+import { useMenuGroups } from "@/lib/category-tree"
 import { signOut } from "@/lib/queries/auth"
 import { useTheme } from "@/lib/theme-provider"
 import { useCartStore } from "@/store/cart-store"
@@ -39,21 +40,22 @@ export function Header() {
   const navigate = useNavigate()
   const location = useLocation()
   const [isHidden, setIsHidden] = useState(false)
-  const [megaOpen, setMegaOpen] = useState(false)
+  const [openGroup, setOpenGroup] = useState<string | null>(null)
+  const menuGroups = useMenuGroups()
   // The product page is dense enough without a full-width panel dropping over
   // it, so the mega menu is switched off there.
   const hasMegaMenu = !location.pathname.startsWith("/product/")
   const [categoryOpen, setCategoryOpen] = useState(false)
   const megaCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const openMega = () => {
+  const openMega = (slug: string) => {
     if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current)
     setCategoryOpen(false)
-    setMegaOpen(true)
+    setOpenGroup(slug)
   }
   const scheduleCloseMega = () => {
     if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current)
-    megaCloseTimer.current = setTimeout(() => setMegaOpen(false), 200)
+    megaCloseTimer.current = setTimeout(() => setOpenGroup(null), 200)
   }
   // The bar slides away once the hero is behind you and comes back as soon as
   // you scroll up into it again. Pages without a hero keep it visible.
@@ -193,7 +195,7 @@ export function Header() {
                 they now open from here. */}
             <button
               onClick={() => {
-                setMegaOpen(false)
+                setOpenGroup(null)
                 setCategoryOpen((v) => !v)
               }}
               aria-expanded={categoryOpen}
@@ -220,26 +222,47 @@ export function Header() {
                 HOT
               </span>
             </Link>
-            <div
-              onMouseEnter={hasMegaMenu ? openMega : undefined}
-              onMouseLeave={hasMegaMenu ? scheduleCloseMega : undefined}
-            >
+            {/* One menu per top-level category, its items filed underneath. If the
+                categories haven't loaded, a plain Products link stands in so the
+                nav is never short of a way into the catalogue. */}
+            {menuGroups.length === 0 && (
               <Link
                 to="/products"
-                className="inline-flex items-center gap-1 whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+                className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
               >
                 Products
-                {hasMegaMenu && <ChevronDown className="size-[13px]" />}
               </Link>
-              {hasMegaMenu && megaOpen && (
-                <MegaMenu onClose={() => setMegaOpen(false)} onMouseEnter={openMega} onMouseLeave={scheduleCloseMega} />
-              )}
-            </div>
+            )}
+            {menuGroups.map((group) => (
+              <div
+                key={group.id}
+                onMouseEnter={hasMegaMenu ? () => openMega(group.slug) : undefined}
+                onMouseLeave={hasMegaMenu ? scheduleCloseMega : undefined}
+              >
+                <Link
+                  to={`/category/${group.slug}`}
+                  className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+                >
+                  {group.name}
+                  {group.badge && <MenuBadge label={group.badge} />}
+                  {hasMegaMenu && <ChevronDown className="size-[13px]" />}
+                </Link>
+                {hasMegaMenu && openGroup === group.slug && (
+                  <MegaMenu
+                    group={group}
+                    onClose={() => setOpenGroup(null)}
+                    onMouseEnter={() => openMega(group.slug)}
+                    onMouseLeave={scheduleCloseMega}
+                  />
+                )}
+              </div>
+            ))}
             <Link
               to="/solar-calculator"
-              className="whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
             >
               Solar Calculator
+              <MenuBadge label="FREE" />
             </Link>
             <Link
               to="/solar-roi-calculator"
