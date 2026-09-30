@@ -8,6 +8,7 @@ import { useSiteContent } from "@/hooks/use-site-content"
 import { officesFrom } from "@/lib/offices"
 
 const shopLinks = [
+  { label: "Solar Packages", to: "/packages" },
   { label: "Solar Panels", to: "/category/solar-panels" },
   { label: "Inverters", to: "/category/inverters" },
   { label: "Batteries", to: "/category/batteries" },

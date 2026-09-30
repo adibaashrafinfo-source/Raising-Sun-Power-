@@ -11,6 +11,7 @@ import { CategoryChips } from "@/pages/home/CategoryChips"
 import { DealsGrid } from "@/pages/home/DealsGrid"
 import { FeaturedTabs } from "@/pages/home/FeaturedTabs"
 import { HeroSlider } from "@/pages/home/HeroSlider"
+import { PackagesSection } from "@/pages/home/PackagesSection"
 import { ProductGridSection } from "@/pages/home/ProductGridSection"
 import { TrustChips } from "@/pages/home/TrustChips"
 import { WhyChooseUs } from "@/pages/home/WhyChooseUs"
@@ -52,6 +53,7 @@ export default function Home() {
           isLoading={pinnedBestSellers.isLoading || autoBestSellers.isLoading}
         />
       </Reveal>
+      <Reveal><PackagesSection /></Reveal>
       <Reveal><FeaturedProducts /></Reveal>
       <Reveal><FeaturedTabs /></Reveal>
       <Reveal>

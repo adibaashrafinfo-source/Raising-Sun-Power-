@@ -486,3 +486,47 @@ export type LedgerEntry = {
   created_by: string | null
   created_at: string
 }
+
+// ---------- Packages ----------
+export type PackageCategory = {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+}
+
+export type PackageItem = {
+  id: string
+  package_id: string
+  product_id: string | null
+  name: string
+  detail: string | null
+  qty: number
+  unit: string
+  sort_order: number
+}
+
+export type SolarPackage = {
+  id: string
+  name: string
+  slug: string
+  category_id: string | null
+  capacity_kw: number | null
+  price: number
+  sale_price: number | null
+  short_description: string | null
+  description: string | null
+  images: string[]
+  badges: string[]
+  specifications: Record<string, string>
+  is_featured: boolean
+  sort_order: number
+  status: ProductStatus
+  created_at: string
+  updated_at: string
+  category?: Pick<PackageCategory, "id" | "name" | "slug"> | null
+  items?: PackageItem[]
+}
