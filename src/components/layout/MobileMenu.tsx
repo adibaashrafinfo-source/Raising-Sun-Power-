@@ -7,6 +7,7 @@ import { useCartStore } from "@/store/cart-store"
 const links = [
   { to: "/", label: "Home" },
   { to: "/products", label: "Products" },
+  { to: "/packages", label: "Packages" },
   { to: "/solar-calculator", label: "Solar Calculator" },
   { to: "/solar-roi-calculator", label: "ROI Calculator" },
   { to: "/solar-assessment", label: "Free Solar Assessment" },

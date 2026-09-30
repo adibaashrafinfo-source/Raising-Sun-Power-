@@ -211,6 +211,15 @@ export function Header() {
             >
               Home
             </Link>
+            <Link
+              to="/packages"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:px-3 xl:text-sm"
+            >
+              Packages
+              <span className="rounded-full bg-orange-500 px-1.5 py-0.5 text-[9px] font-extrabold leading-none text-white">
+                HOT
+              </span>
+            </Link>
             <div
               onMouseEnter={hasMegaMenu ? openMega : undefined}
               onMouseLeave={hasMegaMenu ? scheduleCloseMega : undefined}

@@ -31,6 +31,8 @@ const SolarAssessmentPage = lazy(() => import("@/pages/SolarAssessmentPage"))
 const WholesalePage = lazy(() => import("@/pages/WholesalePage"))
 const BlogPage = lazy(() => import("@/pages/BlogPage"))
 const TrackOrderPage = lazy(() => import("@/pages/TrackOrderPage"))
+const PackagesPage = lazy(() => import("@/pages/PackagesPage"))
+const PackageDetailPage = lazy(() => import("@/pages/PackageDetailPage"))
 const BlogPostPage = lazy(() => import("@/pages/BlogPostPage"))
 
 const AdminLayout = lazy(() =>
@@ -39,6 +41,7 @@ const AdminLayout = lazy(() =>
 const AdminDashboardPage = lazy(() => import("@/pages/admin/AdminDashboardPage"))
 const AdminOrdersPage = lazy(() => import("@/pages/admin/AdminOrdersPage"))
 const AdminProductsPage = lazy(() => import("@/pages/admin/AdminProductsPage"))
+const AdminPackagesPage = lazy(() => import("@/pages/admin/AdminPackagesPage"))
 const AdminStockPage = lazy(() => import("@/pages/admin/AdminStockPage"))
 const AdminSuppliersPage = lazy(() => import("@/pages/admin/AdminSuppliersPage"))
 const AdminPurchasesPage = lazy(() => import("@/pages/admin/AdminPurchasesPage"))
@@ -113,6 +116,8 @@ export default function App() {
             </Suspense>
           }
         />
+        <Route path="packages" element={<PackagesPage />} />
+        <Route path="package/:slug" element={<PackageDetailPage />} />
         <Route path="track-order" element={<TrackOrderPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
@@ -157,6 +162,14 @@ export default function App() {
               element={
                 <Suspense fallback={<PageFallback />}>
                   <AdminOrdersPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="packages"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminPackagesPage />
                 </Suspense>
               }
             />
