@@ -1,3 +1,53 @@
+export type HeroSlide = {
+  badge: string
+  title: string
+  highlight: string
+  body: string
+  ctaLabel: string
+  ctaTo: string
+  secondaryLabel: string
+  secondaryTo: string
+  glow: string
+}
+
+/** Slides for the homepage banner carousel. The first one's copy is overridden
+ *  by the CMS hero fields, so editing those still changes the front of the site. */
+export const heroSlides: HeroSlide[] = [
+  {
+    badge: "Bangladesh's trusted solar & electrical store",
+    title: "Powering Bangladesh with",
+    highlight: "green & renewable energy.",
+    body: "Genuine solar panels, inverters, batteries, MCB & MCCB and complete power solutions.",
+    ctaLabel: "Shop Solar",
+    ctaTo: "/products",
+    secondaryLabel: "Explore Products",
+    secondaryTo: "/products",
+    glow: "radial-gradient(circle,#217CCA 0%,transparent 70%)",
+  },
+  {
+    badge: "Free system sizing",
+    title: "Tell us your load —",
+    highlight: "we size the system free.",
+    body: "Our engineers pick the right panel, inverter and battery for your home or business, then send a written quotation.",
+    ctaLabel: "Free Solar Assessment",
+    ctaTo: "/solar-assessment",
+    secondaryLabel: "Try the calculator",
+    secondaryTo: "/solar-calculator",
+    glow: "radial-gradient(circle,#67A70E 0%,transparent 70%)",
+  },
+  {
+    badge: "Dealer & wholesale pricing",
+    title: "Building a project?",
+    highlight: "Buy at dealer rates.",
+    body: "Installers, contractors and project buyers get wholesale pricing, stock backing and delivery to all 64 districts.",
+    ctaLabel: "Wholesale & Dealer",
+    ctaTo: "/wholesale",
+    secondaryLabel: "Get a quotation",
+    secondaryTo: "/get-quotation",
+    glow: "radial-gradient(circle,#F49E09 0%,transparent 70%)",
+  },
+]
+
 const tB = "linear-gradient(135deg,#EAF1FB,#C9DCF3)"
 const tO = "linear-gradient(135deg,#FEF0D6,#F7D69B)"
 const tG = "linear-gradient(135deg,#EAF6DD,#CDE9B7)"
