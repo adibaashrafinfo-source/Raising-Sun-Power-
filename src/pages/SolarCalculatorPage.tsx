@@ -1,14 +1,15 @@
 import { useMemo, useState } from "react"
-import { ArrowLeft, ArrowRight, BatteryCharging, ChevronRight, CircleHelp, Info, MessageCircle, PanelTop, Zap } from "lucide-react"
+import { ArrowLeft, ArrowRight, BatteryCharging, Calculator, ChevronRight, CircleHelp, Info, MessageCircle, PanelTop, Zap } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
-import { defaultAppliances } from "@/data/calculator-appliances"
+import { appliancePresets } from "@/data/calculator-appliances"
 import { useSeo } from "@/hooks/use-seo"
-import { calculateSolarSystem, sumApplianceLoad } from "@/lib/solar-calculator"
+import { calculateSolarSystem } from "@/lib/solar-calculator"
 import { cn } from "@/lib/utils"
+import { type LoadRow, dailyEnergyWh, peakLoadWatt } from "@/lib/load-sheet"
+import { LoadStep } from "@/pages/calculator/LoadStep"
 
-type Mode = "appliances" | "manual"
 type BatteryType = "leadacid" | "lithium" | "notsure"
 
 const BACKUP_CHIPS = [2, 4, 6, 8]
@@ -26,26 +27,40 @@ export default function SolarCalculatorPage() {
   })
   const navigate = useNavigate()
   const [step, setStep] = useState<1 | 2 | 3>(1)
-  const [mode, setMode] = useState<Mode>("appliances")
-  const [appliances, setAppliances] = useState(defaultAppliances)
-  const [manualWatt, setManualWatt] = useState("")
+  // Seeded with the three loads almost every home starts from, so the sheet is
+  // never blank on arrival.
+  const [rows, setRows] = useState<LoadRow[]>(() =>
+    ["LED Bulb", "Ceiling Fan", "LED Television"].map((name) => {
+      const preset = appliancePresets.find((p) => p.name === name)!
+      return {
+        id: crypto.randomUUID(),
+        name: preset.name,
+        watt: preset.watt,
+        qty: name === "LED Bulb" ? 4 : name === "Ceiling Fan" ? 3 : 1,
+        hours: preset.hours,
+        icon: preset.icon,
+      }
+    }),
+  )
   const [backupHours, setBackupHours] = useState(4)
   const [batteryType, setBatteryType] = useState<BatteryType>("notsure")
   const [expandHow, setExpandHow] = useState(false)
 
-  const totalLoad = useMemo(
-    () => (mode === "manual" ? parseInt(manualWatt, 10) || 0 : sumApplianceLoad(appliances)),
-    [mode, manualWatt, appliances],
-  )
+  const totalLoad = useMemo(() => peakLoadWatt(rows), [rows])
+  const dailyWh = useMemo(() => dailyEnergyWh(rows), [rows])
 
   const result = useMemo(
-    () => (step === 3 ? calculateSolarSystem({ totalLoadWatt: totalLoad, backupHours, batteryType }) : null),
-    [step, totalLoad, backupHours, batteryType],
+    () =>
+      step === 3
+        ? calculateSolarSystem({
+            totalLoadWatt: totalLoad,
+            backupHours,
+            batteryType,
+            dailyEnergyWh: dailyWh,
+          })
+        : null,
+    [step, totalLoad, dailyWh, backupHours, batteryType],
   )
-
-  const updateAppliance = (idx: number, patch: Partial<(typeof defaultAppliances)[number]>) => {
-    setAppliances((prev) => prev.map((a, i) => (i === idx ? { ...a, ...patch } : a)))
-  }
 
   const goToQuote = () => {
     navigate("/get-quotation", {
@@ -67,18 +82,18 @@ export default function SolarCalculatorPage() {
         <span className="font-semibold text-text">Solar Calculator</span>
       </div>
 
-      <div className="mx-auto mb-7 max-w-[640px] text-center">
-        <h1 className="text-balance font-heading text-[clamp(26px,4vw,38px)] font-extrabold leading-tight tracking-tight text-text">
-          Find Your Solar System Size
-        </h1>
-        <p className="mt-3.5 text-[clamp(15px,2vw,17px)] leading-relaxed text-muted">
-          Answer a few quick questions — get an instant estimate of the panel, inverter and battery
-          you'll need.
-        </p>
-        <span className="mt-3.5 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-2 px-3.5 py-1.5 text-xs font-semibold text-muted">
-          <Info className="size-3.5 text-orange-500" />
-          Estimate only · Free formal quotation available after
+      <div className="mx-auto mb-7 max-w-[680px] text-center">
+        <span className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-orange-500">
+          <Calculator className="size-3.5" />
+          Smart solar calculator
         </span>
+        <h1 className="mt-3.5 text-balance font-heading text-[clamp(26px,4.4vw,40px)] font-extrabold leading-tight tracking-tight text-text">
+          Solar System Calculator
+        </h1>
+        <p className="mt-3 text-[clamp(14px,2vw,16px)] leading-relaxed text-muted">
+          সরাসরি আপনার ব্যবহৃত ফ্যান, লাইট এবং অন্যান্য লোডের বিবরণ দিয়ে প্রয়োজনীয় সোলার সিস্টেমের
+          নিখুঁত পরিমাপ করুন।
+        </p>
       </div>
 
       <div className="overflow-hidden rounded-[22px] border border-border bg-surface shadow-[var(--shadow-sm)]">
@@ -99,102 +114,16 @@ export default function SolarCalculatorPage() {
             ))}
           </div>
           <div className="mt-2 flex justify-between text-xs font-semibold text-muted">
-            <span>Your load</span>
-            <span>Backup</span>
+            <span>Load</span>
+            <span>Sizing</span>
             <span>Result</span>
           </div>
         </div>
 
         {step === 1 && (
-          <>
-            <div className="px-[18px] py-6 sm:px-7">
-              <div className="mb-5 flex max-w-[420px] gap-1 rounded-[13px] border border-border bg-surface-2 p-1">
-                <button
-                  onClick={() => setMode("appliances")}
-                  className={cn(
-                    "h-10 flex-1 rounded-[10px] text-[13.5px] font-bold transition-colors",
-                    mode === "appliances" ? "bg-orange-500 text-white" : "text-muted",
-                  )}
-                >
-                  Pick appliances
-                </button>
-                <button
-                  onClick={() => setMode("manual")}
-                  className={cn(
-                    "h-10 flex-1 rounded-[10px] text-[13.5px] font-bold transition-colors",
-                    mode === "manual" ? "bg-orange-500 text-white" : "text-muted",
-                  )}
-                >
-                  I know my wattage
-                </button>
-              </div>
-
-              {mode === "appliances" ? (
-                <div className="flex flex-col gap-2.5">
-                  {appliances.map((a, idx) => (
-                    <div
-                      key={a.name}
-                      className="flex flex-wrap items-center gap-3.5 rounded-2xl border border-border bg-surface-2 p-3.5"
-                    >
-                      <span className="min-w-[120px] flex-1 text-sm font-semibold text-text">{a.name}</span>
-                      <label className="flex items-center gap-1.5 text-xs text-muted">
-                        Watt
-                        <input
-                          value={a.watt}
-                          onChange={(e) =>
-                            updateAppliance(idx, { watt: Math.max(0, parseInt(e.target.value.replace(/\D/g, ""), 10) || 0) })
-                          }
-                          className="h-[38px] w-[66px] rounded-[10px] border border-border bg-surface px-2.5 text-center text-[13.5px] text-text outline-none"
-                        />
-                      </label>
-                      <div className="flex h-[38px] items-center overflow-hidden rounded-[11px] border border-border">
-                        <button
-                          onClick={() => updateAppliance(idx, { qty: Math.max(0, a.qty - 1) })}
-                          className="flex h-full w-[42px] items-center justify-center text-text"
-                        >
-                          −
-                        </button>
-                        <span className="min-w-[38px] text-center text-sm font-bold tabular-nums text-text">
-                          {a.qty}
-                        </span>
-                        <button
-                          onClick={() => updateAppliance(idx, { qty: a.qty + 1 })}
-                          className="flex h-full w-[42px] items-center justify-center text-text"
-                        >
-                          +
-                        </button>
-                      </div>
-                      <span className="min-w-14 text-right font-heading text-sm font-extrabold tabular-nums text-blue-strong">
-                        {a.watt * a.qty}W
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <label className="flex max-w-[360px] flex-col gap-2">
-                  <span className="text-[13px] font-semibold text-muted">Total Load (Watt)</span>
-                  <input
-                    value={manualWatt}
-                    onChange={(e) => setManualWatt(e.target.value.replace(/\D/g, ""))}
-                    placeholder="e.g. 800"
-                    inputMode="numeric"
-                    className="h-[60px] rounded-2xl border border-border bg-surface-2 px-[18px] font-heading text-2xl font-extrabold text-text outline-none"
-                  />
-                </label>
-              )}
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border bg-surface-2 px-[18px] py-4 sm:px-7">
-              <div className="flex items-baseline gap-2.5">
-                <span className="text-[13px] font-semibold text-muted">Total Load</span>
-                <span className="font-heading text-2xl font-extrabold tabular-nums text-orange-500">
-                  {totalLoad}W
-                </span>
-              </div>
-              <Button size="lg" disabled={totalLoad <= 0} onClick={() => setStep(2)}>
-                Next: Backup Time <ArrowRight className="size-[18px]" />
-              </Button>
-            </div>
-          </>
+          <div className="px-[18px] py-6 sm:px-7">
+            <LoadStep rows={rows} setRows={setRows} onNext={() => setStep(2)} />
+          </div>
         )}
 
         {step === 2 && (
@@ -385,6 +314,16 @@ export default function SolarCalculatorPage() {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="mt-5 flex items-start gap-3 rounded-[18px] border border-border bg-surface-2 px-4 py-3.5 sm:px-5">
+        <Info className="mt-0.5 size-4 shrink-0 text-blue" />
+        <p className="text-[12.5px] leading-relaxed text-muted">
+          <b className="text-text">Disclaimer / সতর্কবার্তা:</b> This calculator gives an estimate for
+          sizing. A real rooftop install needs structural checks, a shading survey and a direct load
+          study by our technicians. Visit our Dhaka Cantonment office or send the result on WhatsApp
+          for an official design and final quotation.
+        </p>
       </div>
     </main>
   )
