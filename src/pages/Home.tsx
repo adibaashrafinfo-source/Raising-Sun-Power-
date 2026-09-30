@@ -11,6 +11,8 @@ import { CategoryChips } from "@/pages/home/CategoryChips"
 import { DealsGrid } from "@/pages/home/DealsGrid"
 import { FeaturedTabs } from "@/pages/home/FeaturedTabs"
 import { HeroSlider } from "@/pages/home/HeroSlider"
+import { NewsletterStrip } from "@/pages/home/NewsletterStrip"
+import { OurCategory } from "@/pages/home/OurCategory"
 import { PackagesSection } from "@/pages/home/PackagesSection"
 import { ProductGridSection } from "@/pages/home/ProductGridSection"
 import { TrustChips } from "@/pages/home/TrustChips"
@@ -55,6 +57,7 @@ export default function Home() {
       </Reveal>
       <Reveal><PackagesSection /></Reveal>
       <Reveal><FeaturedProducts /></Reveal>
+      <Reveal><OurCategory /></Reveal>
       <Reveal><FeaturedTabs /></Reveal>
       <Reveal>
         <ProductGridSection
@@ -70,6 +73,7 @@ export default function Home() {
       <Reveal><BrandsStrip /></Reveal>
       <Reveal><WhyChooseUs /></Reveal>
       <Reveal><CtaBand /></Reveal>
+      <Reveal><NewsletterStrip /></Reveal>
       <FloatingWhatsAppButton />
     </main>
   )
