@@ -41,6 +41,15 @@ export async function fetchProducts(
       .select("id")
       .in("slug", categorySlugs)
     const ids = (cats ?? []).map((c) => c.id)
+    // A menu group holds no products itself, so opening one has to include
+    // everything filed under its children.
+    if (ids.length) {
+      const { data: children } = await supabase
+        .from("categories")
+        .select("id")
+        .in("parent_id", ids)
+      for (const child of children ?? []) ids.push(child.id)
+    }
     query = query.in("category_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"])
   }
   if (filters.brandSlugs?.length) {

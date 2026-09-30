@@ -6,6 +6,9 @@ export type Category = {
   parent_id: string | null
   sort_order: number
   created_at: string
+  /** Optional: the HOT / NEW chip and the line under the name in the mega menu. */
+  badge?: string | null
+  tagline?: string | null
 }
 
 export type Brand = {
