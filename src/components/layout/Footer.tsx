@@ -1,4 +1,4 @@
-import { ArrowUpRight, Mail, MapPin, MessageCircle, Phone } from "lucide-react"
+import { ArrowUpRight, BadgeCheck, Headphones, Mail, MapPin, MessageCircle, Phone, ShieldCheck, Truck } from "lucide-react"
 import { Link } from "react-router-dom"
 
 import { FacebookIcon, InstagramIcon, LinkedinIcon, TiktokIcon, YoutubeIcon } from "@/components/icons/SocialIcons"
@@ -6,6 +6,13 @@ import { COMPANY } from "@/data/company"
 import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { officesFrom } from "@/lib/offices"
+
+const TRUST_BAR = [
+  { icon: BadgeCheck, label: "100% Genuine Products" },
+  { icon: Truck, label: "Fast Nationwide Delivery" },
+  { icon: ShieldCheck, label: "Brand-backed Warranty" },
+  { icon: Headphones, label: "Expert Support, 7 days" },
+]
 
 const shopLinks = [
   { label: "Solar Packages", to: "/packages" },
@@ -133,7 +140,20 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--footer-border)] pt-6">
+        {/* Trust bar — the four promises, repeated where people land last. */}
+        <div className="mt-8 grid grid-cols-1 gap-2.5 border-t border-[var(--footer-border)] pt-6 sm:grid-cols-2 lg:grid-cols-4">
+          {TRUST_BAR.map((item) => (
+            <div
+              key={item.label}
+              className="flex items-center gap-2.5 rounded-xl bg-[var(--footer-card)] px-3.5 py-2.5"
+            >
+              <item.icon className="size-[18px] shrink-0 text-orange-500" />
+              <span className="text-[12.5px] font-semibold text-[var(--footer-text)]">{item.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--footer-border)] pt-6">
           <span className="text-[12.5px] text-[var(--footer-muted)]">
             © {new Date().getFullYear()} Rising Sun Power BD. All rights reserved.
           </span>
