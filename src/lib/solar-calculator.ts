@@ -15,6 +15,8 @@ export type SolarCalculatorInput = {
   totalLoadWatt: number
   backupHours: number
   dailyUsageHours?: number
+  /** Per-appliance hours give a truer daily figure than one blanket number. */
+  dailyEnergyWh?: number
   batteryType?: "leadacid" | "lithium" | "notsure"
 }
 
@@ -56,7 +58,7 @@ export function calculateSolarSystem(input: SolarCalculatorInput): SolarCalculat
     (totalLoadWatt * backupHours) / (BATTERY_VOLTAGE * DEPTH_OF_DISCHARGE * INVERTER_EFFICIENCY)
   const batteryAh = roundUpToNearest(batteryAhRaw, 10)
 
-  const dailyEnergyWh = totalLoadWatt * dailyUsageHours
+  const dailyEnergyWh = input.dailyEnergyWh ?? totalLoadWatt * dailyUsageHours
   const solarWpRaw = Math.ceil(dailyEnergyWh / BD_AVG_SUN_HOURS)
   const solarWp = roundUpToNearest(solarWpRaw, PANEL_UNIT_WP)
   const panelCount = Math.max(1, Math.ceil(solarWp / PANEL_UNIT_WP))
