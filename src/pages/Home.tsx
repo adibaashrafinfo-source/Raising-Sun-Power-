@@ -7,7 +7,10 @@ import { AllProductsSection } from "@/pages/home/AllProductsSection"
 import { BrandsStrip } from "@/pages/home/BrandsStrip"
 import { CtaBand } from "@/pages/home/CtaBand"
 import { FeaturedProducts } from "@/pages/home/FeaturedProducts"
-import { Hero } from "@/pages/home/Hero"
+import { CategoryChips } from "@/pages/home/CategoryChips"
+import { DealsGrid } from "@/pages/home/DealsGrid"
+import { FeaturedTabs } from "@/pages/home/FeaturedTabs"
+import { HeroSlider } from "@/pages/home/HeroSlider"
 import { ProductGridSection } from "@/pages/home/ProductGridSection"
 import { TrustChips } from "@/pages/home/TrustChips"
 import { WhyChooseUs } from "@/pages/home/WhyChooseUs"
@@ -35,7 +38,9 @@ export default function Home() {
 
   return (
     <main>
-      <Hero />
+      <HeroSlider />
+      <Reveal><DealsGrid /></Reveal>
+      <Reveal><CategoryChips /></Reveal>
       <Reveal><TrustChips /></Reveal>
       <Reveal>
         <ProductGridSection
@@ -48,6 +53,7 @@ export default function Home() {
         />
       </Reveal>
       <Reveal><FeaturedProducts /></Reveal>
+      <Reveal><FeaturedTabs /></Reveal>
       <Reveal>
         <ProductGridSection
           kicker="Just landed"
