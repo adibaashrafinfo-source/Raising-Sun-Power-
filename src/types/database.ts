@@ -125,6 +125,8 @@ export type Settings = {
 export type SiteContent = {
   id: number
   header_logo_url: string | null
+  /** Optional: present once the header_logo_height column exists on the row. */
+  header_logo_height?: number | null
   footer_logo_url: string | null
   hero_image_url: string | null
   hero_badge: string | null

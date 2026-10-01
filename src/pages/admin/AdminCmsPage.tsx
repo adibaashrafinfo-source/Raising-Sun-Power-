@@ -10,17 +10,23 @@ import { useUpdateSettings } from "@/hooks/use-admin"
 import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent, useUpdateSiteContent } from "@/hooks/use-site-content"
 import { formatBytes } from "@/lib/compress-image"
+import { DEFAULT_LOGO_HEIGHT, LOGO_HEIGHT_MAX, LOGO_HEIGHT_MIN } from "@/lib/logo-size"
 import { uploadSiteAsset } from "@/lib/queries/site-content"
 import { getErrorMessage } from "@/lib/utils"
 import type { SiteContent } from "@/types/database"
 
-type FormState = Omit<SiteContent, "id" | "updated_at" | "showroom_3_name" | "showroom_3_address"> & {
+type FormState = Omit<
+  SiteContent,
+  "id" | "updated_at" | "showroom_3_name" | "showroom_3_address" | "header_logo_height"
+> & {
   showroom_3_name: string | null
   showroom_3_address: string | null
+  header_logo_height: number
 }
 
 const EMPTY: FormState = {
   header_logo_url: "",
+  header_logo_height: DEFAULT_LOGO_HEIGHT,
   footer_logo_url: "",
   hero_image_url: "",
   hero_badge: "",
@@ -59,6 +65,7 @@ export default function AdminCmsPage() {
     if (!content) return
     setForm({
       header_logo_url: content.header_logo_url ?? "",
+      header_logo_height: content.header_logo_height ?? DEFAULT_LOGO_HEIGHT,
       footer_logo_url: content.footer_logo_url ?? "",
       hero_image_url: content.hero_image_url ?? "",
       hero_badge: content.hero_badge ?? "",
@@ -95,6 +102,9 @@ export default function AdminCmsPage() {
   // site_content row; without them the fields are hidden and left out of the
   // save so the rest of the page keeps working.
   const hasOffice3 = !!content && "showroom_3_name" in content
+  // Same story for the logo size: the slider only appears once the column is
+  // there, and it is left out of the save until then.
+  const hasLogoSize = !!content && "header_logo_height" in content
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
@@ -103,10 +113,12 @@ export default function AdminCmsPage() {
     e.preventDefault()
     try {
       // Both rows are saved together so one Save button covers the page.
-      const { showroom_3_name, showroom_3_address, ...rest } = form
-      await updateContent.mutateAsync(
-        hasOffice3 ? { ...rest, showroom_3_name, showroom_3_address } : rest,
-      )
+      const { showroom_3_name, showroom_3_address, header_logo_height, ...rest } = form
+      await updateContent.mutateAsync({
+        ...rest,
+        ...(hasOffice3 ? { showroom_3_name, showroom_3_address } : {}),
+        ...(hasLogoSize ? { header_logo_height } : {}),
+      })
       await updateSettings.mutateAsync(contact)
       toast.success("Site content saved")
     } catch (err) {
@@ -133,6 +145,16 @@ export default function AdminCmsPage() {
             <ImageField label="Header logo" value={form.header_logo_url} onChange={(v) => set("header_logo_url", v)} />
             <ImageField label="Footer logo" value={form.footer_logo_url} onChange={(v) => set("footer_logo_url", v)} />
           </div>
+          {hasLogoSize && (
+            <SizeField
+              label="Header logo size"
+              hint="How tall the logo is in the header, in pixels. The header bar grows and shrinks with it."
+              value={form.header_logo_height}
+              min={LOGO_HEIGHT_MIN}
+              max={LOGO_HEIGHT_MAX}
+              onChange={(v) => set("header_logo_height", v)}
+            />
+          )}
         </Section>
 
         {/* Hero */}
@@ -253,6 +275,52 @@ function TextArea({
         rows={rows}
         className="w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-2.5 text-base text-text outline-none sm:text-sm"
       />
+    </div>
+  )
+}
+
+/** A pixel size, driven either by the slider or by typing the number. */
+function SizeField({
+  label,
+  hint,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string
+  hint?: string
+  value: number
+  min: number
+  max: number
+  onChange: (v: number) => void
+}) {
+  const clamp = (n: number) => Math.min(Math.max(n, min), max)
+
+  return (
+    <div>
+      <Label className="mb-1.5 block">{label}</Label>
+      <div className="flex items-center gap-3">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={value}
+          onChange={(e) => onChange(clamp(Number(e.target.value)))}
+          className="h-1.5 w-full max-w-[280px] cursor-pointer appearance-none rounded-full bg-surface-3 accent-[var(--blue)]"
+        />
+        <div className="flex w-[108px] shrink-0 items-center gap-1.5">
+          <Input
+            type="number"
+            min={min}
+            max={max}
+            value={value}
+            onChange={(e) => onChange(clamp(Number(e.target.value) || min))}
+          />
+          <span className="text-xs font-semibold text-muted">px</span>
+        </div>
+      </div>
+      {hint && <p className="mt-1.5 text-xs text-muted">{hint}</p>}
     </div>
   )
 }

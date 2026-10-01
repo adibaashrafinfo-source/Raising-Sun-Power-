@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Link, useLocation, useNavigate } from "react-router-dom"
@@ -8,15 +9,27 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useSeo } from "@/hooks/use-seo"
-import { fetchLandingPath, signIn } from "@/lib/queries/auth"
+import { useAuth } from "@/lib/auth-provider"
+import { signIn } from "@/lib/queries/auth"
 import { type LoginFormValues, loginSchema } from "@/lib/schemas/auth"
 
 export default function LoginPage() {
   useSeo({ title: "Sign In" })
   const navigate = useNavigate()
   const location = useLocation()
+  const { session, isLoading, isInventoryStaff } = useAuth()
+  const [signedIn, setSignedIn] = useState(false)
   // Only set when a guard bounced the user here from a protected page.
   const from = (location.state as { from?: string } | null)?.from
+
+  // Where to go is decided once the profile — and so the role — has actually
+  // loaded: staff land on the admin dashboard, everyone else on their account.
+  // Reading it from the provider rather than re-fetching here means an admin is
+  // never dropped on the customer dashboard because the role arrived late.
+  useEffect(() => {
+    if (!signedIn || isLoading || !session) return
+    navigate(from ?? (isInventoryStaff ? "/admin" : "/account"), { replace: true })
+  }, [signedIn, isLoading, session, isInventoryStaff, from, navigate])
 
   const {
     register,
@@ -27,7 +40,7 @@ export default function LoginPage() {
   const onSubmit = async (values: LoginFormValues) => {
     try {
       await signIn(values)
-      navigate(from ?? (await fetchLandingPath()), { replace: true })
+      setSignedIn(true)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't sign in. Check your credentials.")
     }
@@ -64,8 +77,8 @@ export default function LoginPage() {
             <span className="text-xs font-medium text-red-500">{errors.password.message}</span>
           )}
         </div>
-        <Button size="lg" type="submit" disabled={isSubmitting} className="mt-1.5 w-full">
-          {isSubmitting ? "Signing in…" : "Sign In"}
+        <Button size="lg" type="submit" disabled={isSubmitting || signedIn} className="mt-1.5 w-full">
+          {isSubmitting || signedIn ? "Signing in…" : "Sign In"}
         </Button>
       </form>
     </AuthCard>
