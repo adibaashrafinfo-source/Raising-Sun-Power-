@@ -9,7 +9,7 @@ import { COMPANY, telLink, whatsappLink } from "@/data/company"
 import { useSettings } from "@/hooks/use-checkout"
 import { useSeo } from "@/hooks/use-seo"
 import { useSiteContent } from "@/hooks/use-site-content"
-import { printInvoice } from "@/lib/invoice"
+import { invoiceMetaFrom, printInvoice } from "@/lib/invoice"
 import { officesFrom } from "@/lib/offices"
 import { TrackingUnavailableError, trackOrder, type TrackedOrder } from "@/lib/queries/checkout"
 import { cn, formatBDT } from "@/lib/utils"
@@ -62,11 +62,8 @@ export default function TrackOrderPage() {
   const downloadInvoice = () => {
     if (!result) return
     printInvoice(result.order, result.items, {
+      ...invoiceMetaFrom(settings, cms),
       offices: officesFrom(cms),
-      phone: settings?.support_phone || COMPANY.phone,
-      whatsapp: settings?.whatsapp_number || COMPANY.whatsapp,
-      email: settings?.contact_email || COMPANY.email,
-      logoUrl: cms?.header_logo_url || `${window.location.origin}/logo.png`,
     })
   }
 

@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Check, ChevronRight, MapPin, Truck } from "lucide-react"
+import { Check, ChevronRight, MapPin, Store, Truck } from "lucide-react"
 import { Controller, useForm } from "react-hook-form"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
@@ -50,6 +50,7 @@ export default function CheckoutPage() {
     },
   })
 
+  const deliveryMethod = watch("deliveryMethod")
   const division = watch("division")
   const district = watch("district")
   const paymentMethod = watch("paymentMethod")
@@ -74,7 +75,10 @@ export default function CheckoutPage() {
       toast.error("Your cart is empty.")
       return
     }
-    const addressLine = [values.area, values.address].filter(Boolean).join(", ")
+    const addressLine =
+      values.deliveryMethod === "pickup"
+        ? "Pick-up from office"
+        : [values.area, values.address].filter(Boolean).join(", ")
     const order: OrderInsert = {
       order_number: generateOrderNumber(),
       user_id: user?.id ?? null,
@@ -84,8 +88,9 @@ export default function CheckoutPage() {
       payment_method: values.paymentMethod,
       payment_reference: values.paymentMethod === "cod" ? null : values.paymentReference ?? null,
       payment_sender_number: values.paymentMethod === "cod" ? null : values.paymentSenderNumber ?? null,
-      division: values.division,
-      district: values.district,
+      // Pick-up orders have no delivery address; the office is the address.
+      division: values.division || "—",
+      district: values.district || "—",
       upazila: values.upazila || null,
       address_line: addressLine,
       landmark: values.landmark || null,
@@ -159,12 +164,10 @@ export default function CheckoutPage() {
               <Field label="Phone (+880) *" error={errors.phone?.message}>
                 <Input placeholder="01XXX-XXXXXX" {...register("phone")} />
               </Field>
-              <Field label="Email (optional)" className="sm:col-span-2" error={errors.email?.message}>
-                <Input placeholder="you@example.com" type="email" {...register("email")} />
-              </Field>
             </div>
           </Section>
 
+          {deliveryMethod === "courier" && (
           <Section title="Delivery address">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Division *" error={errors.division?.message}>
@@ -219,19 +222,27 @@ export default function CheckoutPage() {
               </Field>
             </div>
           </Section>
+          )}
 
           <Section title="Delivery method">
             <Controller
               control={control}
               name="deliveryMethod"
               render={({ field }) => (
-                <div className="grid grid-cols-1">
+                <div className="grid grid-cols-1 gap-3">
                   <OptionCard
                     active={field.value === "courier"}
                     onClick={() => field.onChange("courier")}
                     icon={<Truck className="size-5" />}
                     title="By Courier"
                     note="Nationwide · 2–4 days"
+                  />
+                  <OptionCard
+                    active={field.value === "pickup"}
+                    onClick={() => field.onChange("pickup")}
+                    icon={<Store className="size-5" />}
+                    title="By Pick-up"
+                    note="Collect from our office — no delivery needed"
                   />
                 </div>
               )}
