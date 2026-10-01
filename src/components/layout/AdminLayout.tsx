@@ -58,6 +58,7 @@ const links = [
   { to: "/admin/settings", label: "Settings", icon: Settings, adminOnly: true },
   { to: "/admin/cms", label: "Site Content", icon: LayoutTemplate, adminOnly: true },
   { to: "/admin/hero-slider", label: "Hero Slider", icon: GalleryHorizontal, adminOnly: true },
+  { to: "/admin/solar-calculator", label: "Solar Calculator", icon: Calculator, adminOnly: true },
   { to: "/admin/roi-calculator", label: "ROI Calculator", icon: Calculator, adminOnly: true },
   { to: "/admin/staff", label: "Staff Management", icon: ShieldCheck, adminOnly: true },
 ]

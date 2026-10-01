@@ -173,6 +173,32 @@ export type HeroSlideRow = {
   updated_at: string
 }
 
+/** The engineering constants the solar calculator sizes a system with. */
+export type CalculatorSettings = {
+  id: number
+  battery_voltage: number
+  depth_of_discharge: number
+  inverter_efficiency: number
+  avg_sun_hours: number
+  panel_unit_wp: number
+  inverter_headroom: number
+  inverter_sizes_va: number[]
+  updated_at: string
+}
+
+/** One tile in the calculator's quick-add appliance grid. */
+export type CalculatorAppliance = {
+  id: string
+  name: string
+  name_bn: string | null
+  watt: number
+  hours: number
+  icon: string
+  sort_order: number
+  is_active: boolean
+  created_at: string
+}
+
 export type ContactMessageStatus = "new" | "read"
 
 export type ContactMessageInsert = {

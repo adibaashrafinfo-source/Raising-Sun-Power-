@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { type AppliancePreset, appliancePresets } from "@/data/calculator-appliances"
+import { useCalculatorAppliances } from "@/hooks/use-calculator"
 import { type LoadRow, dailyEnergyWh, peakLoadWatt } from "@/lib/load-sheet"
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -55,6 +56,19 @@ export function LoadStep({
   setRows: React.Dispatch<React.SetStateAction<LoadRow[]>>
   onNext: () => void
 }) {
+  // Presets come from the admin panel; the bundled list stands in until the
+  // query resolves, and if an admin empties the table.
+  const { data: cmsAppliances = [] } = useCalculatorAppliances()
+  const presets: AppliancePreset[] = cmsAppliances.length
+    ? cmsAppliances.map((a) => ({
+        name: a.name,
+        bn: a.name_bn ?? "",
+        watt: a.watt,
+        hours: Number(a.hours),
+        icon: a.icon,
+      }))
+    : appliancePresets
+
   const [customName, setCustomName] = useState("")
   const [customWatt, setCustomWatt] = useState("")
 
@@ -109,7 +123,7 @@ export function LoadStep({
         </p>
 
         <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          {appliancePresets.map((preset) => (
+          {presets.map((preset) => (
             <button
               key={preset.name}
               onClick={() => addPreset(preset)}
