@@ -28,6 +28,7 @@ import {
   fetchCustomerDueTotal,
   fetchCustomers,
   fetchDashboardStats,
+  createExpenseCategory,
   fetchExpenseCategories,
   fetchExpenses,
   fetchLedgerSummary,
@@ -409,6 +410,14 @@ export function useCreateSalesReturn() {
 // ---------- Expenses ----------
 export function useExpenseCategories() {
   return useQuery({ queryKey: ["admin-expense-categories"], queryFn: fetchExpenseCategories })
+}
+
+export function useCreateExpenseCategory() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (name: string) => createExpenseCategory(name),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-expense-categories"] }),
+  })
 }
 
 export function useExpenses(filters: { categoryId?: string; fromDate?: string; toDate?: string }) {

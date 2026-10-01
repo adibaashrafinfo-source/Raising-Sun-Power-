@@ -319,7 +319,9 @@ function ProfitLossReport() {
       const cogs = Number(r.cogs)
       const grossProfit = revenue - cogs
       const expenses = Number(expenseByMonth.get(r.month) ?? 0)
-      return { month: r.month, revenue, cogs, grossProfit, expenses, netProfit: grossProfit - expenses }
+      // COGS and gross profit are still what net profit is built from; they
+      // are no longer shown as their own columns.
+      return { month: r.month, revenue, expenses, netProfit: grossProfit - expenses }
     })
   }, [plRows, ledgerRows])
 
@@ -338,13 +340,11 @@ function ProfitLossReport() {
         {combined.length === 0 ? (
           <p className="p-8 text-center text-sm text-muted">No sales data yet.</p>
         ) : (
-          <table className="w-full min-w-[680px] text-sm">
+          <table className="w-full min-w-[520px] text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
                 <th className="px-4 py-3 font-semibold">Month</th>
                 <th className="px-4 py-3 font-semibold">Revenue</th>
-                <th className="px-4 py-3 font-semibold">COGS</th>
-                <th className="px-4 py-3 font-semibold">Gross Profit</th>
                 <th className="px-4 py-3 font-semibold">Expenses</th>
                 <th className="px-4 py-3 font-semibold">Net Profit</th>
               </tr>
@@ -356,8 +356,6 @@ function ProfitLossReport() {
                     {new Date(row.month).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
                   </td>
                   <td className="px-4 py-3 tabular-nums text-text">{formatBDT(row.revenue)}</td>
-                  <td className="px-4 py-3 tabular-nums text-text">{formatBDT(row.cogs)}</td>
-                  <td className="px-4 py-3 tabular-nums text-text">{formatBDT(row.grossProfit)}</td>
                   <td className="px-4 py-3 tabular-nums text-red-500">{formatBDT(row.expenses)}</td>
                   <td
                     className={`px-4 py-3 font-bold tabular-nums ${row.netProfit >= 0 ? "text-green-600" : "text-red-500"}`}

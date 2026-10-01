@@ -866,6 +866,17 @@ export async function fetchExpenseCategories(): Promise<ExpenseCategory[]> {
   return data ?? []
 }
 
+/** Admins add their own expense categories as their bookkeeping grows. */
+export async function createExpenseCategory(name: string): Promise<ExpenseCategory> {
+  const { data, error } = await supabase
+    .from("expense_categories")
+    .insert({ name: name.trim() })
+    .select()
+    .single()
+  if (error) throw error
+  return data as ExpenseCategory
+}
+
 export async function fetchExpenses(filters: {
   categoryId?: string
   fromDate?: string

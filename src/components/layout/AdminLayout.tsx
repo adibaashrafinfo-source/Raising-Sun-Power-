@@ -30,6 +30,7 @@ import {
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
 
 import { useSeo } from "@/hooks/use-seo"
+import { useSiteContent } from "@/hooks/use-site-content"
 import { useAuth } from "@/lib/auth-provider"
 import { signOut } from "@/lib/queries/auth"
 import { cn } from "@/lib/utils"
@@ -66,6 +67,10 @@ export function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const { profile, isAdmin } = useAuth()
+  // The same logo the public site shows, so the panel is branded from the CMS
+  // rather than from a file path baked in here.
+  const { data: siteContent } = useSiteContent()
+  const logo = siteContent?.header_logo_url || "/logo.png"
   const navigate = useNavigate()
   const visibleLinks = links.filter((link) => isAdmin || !link.adminOnly)
 
@@ -93,7 +98,7 @@ export function AdminLayout() {
         <div className="flex h-16 items-center justify-between border-b border-border px-4">
           {!collapsed && (
             <Link to="/" className="flex items-center gap-2 no-underline">
-              <img src="/logo.png" alt="Rising Sun Power BD" className="h-8 w-auto max-w-[130px] object-contain" />
+              <img src={logo} alt="Rising Sun Power BD" className="h-9 w-auto max-w-[150px] object-contain" />
               <span className="font-heading text-sm font-extrabold text-text">Admin</span>
             </Link>
           )}

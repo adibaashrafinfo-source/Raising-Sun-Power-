@@ -13,7 +13,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useCreateExpense, useDeleteExpense, useExpenseCategories, useExpenses } from "@/hooks/use-admin"
+import {
+  useCreateExpense,
+  useCreateExpenseCategory,
+  useDeleteExpense,
+  useExpenseCategories,
+  useExpenses,
+} from "@/hooks/use-admin"
 import { useAuth } from "@/lib/auth-provider"
 import { formatBDT } from "@/lib/utils"
 import type { Expense, FinancePaymentMethod } from "@/types/database"
@@ -140,6 +146,28 @@ function AddExpenseDialog({
 }) {
   const createExpense = useCreateExpense()
   const [categoryId, setCategoryId] = useState("")
+  const [addingCategory, setAddingCategory] = useState(false)
+  const [newCategory, setNewCategory] = useState("")
+  const createCategory = useCreateExpenseCategory()
+
+  // A new category is selected straight away, so adding one never costs the
+  // admin an extra click back into the dropdown.
+  const handleAddCategory = async () => {
+    const name = newCategory.trim()
+    if (!name) {
+      toast.error("Enter a category name")
+      return
+    }
+    try {
+      const created = await createCategory.mutateAsync(name)
+      setCategoryId(created.id)
+      setNewCategory("")
+      setAddingCategory(false)
+      toast.success("Category added")
+    } catch {
+      toast.error("Couldn't add this category — the name may already exist.")
+    }
+  }
   const [amount, setAmount] = useState("")
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [method, setMethod] = useState<FinancePaymentMethod>("cash")
@@ -182,19 +210,49 @@ function AddExpenseDialog({
         </DialogHeader>
         <form onSubmit={onSubmit} className="flex flex-col gap-3.5">
           <div>
-            <Label className="mb-1.5 block">Category *</Label>
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
-            >
-              <option value="">Select category</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <div className="mb-1.5 flex items-center justify-between">
+              <Label>Category *</Label>
+              <button
+                type="button"
+                onClick={() => setAddingCategory((v) => !v)}
+                className="text-xs font-bold text-blue"
+              >
+                {addingCategory ? "Cancel" : "+ New category"}
+              </button>
+            </div>
+            {addingCategory ? (
+              <div className="flex gap-2">
+                <Input
+                  autoFocus
+                  placeholder="e.g. Office rent"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  onKeyDown={(e) => {
+                    // Enter must not submit the expense form while naming a category.
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      void handleAddCategory()
+                    }
+                  }}
+                />
+                <Button type="button" onClick={handleAddCategory} disabled={createCategory.isPending}>
+                  {createCategory.isPending ? "Adding…" : "Add"}
+                </Button>
+              </div>
+            ) : (
+              <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 text-base text-text outline-none sm:text-sm"
+              >
+                <option value="">Select category</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
           <div>
             <Label className="mb-1.5 block">Amount (৳) *</Label>
