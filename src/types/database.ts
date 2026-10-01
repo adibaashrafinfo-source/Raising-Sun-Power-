@@ -151,6 +151,28 @@ export type SiteContent = {
   updated_at: string
 }
 
+/**
+ * One banner in the homepage hero carousel. Everything is optional: a slide can
+ * be a designed banner image on its own, or image-free copy like the built-in
+ * slides, or both.
+ */
+export type HeroSlideRow = {
+  id: string
+  image_url: string | null
+  badge: string | null
+  title: string | null
+  highlight: string | null
+  body: string | null
+  cta_label: string | null
+  cta_href: string | null
+  secondary_label: string | null
+  secondary_href: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export type ContactMessageStatus = "new" | "read"
 
 export type ContactMessageInsert = {
