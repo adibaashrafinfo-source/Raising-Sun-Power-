@@ -5,11 +5,12 @@ export const checkoutSchema = z
     name: z.string().min(2, "Enter your full name"),
     phone: z.string().regex(/^01[3-9]\d{8}$/, "Enter a valid Bangladeshi mobile number"),
     email: z.union([z.string().email("Enter a valid email"), z.literal("")]).optional(),
-    division: z.string().min(1, "Select a division"),
-    district: z.string().min(1, "Select a district"),
+    // Address is required for courier only — see the refinement below.
+    division: z.string().optional(),
+    district: z.string().optional(),
     upazila: z.string().optional(),
     area: z.string().optional(),
-    address: z.string().min(5, "Enter your full address"),
+    address: z.string().optional(),
     landmark: z.string().optional(),
     deliveryMethod: z.enum(["courier", "pickup"]),
     paymentMethod: z.enum(["cod", "bkash", "nagad"]),
@@ -18,6 +19,18 @@ export const checkoutSchema = z
     notes: z.string().optional(),
   })
   .superRefine((data, ctx) => {
+    // Picking the order up from an office needs no delivery address.
+    if (data.deliveryMethod === "courier") {
+      if (!data.division?.trim()) {
+        ctx.addIssue({ code: "custom", path: ["division"], message: "Select a division" })
+      }
+      if (!data.district?.trim()) {
+        ctx.addIssue({ code: "custom", path: ["district"], message: "Select a district" })
+      }
+      if ((data.address?.trim().length ?? 0) < 5) {
+        ctx.addIssue({ code: "custom", path: ["address"], message: "Enter your full address" })
+      }
+    }
     if (data.paymentMethod !== "cod") {
       if (!data.paymentSenderNumber?.trim()) {
         ctx.addIssue({

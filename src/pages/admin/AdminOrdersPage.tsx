@@ -15,10 +15,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAllOrders, useDeleteOrder, useRecordCustomerPayment, useUpdateOrderStatus } from "@/hooks/use-admin"
-import { COMPANY } from "@/data/company"
 import { useOrderItems, useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
-import { printInvoice } from "@/lib/invoice"
+import { invoiceMetaFrom, printInvoice } from "@/lib/invoice"
 import { officesFrom } from "@/lib/offices"
 import { formatBDT, getErrorMessage } from "@/lib/utils"
 import type { FinancePaymentMethod, Order, OrderStatus } from "@/types/database"
@@ -186,11 +185,8 @@ function OrderDetailDialog({ order, onClose }: { order: Order | null; onClose: (
   const downloadInvoice = () => {
     if (!order) return
     printInvoice(order, items, {
+      ...invoiceMetaFrom(settings, cms),
       offices: officesFrom(cms),
-      phone: settings?.support_phone || COMPANY.phone,
-      whatsapp: settings?.whatsapp_number || COMPANY.whatsapp,
-      email: settings?.contact_email || COMPANY.email,
-      logoUrl: cms?.header_logo_url || `${window.location.origin}/logo.png`,
     })
   }
 

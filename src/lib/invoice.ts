@@ -9,6 +9,34 @@ export type InvoiceMeta = {
   whatsapp: string
   email: string
   logoUrl?: string
+  /** Printed in the footer so a saved PDF still leads back to us. */
+  website?: string
+  facebook?: string
+}
+
+/**
+ * The invoice's letterhead, assembled from the settings and CMS rows every
+ * page that offers a download already has to hand.
+ */
+export function invoiceMetaFrom(
+  settings: { support_phone?: string | null; whatsapp_number?: string | null; contact_email?: string | null; facebook_url?: string | null } | undefined,
+  cms: { header_logo_url?: string | null } | undefined,
+): InvoiceMeta {
+  const origin = typeof window === "undefined" ? "" : window.location.origin
+  return {
+    offices: [],
+    phone: settings?.support_phone || COMPANY.phone,
+    whatsapp: settings?.whatsapp_number || COMPANY.whatsapp,
+    email: settings?.contact_email || COMPANY.email,
+    logoUrl: cms?.header_logo_url || `${origin}/logo.png`,
+    website: origin,
+    facebook: settings?.facebook_url || undefined,
+  }
+}
+
+const DELIVERY_LABELS: Record<string, string> = {
+  courier: "By Courier",
+  pickup: "By Pick-up",
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
@@ -126,7 +154,7 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta): strin
     <div>
       <div class="label">Order details</div>
       <div>Payment: <b>${esc(PAYMENT_LABELS[order.payment_method] ?? order.payment_method)}</b></div>
-      <div>Delivery: <b>By Courier</b></div>
+      <div>Delivery: <b>${esc(DELIVERY_LABELS[order.delivery_method] ?? order.delivery_method)}</b></div>
       <div>Status: <b>${esc(titleCase(order.status))}</b></div>
       ${order.payment_reference ? `<div class="muted">Ref: ${esc(order.payment_reference)}</div>` : ""}
     </div>
@@ -173,6 +201,11 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta): strin
 
   <footer>
     ${offices}
+    <div style="margin-top:8px">
+      ${meta.website ? `Website: <b>${esc(meta.website)}</b>` : ""}
+      ${meta.website && meta.facebook ? " · " : ""}
+      ${meta.facebook ? `Facebook: <b>${esc(meta.facebook)}</b>` : ""}
+    </div>
     <div class="muted" style="margin-top:8px">
       This is a computer-generated invoice and needs no signature. Thank you for your order.
     </div>

@@ -3,10 +3,9 @@ import { Link, useParams } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { COMPANY } from "@/data/company"
 import { useOrder, useOrderItems, useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
-import { printInvoice } from "@/lib/invoice"
+import { invoiceMetaFrom, printInvoice } from "@/lib/invoice"
 import { officesFrom } from "@/lib/offices"
 import { cn, formatBDT } from "@/lib/utils"
 import type { OrderStatus } from "@/types/database"
@@ -28,11 +27,8 @@ export default function AccountOrderDetailPage() {
   const downloadInvoice = () => {
     if (!order) return
     printInvoice(order, items, {
+      ...invoiceMetaFrom(settings, cms),
       offices: officesFrom(cms),
-      phone: settings?.support_phone || COMPANY.phone,
-      whatsapp: settings?.whatsapp_number || COMPANY.whatsapp,
-      email: settings?.contact_email || COMPANY.email,
-      logoUrl: cms?.header_logo_url || `${window.location.origin}/logo.png`,
     })
   }
 
