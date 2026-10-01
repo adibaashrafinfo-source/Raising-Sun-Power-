@@ -66,6 +66,22 @@
   --glass-shadow: 0 10px 34px rgba(10, 27, 51, 0.1);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
 
+  /* The heavier glass used for floating panels (the admin rail, its bars). */
+  --glass-panel-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.34));
+  --glass-panel-border: rgba(255, 255, 255, 0.85);
+  --glass-panel-shadow: 0 26px 70px rgba(10, 27, 51, 0.16), 0 2px 8px rgba(10, 27, 51, 0.06);
+  --glass-panel-edge: rgba(255, 255, 255, 0.95);
+  /* The light that catches the top-left of a pane of glass. */
+  --glass-sheen:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 42%),
+    radial-gradient(130% 55% at 48% -12%, rgba(255, 255, 255, 0.7), transparent 62%);
+  --glass-sheen-opacity: 0.5;
+  /* What the glass has to refract — colour blobs behind the whole panel. */
+  --admin-blob-1: radial-gradient(circle, rgba(33, 124, 202, 0.55), transparent 62%);
+  --admin-blob-2: radial-gradient(circle, rgba(103, 167, 14, 0.4), transparent 62%);
+  --admin-blob-3: radial-gradient(circle, rgba(244, 158, 9, 0.42), transparent 62%);
+  --admin-blob-opacity: 0.42;
+
   /* Hero surface — light by default so the section follows the theme. */
   --hero-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(245, 248, 253, 0.35) 60%, rgba(245, 248, 253, 0) 100%);
   --hero-text: #0a1b33;
@@ -112,6 +128,19 @@
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: 0 12px 38px rgba(0, 0, 0, 0.45);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+  --glass-panel-bg: linear-gradient(145deg, rgba(36, 54, 88, 0.5), rgba(9, 16, 30, 0.34));
+  --glass-panel-border: rgba(255, 255, 255, 0.16);
+  --glass-panel-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 2px 10px rgba(0, 0, 0, 0.4);
+  --glass-panel-edge: rgba(255, 255, 255, 0.28);
+  --glass-sheen:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 40%),
+    radial-gradient(130% 55% at 48% -12%, rgba(255, 255, 255, 0.22), transparent 62%);
+  --glass-sheen-opacity: 0.75;
+  --admin-blob-1: radial-gradient(circle, rgba(33, 124, 202, 0.85), transparent 62%);
+  --admin-blob-2: radial-gradient(circle, rgba(103, 167, 14, 0.5), transparent 62%);
+  --admin-blob-3: radial-gradient(circle, rgba(244, 158, 9, 0.45), transparent 62%);
+  --admin-blob-opacity: 0.6;
 
   --hero-bg: linear-gradient(180deg, rgba(14, 30, 58, 0.85) 0%, rgba(9, 19, 38, 0.5) 60%, rgba(6, 12, 24, 0) 100%);
   --hero-text: #ffffff;
@@ -222,12 +251,98 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Liquid glass — used across the admin panel. Panels are translucent and blur
-   what is behind them, with a lit top edge and a soft drop shadow, so the
-   brand wash on the page shows through. Scoped to .rsp-admin so the public
-   site keeps its solid surfaces.
+   Liquid glass — the admin panel. Floating panels are translucent, blur what
+   is behind them and catch a specular highlight on their top-left edge, over a
+   backdrop of slowly drifting colour so there is something real to refract.
+   Scoped to .rsp-admin, so the public site keeps its solid surfaces.
    --------------------------------------------------------------------------- */
-.rsp-glass,
+
+/* The colour behind the glass. Fixed, decorative, never interactive. */
+.rsp-admin-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.rsp-admin-backdrop span {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(96px);
+  opacity: var(--admin-blob-opacity);
+  will-change: transform;
+}
+
+.rsp-admin-backdrop span:nth-child(1) {
+  width: 54vw;
+  height: 54vw;
+  left: -10vw;
+  top: -12vh;
+  background: var(--admin-blob-1);
+  animation: rsp-drift-a 26s ease-in-out infinite alternate;
+}
+
+.rsp-admin-backdrop span:nth-child(2) {
+  width: 46vw;
+  height: 46vw;
+  left: 8vw;
+  bottom: -16vh;
+  background: var(--admin-blob-2);
+  animation: rsp-drift-b 32s ease-in-out infinite alternate;
+}
+
+.rsp-admin-backdrop span:nth-child(3) {
+  width: 44vw;
+  height: 44vw;
+  right: -8vw;
+  top: 26vh;
+  background: var(--admin-blob-3);
+  animation: rsp-drift-c 29s ease-in-out infinite alternate;
+}
+
+@keyframes rsp-drift-a {
+  to {
+    transform: translate3d(6vw, 8vh, 0) scale(1.12);
+  }
+}
+@keyframes rsp-drift-b {
+  to {
+    transform: translate3d(10vw, -6vh, 0) scale(1.08);
+  }
+}
+@keyframes rsp-drift-c {
+  to {
+    transform: translate3d(-8vw, 6vh, 0) scale(1.14);
+  }
+}
+
+/* A floating pane of glass. */
+.rsp-glass-panel {
+  position: relative;
+  isolation: isolate;
+  background-color: transparent;
+  background-image: var(--glass-panel-bg);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid var(--glass-panel-border);
+  box-shadow: var(--glass-panel-shadow), inset 0 1px 0 var(--glass-panel-edge);
+}
+
+/* The highlight that runs across the top-left of the pane. */
+.rsp-glass-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: var(--glass-sheen);
+  opacity: var(--glass-sheen-opacity);
+}
+
+/* Cards inside the panel: lighter glass, so the rail stays the hero. */
 .rsp-admin .bg-surface {
   background-color: transparent;
   background-image: var(--glass-bg);
@@ -242,44 +357,56 @@
   background-color: color-mix(in srgb, var(--surface-2) 72%, transparent);
 }
 
-/* Browsers without backdrop-filter get the solid surface back. */
-@supports not (backdrop-filter: blur(2px)) {
-  .rsp-glass,
+/* Browsers without backdrop-filter get solid surfaces back. */
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .rsp-glass-panel,
   .rsp-admin .bg-surface {
     background-image: none;
     background-color: var(--surface);
   }
+  .rsp-glass-panel::after {
+    display: none;
+  }
 }
 
-/* The active sidebar item: a sliding accent rail plus a soft lit pill. */
+/* --- Sidebar items ------------------------------------------------------- */
 .rsp-nav-item {
   position: relative;
-  overflow: hidden;
 }
 
+/* The lit rail that slides in beside the active item. */
 .rsp-nav-item::before {
   content: "";
   position: absolute;
-  left: 0;
+  left: -2px;
   top: 50%;
   height: 0;
-  width: 3px;
+  width: 4px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #f49e09, #67a70e);
+  background: linear-gradient(180deg, #f9b233, #f49e09 55%, #67a70e);
   transform: translateY(-50%);
   transition:
-    height 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 320ms ease;
+    height 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 340ms ease;
   opacity: 0;
 }
 
 .rsp-nav-item[aria-current="page"]::before {
-  height: 62%;
+  height: 64%;
   opacity: 1;
+  box-shadow: 0 0 16px rgba(244, 158, 9, 0.85);
 }
 
 .rsp-nav-item[aria-current="page"] {
+  background-image: linear-gradient(135deg, rgba(244, 158, 9, 0.26), rgba(244, 158, 9, 0.07));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 8px 22px rgba(244, 158, 9, 0.16);
   animation: rsp-nav-pop 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rsp-nav-item:not([aria-current="page"]):hover {
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.06));
 }
 
 @keyframes rsp-nav-pop {
@@ -293,6 +420,35 @@
   100% {
     transform: translateX(0);
     opacity: 1;
+  }
+}
+
+/* Collapsed to icons: the label rides out as a pill beside the rail. It is
+   rendered outside the scrolling nav, so nothing clips it. */
+.rsp-nav-tip {
+  position: fixed;
+  z-index: 60;
+  transform: translateY(-50%);
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f9b233, #e08900);
+  color: #241700;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 10px 26px rgba(244, 158, 9, 0.45);
+  pointer-events: none;
+  animation: rsp-tip-in 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes rsp-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
   }
 }
 
@@ -316,11 +472,15 @@
 
 @media (prefers-reduced-motion: reduce) {
   .rsp-page-enter,
-  .rsp-nav-item[aria-current="page"] {
+  .rsp-nav-item[aria-current="page"],
+  .rsp-admin-backdrop span {
     animation: none;
   }
   .rsp-nav-item::before {
     transition: none;
+  }
+  .rsp-nav-tip {
+    animation: none;
   }
 }
 
