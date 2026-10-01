@@ -1,4 +1,4 @@
-import { ArrowUpRight, BadgeCheck, Headphones, Mail, MapPin, MessageCircle, Phone, ShieldCheck, Truck } from "lucide-react"
+import { ArrowUpRight, Mail, MapPin, MessageCircle, Phone } from "lucide-react"
 import { Link } from "react-router-dom"
 
 import { FacebookIcon, InstagramIcon, LinkedinIcon, TiktokIcon, YoutubeIcon } from "@/components/icons/SocialIcons"
@@ -7,12 +7,14 @@ import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { officesFrom } from "@/lib/offices"
 
-const TRUST_BAR = [
-  { icon: BadgeCheck, label: "100% Genuine Products" },
-  { icon: Truck, label: "Fast Nationwide Delivery" },
-  { icon: ShieldCheck, label: "Brand-backed Warranty" },
-  { icon: Headphones, label: "Expert Support, 7 days" },
-]
+/** Each network in its own colour — a grey icon row reads as decoration. */
+const SOCIAL_BRAND: Record<string, string> = {
+  Facebook: "#1877F2",
+  Instagram: "#E4405F",
+  YouTube: "#FF0000",
+  LinkedIn: "#0A66C2",
+  TikTok: "#111827",
+}
 
 const shopLinks = [
   { label: "Solar Packages", to: "/packages" },
@@ -74,15 +76,15 @@ export function Footer() {
         style={{ background: "radial-gradient(circle,#67A70E 0%,transparent 70%)" }}
       />
 
-      <div className="relative mx-auto max-w-[1280px] px-4 pb-8 pt-14 sm:px-6">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
+      <div className="relative mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6">
+        <div className="grid grid-cols-1 gap-7 lg:grid-cols-12">
           {/* Brand + contact + social */}
           <div className="lg:col-span-4">
             {/* The lockup already carries the name, so no typed wordmark beside it. */}
-            <img src={logo} alt="Rising Sun Power BD" className="h-[64px] w-auto max-w-[260px] object-contain" />
-            <p className="mt-4 max-w-[320px] text-[13.5px] leading-relaxed text-[var(--footer-muted)]">{description}</p>
+            <img src={logo} alt="Rising Sun Power BD" className="h-[52px] w-auto max-w-[220px] object-contain" />
+            <p className="mt-3 max-w-[320px] text-[13px] leading-relaxed text-[var(--footer-muted)]">{description}</p>
 
-            <div className="mt-5 flex flex-col gap-2.5">
+            <div className="mt-4 flex flex-col gap-1.5">
               <ContactChip icon={Phone} href={`tel:${phone.replace(/\s|-/g, "")}`} label={phone} />
               <ContactChip icon={Mail} href={`mailto:${email}`} label={email} />
               <ContactChip
@@ -95,7 +97,7 @@ export function Footer() {
             </div>
 
             {socialLinks.length > 0 && (
-              <div className="mt-5 flex items-center gap-2.5">
+              <div className="mt-4 flex items-center gap-2.5">
                 {socialLinks.map((s) => (
                   <a
                     key={s.label}
@@ -103,16 +105,17 @@ export function Footer() {
                     target="_blank"
                     rel="noreferrer"
                     aria-label={s.label}
-                    className="flex size-9 items-center justify-center rounded-full border border-[var(--footer-border)] bg-[var(--footer-card)] text-[var(--footer-heading)] transition-all duration-200 hover:-translate-y-0.5 hover:border-transparent hover:bg-orange-500 hover:text-white hover:shadow-[0_8px_20px_rgba(244,158,9,.4)]"
+                    style={{ background: SOCIAL_BRAND[s.label] ?? "var(--footer-card)" }}
+                    className="flex size-11 items-center justify-center rounded-full text-white shadow-[0_6px_16px_rgba(0,0,0,.25)] transition-transform duration-200 hover:-translate-y-0.5 hover:brightness-110"
                   >
-                    <s.icon className="size-4" />
+                    <s.icon className="size-[22px]" />
                   </a>
                 ))}
               </div>
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-5">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:col-span-5">
             <FooterCol title="Shop" links={shopLinks} />
             <FooterCol title="Customer Service" links={serviceLinks} />
             <FooterCol title="Company" links={companyLinks} />
@@ -120,8 +123,8 @@ export function Footer() {
 
           {/* Showrooms */}
           <div className="lg:col-span-3">
-            <div className="mb-4 font-heading text-sm font-bold uppercase tracking-wide text-[var(--footer-heading)]">Our Offices</div>
-            <div className="flex flex-col gap-4">
+            <div className="mb-3 font-heading text-sm font-bold uppercase tracking-wide text-[var(--footer-heading)]">Our Offices</div>
+            <div className="flex flex-col gap-2.5">
               {showrooms.map((s) => (
                 <ShopAddress key={s.name} name={s.name} address={s.address} />
               ))}
@@ -130,7 +133,7 @@ export function Footer() {
         </div>
 
         {/* Payment strip */}
-        <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-[var(--footer-border)] bg-[var(--footer-card)] px-5 py-4 sm:flex-row sm:justify-between">
+        <div className="mt-7 flex flex-col items-center gap-3 rounded-2xl border border-[var(--footer-border)] bg-[var(--footer-card)] px-5 py-4 sm:flex-row sm:justify-between">
           <span className="text-[13px] font-semibold text-[var(--footer-text)]">We accept</span>
           <div className="flex flex-wrap items-center gap-2.5">
             <PaymentBadge bg="#E2136E" color="#fff">bKash</PaymentBadge>
@@ -140,20 +143,7 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Trust bar — the four promises, repeated where people land last. */}
-        <div className="mt-8 grid grid-cols-1 gap-2.5 border-t border-[var(--footer-border)] pt-6 sm:grid-cols-2 lg:grid-cols-4">
-          {TRUST_BAR.map((item) => (
-            <div
-              key={item.label}
-              className="flex items-center gap-2.5 rounded-xl bg-[var(--footer-card)] px-3.5 py-2.5"
-            >
-              <item.icon className="size-[18px] shrink-0 text-orange-500" />
-              <span className="text-[12.5px] font-semibold text-[var(--footer-text)]">{item.label}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--footer-border)] pt-6">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--footer-border)] pt-5">
           <span className="text-[12.5px] text-[var(--footer-muted)]">
             © {new Date().getFullYear()} Rising Sun Power BD. All rights reserved.
           </span>
