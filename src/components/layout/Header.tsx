@@ -28,6 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { isAdminRole } from "@/lib/admin-access"
 import { useAuth } from "@/lib/auth-provider"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { useMenuGroups } from "@/lib/category-tree"
@@ -41,7 +42,7 @@ const NAV_HIDE_AFTER = 80
 
 export function Header() {
   const { theme, toggleTheme } = useTheme()
-  const { session, profile, isAdmin } = useAuth()
+  const { session, profile } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [isHidden, setIsHidden] = useState(false)
@@ -223,7 +224,7 @@ export function Header() {
                     <MapPin className="size-4" /> Addresses
                   </Link>
                 </DropdownMenuItem>
-                {isAdmin && (
+                {isAdminRole(profile?.role) && (
                   <DropdownMenuItem asChild>
                     <Link to="/admin">
                       <Settings className="size-4" /> Admin Panel

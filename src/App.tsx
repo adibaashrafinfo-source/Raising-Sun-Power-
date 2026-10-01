@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react"
 import { Route, Routes } from "react-router-dom"
 
-import { RequireAdminOnly, RequireAuth, RequireInventoryStaff } from "@/components/auth/RequireAuth"
+import { RequireAdminAccess, RequireAuth, RequireInventoryStaff } from "@/components/auth/RequireAuth"
 import { ScrollToTop } from "@/components/layout/ScrollToTop"
 import { AccountLayout } from "@/components/layout/AccountLayout"
 import { AppLayout } from "@/components/layout/AppLayout"
@@ -153,7 +153,7 @@ export default function App() {
               </Suspense>
             }
           >
-            <Route element={<RequireAdminOnly />}>
+            <Route element={<RequireAdminAccess />}>
               <Route
                 index
                 element={
@@ -282,7 +282,6 @@ export default function App() {
                   </Suspense>
                 }
               />
-            </Route>
 
             <Route
               path="inventory/stock"
@@ -356,6 +355,7 @@ export default function App() {
                 </Suspense>
               }
             />
+            </Route>
           </Route>
         </Route>
       </Routes>

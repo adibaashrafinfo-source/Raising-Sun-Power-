@@ -30,50 +30,53 @@ import {
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
 
 import { useSeo } from "@/hooks/use-seo"
+import { canAccessAdminPath } from "@/lib/admin-access"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { useAuth } from "@/lib/auth-provider"
 import { signOut } from "@/lib/queries/auth"
 import { cn } from "@/lib/utils"
 
 const links = [
-  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true, adminOnly: true },
-  { to: "/admin/orders", label: "Orders", icon: ShoppingBag, adminOnly: true },
-  { to: "/admin/products", label: "Products", icon: Package, adminOnly: true },
-  { to: "/admin/packages", label: "Packages", icon: Layers, adminOnly: true },
-  { to: "/admin/inventory/stock", label: "Stock", icon: Boxes, adminOnly: false },
-  { to: "/admin/inventory/suppliers", label: "Suppliers", icon: Truck, adminOnly: false },
-  { to: "/admin/inventory/purchases", label: "Purchases", icon: ClipboardList, adminOnly: false },
-  { to: "/admin/inventory/purchase-returns", label: "Purchase Returns", icon: RotateCcw, adminOnly: false },
-  { to: "/admin/inventory/sales-returns", label: "Sales Returns", icon: RotateCcw, adminOnly: false },
-  { to: "/admin/inventory/reports", label: "Inventory Reports", icon: BarChart3, adminOnly: false },
-  { to: "/admin/finance/dashboard", label: "Finance Dashboard", icon: PieChart, adminOnly: false },
-  { to: "/admin/finance/expenses", label: "Expenses", icon: Receipt, adminOnly: false },
-  { to: "/admin/finance/accounts", label: "Cash & Bank", icon: Landmark, adminOnly: false },
-  { to: "/admin/categories", label: "Categories", icon: ListTree, adminOnly: true },
-  { to: "/admin/brands", label: "Brands", icon: Tags, adminOnly: true },
-  { to: "/admin/customers", label: "Customers", icon: Users, adminOnly: true },
-  { to: "/admin/coupons", label: "Coupons", icon: Ticket, adminOnly: true },
-  { to: "/admin/leads", label: "Leads", icon: Users, adminOnly: true },
-  { to: "/admin/messages", label: "Contact Messages", icon: Mail, adminOnly: true },
-  { to: "/admin/settings", label: "Settings", icon: Settings, adminOnly: true },
-  { to: "/admin/cms", label: "Site Content", icon: LayoutTemplate, adminOnly: true },
-  { to: "/admin/hero-slider", label: "Hero Slider", icon: GalleryHorizontal, adminOnly: true },
-  { to: "/admin/solar-calculator", label: "Solar Calculator", icon: Calculator, adminOnly: true },
-  { to: "/admin/roi-calculator", label: "ROI Calculator", icon: Calculator, adminOnly: true },
-  { to: "/admin/staff", label: "Staff Management", icon: ShieldCheck, adminOnly: true },
+  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
+  { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/packages", label: "Packages", icon: Layers },
+  { to: "/admin/inventory/stock", label: "Stock", icon: Boxes },
+  { to: "/admin/inventory/suppliers", label: "Suppliers", icon: Truck },
+  { to: "/admin/inventory/purchases", label: "Purchases", icon: ClipboardList },
+  { to: "/admin/inventory/purchase-returns", label: "Purchase Returns", icon: RotateCcw },
+  { to: "/admin/inventory/sales-returns", label: "Sales Returns", icon: RotateCcw },
+  { to: "/admin/inventory/reports", label: "Inventory Reports", icon: BarChart3 },
+  { to: "/admin/finance/dashboard", label: "Finance Dashboard", icon: PieChart },
+  { to: "/admin/finance/expenses", label: "Expenses", icon: Receipt },
+  { to: "/admin/finance/accounts", label: "Cash & Bank", icon: Landmark },
+  { to: "/admin/categories", label: "Categories", icon: ListTree },
+  { to: "/admin/brands", label: "Brands", icon: Tags },
+  { to: "/admin/customers", label: "Customers", icon: Users },
+  { to: "/admin/coupons", label: "Coupons", icon: Ticket },
+  { to: "/admin/leads", label: "Leads", icon: Users },
+  { to: "/admin/messages", label: "Contact Messages", icon: Mail },
+  { to: "/admin/settings", label: "Settings", icon: Settings },
+  { to: "/admin/cms", label: "Site Content", icon: LayoutTemplate },
+  { to: "/admin/hero-slider", label: "Hero Slider", icon: GalleryHorizontal },
+  { to: "/admin/solar-calculator", label: "Solar Calculator", icon: Calculator },
+  { to: "/admin/roi-calculator", label: "ROI Calculator", icon: Calculator },
+  { to: "/admin/staff", label: "Staff Management", icon: ShieldCheck },
 ]
 
 export function AdminLayout() {
   useSeo({ title: "Admin", noIndex: true })
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { profile, isAdmin } = useAuth()
+  const { profile } = useAuth()
   // The same logo the public site shows, so the panel is branded from the CMS
   // rather than from a file path baked in here.
   const { data: siteContent } = useSiteContent()
   const logo = siteContent?.header_logo_url || "/logo.png"
   const navigate = useNavigate()
-  const visibleLinks = links.filter((link) => isAdmin || !link.adminOnly)
+  // The sidebar offers exactly what this role may open, from the same map the
+  // route guard checks, so no link ever leads to a redirect.
+  const visibleLinks = links.filter((link) => canAccessAdminPath(profile?.role, link.to))
 
   const handleSignOut = async () => {
     await signOut()
