@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom"
 
+import { adminLandingPath, canAccessAdminPath, isAdminRole } from "@/lib/admin-access"
 import { useAuth } from "@/lib/auth-provider"
 
 export function RequireAuth() {
@@ -23,28 +24,34 @@ export function RequireAdmin() {
   return <Outlet />
 }
 
-// Gates the whole /admin tree to admin/manager/staff. Nest <RequireAdminOnly />
-// inside for pages that must stay admin-only (everything outside
-// /admin/inventory and /admin/finance).
+// Gates the whole /admin tree. Any role with some admin access gets in; which
+// pages they may open is decided by RequireAdminAccess below, from the same
+// map the sidebar is built from.
 export function RequireInventoryStaff() {
-  const { session, isInventoryStaff, isLoading } = useAuth()
+  const { session, profile, isLoading } = useAuth()
   const location = useLocation()
 
   if (isLoading) return null
   if (!session) return <Navigate to="/login" state={{ from: location.pathname }} replace />
-  if (!isInventoryStaff) return <Navigate to="/account" replace />
+  if (!isAdminRole(profile?.role)) return <Navigate to="/account" replace />
 
   return <Outlet />
 }
 
-// Used nested inside RequireInventoryStaff for admin-only pages — redirects
-// a signed-in manager/staff user to the inventory section instead of
-// /account, since they do belong in /admin, just not on this specific page.
-export function RequireAdminOnly() {
-  const { isAdmin, isLoading } = useAuth()
+// Nested inside RequireInventoryStaff: checks the page itself against the
+// role's allowed sections, and sends anyone who does not belong here to their
+// own landing page rather than out of the panel.
+export function RequireAdminAccess() {
+  const { profile, isLoading } = useAuth()
+  const location = useLocation()
 
   if (isLoading) return null
-  if (!isAdmin) return <Navigate to="/admin/inventory/stock" replace />
+  if (!canAccessAdminPath(profile?.role, location.pathname)) {
+    const landing = adminLandingPath(profile?.role)
+    // Guard against a role whose landing page is itself out of bounds.
+    if (landing === location.pathname) return <Navigate to="/account" replace />
+    return <Navigate to={landing} replace />
+  }
 
   return <Outlet />
 }

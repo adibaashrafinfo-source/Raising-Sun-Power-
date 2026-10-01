@@ -4,10 +4,30 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/lib/auth-provider"
 import { useCustomers, useUpdateProfileRole } from "@/hooks/use-admin"
+import { ROLE_LABELS, ROLE_SUMMARIES } from "@/lib/admin-access"
 import type { ProfileRole } from "@/types/database"
 
-const ROLE_VARIANT = { admin: "orange", manager: "blue", staff: "green", customer: "neutral" } as const
-const ROLES: ProfileRole[] = ["customer", "staff", "manager", "admin"]
+const ROLE_VARIANT: Record<ProfileRole, "orange" | "blue" | "green" | "gold" | "neutral"> = {
+  admin: "orange",
+  manager: "blue",
+  staff: "green",
+  sales: "gold",
+  accountant: "blue",
+  delivery: "green",
+  content_editor: "blue",
+  customer: "neutral",
+}
+
+const ROLES: ProfileRole[] = [
+  "customer",
+  "staff",
+  "manager",
+  "sales",
+  "accountant",
+  "delivery",
+  "content_editor",
+  "admin",
+]
 
 export default function AdminStaffPage() {
   const { data: profiles = [], isLoading } = useCustomers()
@@ -28,9 +48,17 @@ export default function AdminStaffPage() {
       <div>
         <h1 className="font-heading text-2xl font-extrabold text-text">Staff Management</h1>
         <p className="mt-0.5 text-sm text-muted">
-          Manager and staff roles can access Inventory and Finance. Only admin can access everything else and
-          delete records.
+          A role decides which parts of this panel someone opens — the database enforces the same split,
+          so a role never loads data it is not entitled to.
         </p>
+        <div className="mt-3 grid grid-cols-1 gap-1.5 rounded-xl border border-border bg-surface p-3.5 sm:grid-cols-2">
+          {ROLES.filter((r) => r !== "customer").map((role) => (
+            <div key={role} className="flex items-start gap-2 text-[12.5px]">
+              <Badge variant={ROLE_VARIANT[role]}>{ROLE_LABELS[role]}</Badge>
+              <span className="text-muted">{ROLE_SUMMARIES[role]}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
@@ -54,7 +82,7 @@ export default function AdminStaffPage() {
                   <td className="px-4 py-3 font-semibold text-text">{p.full_name ?? "—"}</td>
                   <td className="px-4 py-3 text-muted">{p.phone ?? "—"}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={ROLE_VARIANT[p.role]}>{p.role}</Badge>
+                    <Badge variant={ROLE_VARIANT[p.role]}>{ROLE_LABELS[p.role]}</Badge>
                   </td>
                   <td className="px-4 py-3">
                     <select
@@ -65,7 +93,7 @@ export default function AdminStaffPage() {
                     >
                       {ROLES.map((r) => (
                         <option key={r} value={r}>
-                          {r}
+                          {ROLE_LABELS[r]}
                         </option>
                       ))}
                     </select>

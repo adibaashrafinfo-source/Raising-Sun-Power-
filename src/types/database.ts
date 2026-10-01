@@ -335,7 +335,15 @@ export type Lead = LeadInsert & {
   updated_at: string
 }
 
-export type ProfileRole = "customer" | "admin" | "manager" | "staff"
+export type ProfileRole =
+  | "customer"
+  | "admin"
+  | "manager"
+  | "staff"
+  | "sales"
+  | "accountant"
+  | "delivery"
+  | "content_editor"
 
 export type Profile = {
   id: string

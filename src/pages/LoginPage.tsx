@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useSeo } from "@/hooks/use-seo"
+import { adminLandingPath } from "@/lib/admin-access"
 import { useAuth } from "@/lib/auth-provider"
 import { signIn } from "@/lib/queries/auth"
 import { type LoginFormValues, loginSchema } from "@/lib/schemas/auth"
@@ -17,7 +18,7 @@ export default function LoginPage() {
   useSeo({ title: "Sign In" })
   const navigate = useNavigate()
   const location = useLocation()
-  const { session, isLoading, isInventoryStaff } = useAuth()
+  const { session, isLoading, profile } = useAuth()
   const [signedIn, setSignedIn] = useState(false)
   // Only set when a guard bounced the user here from a protected page.
   const from = (location.state as { from?: string } | null)?.from
@@ -28,8 +29,8 @@ export default function LoginPage() {
   // never dropped on the customer dashboard because the role arrived late.
   useEffect(() => {
     if (!signedIn || isLoading || !session) return
-    navigate(from ?? (isInventoryStaff ? "/admin" : "/account"), { replace: true })
-  }, [signedIn, isLoading, session, isInventoryStaff, from, navigate])
+    navigate(from ?? adminLandingPath(profile?.role), { replace: true })
+  }, [signedIn, isLoading, session, profile, from, navigate])
 
   const {
     register,
