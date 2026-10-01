@@ -17,6 +17,9 @@ const GLOWS = [
   "radial-gradient(circle,#F49E09 0%,transparent 70%)",
 ]
 
+/** The banner frame's shape. Upload at this ratio and nothing is letterboxed. */
+const HERO_FRAME = "aspect-[1600/640]"
+
 type Slide = {
   key: string
   image?: string
@@ -100,11 +103,11 @@ export function HeroSlider() {
             key={slide.key}
             aria-hidden={i !== safeIndex}
             className={cn(
-              "transition-opacity duration-500",
+              "transition-opacity duration-700",
               i === safeIndex ? "opacity-100" : "pointer-events-none absolute inset-0 opacity-0",
             )}
           >
-            <SlidePanel slide={slide} />
+            <SlidePanel slide={slide} isActive={i === safeIndex} />
           </div>
         ))}
       </div>
@@ -133,28 +136,41 @@ export function HeroSlider() {
   )
 }
 
-function SlidePanel({ slide }: { slide: Slide }) {
+function SlidePanel({ slide, isActive }: { slide: Slide; isActive: boolean }) {
   const hasCopy = !!(slide.badge || slide.title || slide.highlight || slide.body)
 
-  // A designed banner with no copy on top of it is shown whole — cropping it to
-  // fit a text layout would cut off the artwork the image already carries.
+  // A designed banner with no copy on top of it keeps the page's own width and
+  // gutters rather than bleeding to the edges, and is fitted whole inside the
+  // frame — cropping it would cut off the artwork the image already carries.
   if (slide.image && !hasCopy) {
     const banner = (
       <img
+        // Remounted when the slide takes over so the drift starts again.
+        key={isActive ? "live" : "idle"}
         src={slide.image}
         alt={slide.ctaLabel || "Rising Sun Power BD"}
-        className="block max-h-[70vh] w-full object-cover"
+        className={cn("size-full object-contain", isActive && "rsp-ken-burns")}
       />
     )
     return (
-      <div className="relative overflow-hidden" style={{ background: "var(--hero-bg)" }}>
-        {slide.ctaTo ? (
-          <Link to={slide.ctaTo} className="block no-underline">
-            {banner}
-          </Link>
-        ) : (
-          banner
-        )}
+      <div className="relative" style={{ background: "var(--hero-bg)" }}>
+        <div className="mx-auto w-full max-w-[1280px] px-4 py-4 sm:px-6 sm:py-5">
+          <div
+            className={cn(
+              "relative w-full overflow-hidden rounded-[20px] border border-border/60 shadow-[var(--shadow-sm)]",
+              HERO_FRAME,
+            )}
+            style={{ background: "var(--hero-bg)" }}
+          >
+            {slide.ctaTo ? (
+              <Link to={slide.ctaTo} className="block size-full no-underline">
+                {banner}
+              </Link>
+            ) : (
+              banner
+            )}
+          </div>
+        </div>
       </div>
     )
   }
@@ -166,7 +182,12 @@ function SlidePanel({ slide }: { slide: Slide }) {
             whatever the photo is. */}
         {slide.image && (
           <>
-            <img src={slide.image} alt="" className="absolute inset-0 size-full object-cover" />
+            <img
+              key={isActive ? "live" : "idle"}
+              src={slide.image}
+              alt=""
+              className={cn("absolute inset-0 size-full object-cover", isActive && "rsp-ken-burns")}
+            />
             <div className="absolute inset-0 bg-black/45" />
           </>
         )}

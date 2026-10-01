@@ -176,6 +176,28 @@
   }
 }
 
+/* Hero slider: the live slide drifts in slowly, so banners change with a push
+   rather than a cut. Kept to 4% so a banner's own edges stay on screen.
+   Paused for reduced-motion users. */
+@keyframes rsp-ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.04);
+  }
+}
+
+.rsp-ken-burns {
+  animation: rsp-ken-burns 9s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rsp-ken-burns {
+    animation: none;
+  }
+}
+
 /* Typewriter caret blink for the hero subheading */
 @keyframes rsp-caret {
   0%,

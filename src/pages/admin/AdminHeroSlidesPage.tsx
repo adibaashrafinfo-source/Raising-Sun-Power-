@@ -278,8 +278,9 @@ function SlideDialog({
               />
             </div>
             <p className="mt-1.5 text-xs text-muted">
-              A wide banner works best — around 1920×700. Leave the copy below empty to show the image
-              on its own.
+              Upload at <strong>1600 × 640 px</strong> (2.5∶1) — that is the exact shape of the banner
+              frame, so nothing is cropped or letterboxed. 3200 × 1280 works too for sharper screens.
+              Leave the copy below empty to show the image on its own.
             </p>
           </div>
 
