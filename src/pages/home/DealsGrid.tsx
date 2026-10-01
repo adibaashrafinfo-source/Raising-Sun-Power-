@@ -20,7 +20,7 @@ export function DealsGrid() {
     .filter((p) => p.sale_price != null && p.sale_price < p.price)
     .map((p) => ({ product: p, off: Math.round(((p.price - p.sale_price!) / p.price) * 100) }))
     .sort((a, b) => b.off - a.off)
-    .slice(0, 7)
+    .slice(0, 9)
 
   if (isLoading) {
     return (
@@ -53,7 +53,7 @@ export function DealsGrid() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
         <HeroDeal product={hero.product} off={hero.off} />
         {rest.map(({ product }) => (
           <CatalogProductCard key={product.id} product={product} />
