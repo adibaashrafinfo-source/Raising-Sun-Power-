@@ -154,6 +154,22 @@ function LeadDetailDialog({ lead, onClose }: { lead: Lead | null; onClose: () =>
               {lead.roof_type && <Row label="Roof" value={lead.roof_type} />}
               {lead.timeline && <Row label="Timeline" value={lead.timeline} />}
               {lead.notes && <Row label="Customer notes" value={lead.notes} />}
+              {/* Wholesale enquiries name the products they want priced. */}
+              {!!lead.interested_products?.length && (
+                <div>
+                  <div className="mb-1.5 text-xs font-semibold text-muted">Products wanted</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {lead.interested_products.map((name) => (
+                      <span
+                        key={name}
+                        className="rounded-full bg-blue/10 px-3 py-1 text-[12.5px] font-semibold text-blue"
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <div className="mb-1.5 text-xs font-semibold text-muted">Status</div>

@@ -298,6 +298,8 @@ export type LeadInsert = {
   system_type?: string | null
   monthly_bill?: string | null
   location?: string | null
+  /** Wholesale enquiries: the products the customer wants to buy in bulk. */
+  interested_products?: string[] | null
 }
 
 export type Lead = LeadInsert & {
