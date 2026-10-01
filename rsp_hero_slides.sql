@@ -42,3 +42,11 @@ create policy "staff_write_hero_slides" on hero_slides
 for all to authenticated using (fn_is_inventory_staff()) with check (fn_is_inventory_staff());
 
 notify pgrst, 'reload schema';
+
+-- ----------------------------------------------------------------------------
+-- Third shop location for the admin Stock page.
+-- APPLIED 2026-10-01 directly (data only, no schema change).
+-- ----------------------------------------------------------------------------
+insert into locations (name, address, is_active)
+select 'Paniwala Bazar Shop', 'Paniwala Bazar, Ramgonj, Laximpur.', true
+where not exists (select 1 from locations where name = 'Paniwala Bazar Shop');
