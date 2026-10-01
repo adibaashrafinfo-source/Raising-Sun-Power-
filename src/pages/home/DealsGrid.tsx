@@ -24,8 +24,8 @@ export function DealsGrid() {
 
   if (isLoading) {
     return (
-      <section className="mx-auto max-w-[1280px] px-4 pt-10 sm:px-6 sm:pt-12">
-        <Skeleton className="h-[420px] w-full rounded-[24px]" />
+      <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 sm:pt-10">
+        <Skeleton className="h-[300px] w-full rounded-[24px]" />
       </section>
     )
   }
@@ -34,13 +34,13 @@ export function DealsGrid() {
   const [hero, ...rest] = deals
 
   return (
-    <section className="mx-auto max-w-[1280px] px-4 pt-10 sm:px-6 sm:pt-12">
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 sm:pt-10">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <span className="inline-flex items-center gap-2 rounded-full bg-red-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-red-500">
             <span className="size-1.5 rounded-full bg-red-500" /> On offer
           </span>
-          <h2 className="mt-2.5 font-heading text-[clamp(22px,3.2vw,30px)] font-extrabold tracking-tight text-text">
+          <h2 className="mt-2 font-heading text-[clamp(20px,2.6vw,26px)] font-extrabold tracking-tight text-text">
             Hand-picked deals you shouldn't miss
           </h2>
         </div>
@@ -70,13 +70,13 @@ function HeroDeal({ product, off }: { product: Parameters<typeof CatalogProductC
   return (
     <Link
       to={`/product/${product.slug}`}
-      className="group relative col-span-2 flex flex-col overflow-hidden rounded-[20px] border border-border bg-surface no-underline shadow-[var(--shadow-sm)] transition-[transform,box-shadow] duration-250 hover:-translate-y-1 hover:shadow-[var(--shadow)] lg:row-span-2"
+      className="group relative col-span-2 flex flex-col overflow-hidden rounded-[20px] border border-border bg-surface no-underline shadow-[var(--shadow-sm)] transition-[transform,box-shadow] duration-250 hover:-translate-y-1 hover:shadow-[var(--shadow)]"
     >
       <span className="absolute left-3 top-3 z-10 rounded-full bg-red-500 px-2.5 py-1 text-[11px] font-extrabold text-white">
         -{off}%
       </span>
       <span
-        className="relative flex min-h-[180px] flex-1 items-center justify-center overflow-hidden lg:min-h-[260px]"
+        className="relative flex min-h-[130px] flex-1 items-center justify-center overflow-hidden sm:min-h-[150px]"
         style={image ? undefined : { background: tintForCategory(product.category?.slug) }}
       >
         {image ? (
@@ -90,15 +90,15 @@ function HeroDeal({ product, off }: { product: Parameters<typeof CatalogProductC
           <ProductArt art={artForCategory(product.category?.slug)} className="size-24" />
         )}
       </span>
-      <span className="flex flex-col gap-1.5 p-4">
+      <span className="flex flex-col gap-1 p-3.5">
         <span className="text-[11.5px] font-semibold uppercase tracking-wide text-muted">
           {product.category?.name ?? "Featured deal"}
         </span>
-        <span className="line-clamp-2 font-heading text-[15px] font-bold leading-snug text-text sm:text-[17px]">
+        <span className="line-clamp-2 font-heading text-[14px] font-bold leading-snug text-text sm:text-[15.5px]">
           {product.name}
         </span>
-        <span className="mt-1 flex items-baseline gap-2">
-          <span className="font-heading text-xl font-extrabold tabular-nums text-orange-500">
+        <span className="mt-0.5 flex items-baseline gap-2">
+          <span className="font-heading text-[17px] font-extrabold tabular-nums text-orange-500">
             {formatBDT(price)}
           </span>
           <span className="text-[13px] text-muted line-through">{formatBDT(product.price)}</span>
