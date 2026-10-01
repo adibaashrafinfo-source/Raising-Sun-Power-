@@ -5,7 +5,8 @@ import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { appliancePresets } from "@/data/calculator-appliances"
 import { useSeo } from "@/hooks/use-seo"
-import { calculateSolarSystem } from "@/lib/solar-calculator"
+import { useCalculatorSettings } from "@/hooks/use-calculator"
+import { calculateSolarSystem, configFromSettings } from "@/lib/solar-calculator"
 import { cn } from "@/lib/utils"
 import { type LoadRow, dailyEnergyWh, peakLoadWatt } from "@/lib/load-sheet"
 import { LoadStep } from "@/pages/calculator/LoadStep"
@@ -42,6 +43,7 @@ export default function SolarCalculatorPage() {
       }
     }),
   )
+  const { data: calculatorSettings } = useCalculatorSettings()
   const [backupHours, setBackupHours] = useState(4)
   const [batteryType, setBatteryType] = useState<BatteryType>("notsure")
   const [expandHow, setExpandHow] = useState(false)
@@ -52,14 +54,17 @@ export default function SolarCalculatorPage() {
   const result = useMemo(
     () =>
       step === 3
-        ? calculateSolarSystem({
-            totalLoadWatt: totalLoad,
-            backupHours,
-            batteryType,
-            dailyEnergyWh: dailyWh,
-          })
+        ? calculateSolarSystem(
+            {
+              totalLoadWatt: totalLoad,
+              backupHours,
+              batteryType,
+              dailyEnergyWh: dailyWh,
+            },
+            configFromSettings(calculatorSettings),
+          )
         : null,
-    [step, totalLoad, dailyWh, backupHours, batteryType],
+    [step, totalLoad, dailyWh, backupHours, batteryType, calculatorSettings],
   )
 
   const goToQuote = () => {

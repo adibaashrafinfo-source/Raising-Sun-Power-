@@ -62,6 +62,7 @@ const AdminSettingsPage = lazy(() => import("@/pages/admin/AdminSettingsPage"))
 const AdminCmsPage = lazy(() => import("@/pages/admin/AdminCmsPage"))
 const AdminHeroSlidesPage = lazy(() => import("@/pages/admin/AdminHeroSlidesPage"))
 const AdminRoiSettingsPage = lazy(() => import("@/pages/admin/AdminRoiSettingsPage"))
+const AdminCalculatorPage = lazy(() => import("@/pages/admin/AdminCalculatorPage"))
 const AdminStaffPage = lazy(() => import("@/pages/admin/AdminStaffPage"))
 
 export default function App() {
@@ -166,6 +167,14 @@ export default function App() {
                 element={
                   <Suspense fallback={<PageFallback />}>
                     <AdminOrdersPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="solar-calculator"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminCalculatorPage />
                   </Suspense>
                 }
               />
