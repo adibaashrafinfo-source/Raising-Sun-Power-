@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react"
 import { Route, Routes } from "react-router-dom"
 
 import { RequireAdminOnly, RequireAuth, RequireInventoryStaff } from "@/components/auth/RequireAuth"
+import { ScrollToTop } from "@/components/layout/ScrollToTop"
 import { AccountLayout } from "@/components/layout/AccountLayout"
 import { AppLayout } from "@/components/layout/AppLayout"
 import Home from "@/pages/Home"
@@ -65,288 +66,291 @@ const AdminStaffPage = lazy(() => import("@/pages/admin/AdminStaffPage"))
 
 export default function App() {
   return (
-    <Routes>
-      <Route element={<AppLayout />}>
-        <Route index element={<Home />} />
-        <Route path="products" element={<ProductListPage />} />
-        <Route path="category/:slug" element={<ProductListPage />} />
-        <Route path="product/:slug" element={<ProductDetailPage />} />
-        <Route path="cart" element={<CartPage />} />
-        <Route path="checkout" element={<CheckoutPage />} />
-        <Route path="order-confirmation/:orderId" element={<OrderConfirmationPage />} />
-        <Route path="solar-calculator" element={<SolarCalculatorPage />} />
-        <Route
-          path="solar-roi-calculator"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <SolarROICalculatorPage />
-            </Suspense>
-          }
-        />
-        <Route path="get-quotation" element={<GetQuotationPage />} />
-        <Route path="quotation-received/:refId" element={<QuotationReceivedPage />} />
-        <Route
-          path="solar-assessment"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <SolarAssessmentPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="wholesale"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <WholesalePage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="blog"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <BlogPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="blog/:slug"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <BlogPostPage />
-            </Suspense>
-          }
-        />
-        <Route path="packages" element={<PackagesPage />} />
-        <Route path="package/:slug" element={<PackageDetailPage />} />
-        <Route path="track-order" element={<TrackOrderPage />} />
-        <Route path="about" element={<AboutPage />} />
-        <Route path="contact" element={<ContactPage />} />
-        <Route path="login" element={<LoginPage />} />
-        <Route path="register" element={<RegisterPage />} />
-        <Route path="forgot-password" element={<ForgotPasswordPage />} />
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route index element={<Home />} />
+          <Route path="products" element={<ProductListPage />} />
+          <Route path="category/:slug" element={<ProductListPage />} />
+          <Route path="product/:slug" element={<ProductDetailPage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
+          <Route path="order-confirmation/:orderId" element={<OrderConfirmationPage />} />
+          <Route path="solar-calculator" element={<SolarCalculatorPage />} />
+          <Route
+            path="solar-roi-calculator"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <SolarROICalculatorPage />
+              </Suspense>
+            }
+          />
+          <Route path="get-quotation" element={<GetQuotationPage />} />
+          <Route path="quotation-received/:refId" element={<QuotationReceivedPage />} />
+          <Route
+            path="solar-assessment"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <SolarAssessmentPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="wholesale"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <WholesalePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="blog"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <BlogPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="blog/:slug"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <BlogPostPage />
+              </Suspense>
+            }
+          />
+          <Route path="packages" element={<PackagesPage />} />
+          <Route path="package/:slug" element={<PackageDetailPage />} />
+          <Route path="track-order" element={<TrackOrderPage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="contact" element={<ContactPage />} />
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
 
-        <Route element={<RequireAuth />}>
-          <Route path="account" element={<AccountLayout />}>
-            <Route index element={<AccountDashboardPage />} />
-            <Route path="orders" element={<AccountOrdersPage />} />
-            <Route path="orders/:orderId" element={<AccountOrderDetailPage />} />
-            <Route path="wishlist" element={<AccountWishlistPage />} />
-            <Route path="addresses" element={<AccountAddressesPage />} />
-            <Route path="profile" element={<AccountProfilePage />} />
-          </Route>
-        </Route>
-
-        <Route path="*" element={<ComingSoon title="Page not found" />} />
-      </Route>
-
-      <Route element={<RequireInventoryStaff />}>
-        <Route
-          path="admin"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <AdminLayout />
-            </Suspense>
-          }
-        >
-          <Route element={<RequireAdminOnly />}>
-            <Route
-              index
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminDashboardPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="orders"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminOrdersPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="hero-slider"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminHeroSlidesPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="packages"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminPackagesPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="products"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminProductsPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="categories"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminCategoriesPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="brands"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminBrandsPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="customers"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminCustomersPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="coupons"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminCouponsPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="leads"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminLeadsPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="messages"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminContactMessagesPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="settings"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminSettingsPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="roi-calculator"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminRoiSettingsPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="cms"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminCmsPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="staff"
-              element={
-                <Suspense fallback={<PageFallback />}>
-                  <AdminStaffPage />
-                </Suspense>
-              }
-            />
+          <Route element={<RequireAuth />}>
+            <Route path="account" element={<AccountLayout />}>
+              <Route index element={<AccountDashboardPage />} />
+              <Route path="orders" element={<AccountOrdersPage />} />
+              <Route path="orders/:orderId" element={<AccountOrderDetailPage />} />
+              <Route path="wishlist" element={<AccountWishlistPage />} />
+              <Route path="addresses" element={<AccountAddressesPage />} />
+              <Route path="profile" element={<AccountProfilePage />} />
+            </Route>
           </Route>
 
-          <Route
-            path="inventory/stock"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <AdminStockPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="inventory/suppliers"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <AdminSuppliersPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="inventory/purchases"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <AdminPurchasesPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="inventory/purchase-returns"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <AdminPurchaseReturnsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="inventory/sales-returns"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <AdminSalesReturnsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="finance/expenses"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <AdminExpensesPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="finance/accounts"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <AdminAccountsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="finance/dashboard"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <AdminFinanceDashboardPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="inventory/reports"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <AdminInventoryReportsPage />
-              </Suspense>
-            }
-          />
+          <Route path="*" element={<ComingSoon title="Page not found" />} />
         </Route>
-      </Route>
-    </Routes>
+
+        <Route element={<RequireInventoryStaff />}>
+          <Route
+            path="admin"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <AdminLayout />
+              </Suspense>
+            }
+          >
+            <Route element={<RequireAdminOnly />}>
+              <Route
+                index
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminDashboardPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="orders"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminOrdersPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="hero-slider"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminHeroSlidesPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="packages"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminPackagesPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="products"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminProductsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="categories"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminCategoriesPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="brands"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminBrandsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="customers"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminCustomersPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="coupons"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminCouponsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="leads"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminLeadsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="messages"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminContactMessagesPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="settings"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminSettingsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="roi-calculator"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminRoiSettingsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="cms"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminCmsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="staff"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminStaffPage />
+                  </Suspense>
+                }
+              />
+            </Route>
+
+            <Route
+              path="inventory/stock"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminStockPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="inventory/suppliers"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminSuppliersPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="inventory/purchases"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminPurchasesPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="inventory/purchase-returns"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminPurchaseReturnsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="inventory/sales-returns"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminSalesReturnsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="finance/expenses"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminExpensesPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="finance/accounts"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminAccountsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="finance/dashboard"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminFinanceDashboardPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="inventory/reports"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <AdminInventoryReportsPage />
+                </Suspense>
+              }
+            />
+          </Route>
+        </Route>
+      </Routes>
+    </>
   )
 }
 

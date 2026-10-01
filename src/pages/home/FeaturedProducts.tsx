@@ -161,9 +161,9 @@ export function FeaturedProducts() {
   const products: MiniProduct[] = pinned.length > 1 ? pinned.slice(1).map(toMiniProduct) : PRODUCTS
 
   return (
-    <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-12">
+    <section className="mx-auto max-w-[1280px] px-4 pb-5 pt-8 sm:px-6 sm:pt-10">
       {/* Header */}
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <span className="h-[2px] w-8 rounded-full bg-green-600" />
@@ -171,7 +171,7 @@ export function FeaturedProducts() {
               Our Featured Products
             </span>
           </div>
-          <h2 className="mt-2 font-heading text-[clamp(26px,3.6vw,40px)] font-extrabold leading-tight tracking-tight text-text">
+          <h2 className="mt-2 font-heading text-[clamp(22px,2.8vw,30px)] font-extrabold leading-tight tracking-tight text-text">
             Powering a <span className="text-green-700 dark:text-green-500">Brighter Tomorrow</span>
           </h2>
           <p className="mt-1.5 text-[15px] text-muted">
@@ -186,16 +186,16 @@ export function FeaturedProducts() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.12fr_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.92fr_1.08fr]">
         <FeaturedCard item={featured} />
         <MiniCarousel products={products} />
       </div>
 
       {/* Trust strip */}
-      <div className="mt-4 grid grid-cols-2 gap-4 rounded-2xl border border-green-600/15 bg-green-50 px-5 py-5 dark:bg-green-500/[0.06] lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl border border-green-600/15 bg-green-50 px-4 py-3.5 dark:bg-green-500/[0.06] lg:grid-cols-4">
         {TRUST.map((t) => (
           <div key={t.title} className="flex items-center gap-3">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-green-600/12 text-green-700 dark:text-green-500">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-green-600/12 text-green-700 dark:text-green-500">
               <t.icon className="size-5" />
             </span>
             <div className="min-w-0">
@@ -222,19 +222,19 @@ function FeaturedCard({ item }: { item: FeaturedItem }) {
     <div className="relative flex flex-col overflow-hidden rounded-[22px] border border-green-600/15 bg-[linear-gradient(155deg,#ecf8f0_0%,#f6fbf8_55%,#eef7f1_100%)] dark:bg-[linear-gradient(155deg,rgba(34,197,94,.10),rgba(34,197,94,.03))]">
       {/* Copy on the left, product shot bleeding to the card edges on the right */}
       <div className="grid flex-1 grid-cols-1 sm:grid-cols-[1fr_0.92fr]">
-        <div className="order-2 flex flex-col p-6 sm:order-1 sm:p-7 sm:pr-3">
+        <div className="order-2 flex flex-col p-5 sm:order-1 sm:p-6 sm:pr-3">
           <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-gold-400 px-3 py-1.5 text-[12px] font-extrabold text-[#3d2f00]">
             <Zap className="size-3.5 fill-current" /> {FEATURED.badge}
           </span>
           <span className="mt-4 text-[11.5px] font-bold uppercase tracking-[0.16em] text-muted">
             {FEATURED.eyebrow}
           </span>
-          <h3 className="mt-1.5 font-heading text-[clamp(24px,3vw,32px)] font-extrabold leading-[1.1] tracking-tight text-text">
+          <h3 className="mt-1.5 font-heading text-[clamp(20px,2.4vw,26px)] font-extrabold leading-[1.1] tracking-tight text-text">
             {FEATURED.name}
           </h3>
           <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{FEATURED.tagline}</p>
 
-          <ul className="mt-4 flex flex-col gap-2.5">
+          <ul className="mt-3 flex flex-col gap-2">
             {FEATURED.features.map((f) => (
               <li key={f.text} className="flex items-center gap-2.5 text-[13.5px] font-semibold text-text">
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-green-600 text-white">
@@ -245,8 +245,8 @@ function FeaturedCard({ item }: { item: FeaturedItem }) {
             ))}
           </ul>
 
-          <div className="mt-auto flex flex-wrap items-baseline gap-3 pt-5">
-            <span className="font-heading text-[clamp(28px,4vw,36px)] font-extrabold tabular-nums text-green-700 dark:text-green-500">
+          <div className="mt-auto flex flex-wrap items-baseline gap-3 pt-4">
+            <span className="font-heading text-[clamp(24px,3vw,30px)] font-extrabold tabular-nums text-green-700 dark:text-green-500">
               {formatBDT(FEATURED.price)}
             </span>
             {FEATURED.original > FEATURED.price && (
@@ -258,7 +258,7 @@ function FeaturedCard({ item }: { item: FeaturedItem }) {
         </div>
 
         {/* Full-bleed image column — fills the card's top-right corner */}
-        <div className="relative order-1 min-h-[260px] sm:order-2 sm:min-h-[400px]">
+        <div className="relative order-1 min-h-[200px] sm:order-2 sm:min-h-[300px]">
           <ShowcaseImage
             src={FEATURED.image}
             alt={FEATURED.name}
@@ -275,10 +275,10 @@ function FeaturedCard({ item }: { item: FeaturedItem }) {
       </div>
 
       {/* Bottom action row spans the full card width */}
-      <div className="grid grid-cols-1 gap-3 p-6 pt-0 sm:grid-cols-[1.1fr_0.9fr] sm:p-7 sm:pt-0">
+      <div className="grid grid-cols-1 gap-3 p-5 pt-0 sm:grid-cols-[1.1fr_0.9fr] sm:p-6 sm:pt-0">
         <Link
           to={FEATURED.href}
-          className="flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-green-600 text-[15px] font-bold text-white no-underline shadow-[0_10px_26px_rgba(22,163,74,.3)] transition-all hover:-translate-y-0.5 hover:bg-green-700"
+          className="flex h-[46px] items-center justify-center gap-2 rounded-2xl bg-green-600 text-[15px] font-bold text-white no-underline shadow-[0_10px_26px_rgba(22,163,74,.3)] transition-all hover:-translate-y-0.5 hover:bg-green-700"
         >
           <ShoppingCart className="size-[18px]" /> Add to Cart <ArrowRight className="size-[18px]" />
         </Link>
@@ -305,13 +305,13 @@ function MiniAssurance({ icon: Icon, title, sub }: { icon: typeof Settings; titl
 }
 
 /** How many small cards fill the grid beside the featured card. */
-const PAGE_SIZE = 4
+const PAGE_SIZE = 6
 const AUTO_ADVANCE_MS = 4500
 
 /**
- * Shows the pinned products four at a time. With four or fewer it is just the
- * static 2x2 grid; beyond that it slides through pages automatically, pausing
- * while the pointer is over it so it never yanks a card away mid-click.
+ * Shows the pinned products six at a time, three to a row. With six or fewer
+ * it is a static grid; beyond that it slides through pages automatically,
+ * pausing while the pointer is over it so it never yanks a card away mid-click.
  */
 function MiniCarousel({ products }: { products: MiniProduct[] }) {
   const pages = useMemo(() => {
@@ -335,7 +335,7 @@ function MiniCarousel({ products }: { products: MiniProduct[] }) {
 
   if (pages.length <= 1) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {products.map((p) => (
           <MiniCard key={p.name} product={p} />
         ))}
@@ -360,7 +360,7 @@ function MiniCarousel({ products }: { products: MiniProduct[] }) {
             <div
               key={i}
               aria-hidden={i !== safePage}
-              className="grid w-full shrink-0 grid-cols-1 content-start gap-4 sm:grid-cols-2"
+              className="grid w-full shrink-0 grid-cols-1 content-start gap-4 sm:grid-cols-3"
             >
               {group.map((p) => (
                 <MiniCard key={p.name} product={p} />
@@ -394,7 +394,7 @@ function MiniCard({ product }: { product: MiniProduct }) {
   const [isWishlisted, setWishlisted] = useState(false)
 
   return (
-    <div className="group relative flex flex-col rounded-[18px] border border-border bg-surface p-3.5 shadow-[var(--shadow-sm)] transition-[transform,box-shadow] duration-250 hover:-translate-y-1 hover:shadow-[var(--shadow)]">
+    <div className="group relative flex flex-col rounded-[18px] border border-border bg-surface p-3 shadow-[var(--shadow-sm)] transition-[transform,box-shadow] duration-250 hover:-translate-y-1 hover:shadow-[var(--shadow)]">
       <span className="absolute left-3 top-3 z-10 rounded-md bg-red-500 px-2 py-1 text-[11px] font-extrabold text-white">
         {product.offPct}% OFF
       </span>
@@ -407,7 +407,7 @@ function MiniCard({ product }: { product: MiniProduct }) {
       </button>
 
       <Link to={product.href} className="flex items-center justify-center">
-        <ShowcaseImage src={product.image} alt={product.name} className="aspect-[4/3] w-full" />
+        <ShowcaseImage src={product.image} alt={product.name} className="aspect-[5/4] w-full" />
       </Link>
 
       <Link to={product.href} className="mt-2 line-clamp-2 font-heading text-[14px] font-bold leading-tight text-text no-underline">
@@ -433,7 +433,7 @@ function MiniCard({ product }: { product: MiniProduct }) {
 
       <Link
         to={product.href}
-        className="mt-2.5 flex h-10 items-center justify-center gap-2 rounded-xl bg-green-600/12 text-[13px] font-bold text-green-700 no-underline transition-colors hover:bg-green-600 hover:text-white dark:text-green-500"
+        className="mt-2 flex h-9 items-center justify-center gap-2 rounded-xl bg-green-600/12 text-[13px] font-bold text-green-700 no-underline transition-colors hover:bg-green-600 hover:text-white dark:text-green-500"
       >
         <ShoppingCart className="size-4" /> Add to Cart
       </Link>
