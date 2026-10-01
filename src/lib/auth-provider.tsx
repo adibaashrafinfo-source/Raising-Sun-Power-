@@ -1,5 +1,5 @@
 import type { Session, User } from "@supabase/supabase-js"
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useRef, useState } from "react"
 
 import { fetchProfile } from "@/lib/queries/auth"
 import { supabase } from "@/lib/supabase"
@@ -21,13 +21,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  // Whose profile is currently in state. Used to tell a genuine sign-in from
+  // Supabase re-emitting the session, which it does every time the tab is
+  // brought back to the front.
+  const loadedUserId = useRef<string | null>(null)
 
   const loadProfile = async (userId: string) => {
     try {
       const p = await fetchProfile(userId)
       setProfile(p)
+      loadedUserId.current = p ? userId : null
     } catch {
       setProfile(null)
+      loadedUserId.current = null
     }
   }
 
@@ -48,20 +54,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession)
-      if (newSession?.user) {
-        setIsLoading(true)
-        // Supabase warns against calling its client from inside this callback;
-        // defer a tick so the auth lock is released first.
-        const userId = newSession.user.id
-        setTimeout(() => {
-          loadProfile(userId).finally(() => {
-            if (active) setIsLoading(false)
-          })
-        }, 0)
-      } else {
+      const userId = newSession?.user?.id
+      if (!userId) {
+        loadedUserId.current = null
         setProfile(null)
         setIsLoading(false)
+        return
       }
+      // Returning to the tab makes Supabase refresh the token and re-emit the
+      // session. That is the same user we already have a profile for, so
+      // nothing is reloaded and isLoading stays false: flipping it would blank
+      // the route guards for a moment, unmount the page underneath and throw
+      // away whatever was half-typed in an open dialog.
+      if (loadedUserId.current === userId) return
+
+      setIsLoading(true)
+      // Supabase warns against calling its client from inside this callback;
+      // defer a tick so the auth lock is released first.
+      setTimeout(() => {
+        loadProfile(userId).finally(() => {
+          if (active) setIsLoading(false)
+        })
+      }, 0)
     })
 
     return () => {
