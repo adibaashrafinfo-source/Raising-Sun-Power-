@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { COMPANY, SEO_KEYWORDS, telLink, whatsappLink } from "@/data/company"
+import { ProductPicker } from "@/components/product/ProductPicker"
 import { useCreateLead } from "@/hooks/use-leads"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { useSeo } from "@/hooks/use-seo"
@@ -66,9 +67,13 @@ export default function WholesalePage() {
     setValue,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<WholesaleFormValues>({ resolver: zodResolver(wholesaleSchema) })
+  } = useForm<WholesaleFormValues>({
+    resolver: zodResolver(wholesaleSchema),
+    defaultValues: { products: [] },
+  })
 
   const inquiryType = watch("inquiryType")
+  const pickedProducts = watch("products") ?? []
 
   const jumpToForm = (type: (typeof wholesaleInquiryTypes)[number]) => {
     setValue("inquiryType", type, { shouldValidate: false })
@@ -90,6 +95,7 @@ export default function WholesalePage() {
       district: null,
       location: values.location,
       customer_type: values.inquiryType,
+      interested_products: values.products ?? [],
       system_type: null,
       monthly_bill: null,
       roof_type: null,
@@ -262,6 +268,13 @@ export default function WholesalePage() {
                 <Input placeholder="Area, District" {...register("location")} />
               </Field>
             </div>
+
+            <Field label="Products you want wholesale pricing on">
+              <ProductPicker
+                value={pickedProducts}
+                onChange={(next) => setValue("products", next, { shouldValidate: false })}
+              />
+            </Field>
 
             <Field label="Message">
               <textarea
