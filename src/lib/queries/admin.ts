@@ -52,6 +52,8 @@ export async function fetchDashboardStats() {
     trendOrders,
     statusRows,
     customerCount,
+    pendingTrendRows,
+    customerTrendRows,
   ] = await Promise.all([
     supabase.from("orders").select("total").gte("created_at", startOfToday.toISOString()),
     supabase
@@ -67,6 +69,14 @@ export async function fetchDashboardStats() {
     supabase.from("orders").select("total, created_at").gte("created_at", trendStart.toISOString()),
     supabase.from("orders").select("status"),
     supabase.from("profiles").select("id", { count: "exact", head: true }),
+    // Series behind the Pending and Customers cards, over the same window as
+    // the sales trend so every card's sparkline covers the same days.
+    supabase
+      .from("orders")
+      .select("created_at")
+      .eq("status", "pending")
+      .gte("created_at", trendStart.toISOString()),
+    supabase.from("profiles").select("created_at").gte("created_at", trendStart.toISOString()),
   ])
 
   const todaySales = (todayOrders.data ?? []).reduce((sum, o) => sum + Number(o.total), 0)
@@ -89,6 +99,38 @@ export async function fetchDashboardStats() {
     }
   }
 
+  /** Daily counts over the trend window, zero-filled so the line never gaps. */
+  const dailyCounts = (rows: { created_at: string | null }[] | null) => {
+    const buckets = new Map(salesTrend.map((t) => [t.date, 0]))
+    for (const row of rows ?? []) {
+      const key = String(row.created_at).slice(0, 10)
+      if (buckets.has(key)) buckets.set(key, (buckets.get(key) ?? 0) + 1)
+    }
+    return [...buckets.values()]
+  }
+
+  const pendingTrend = dailyCounts(pendingTrendRows.data)
+  const customerTrend = dailyCounts(customerTrendRows.data)
+
+  /** Change across the window: its second half against its first. */
+  const halfOverHalfPct = (series: number[]) => {
+    const mid = Math.floor(series.length / 2)
+    const first = series.slice(0, mid).reduce((a, b) => a + b, 0)
+    const second = series.slice(mid).reduce((a, b) => a + b, 0)
+    if (first === 0) return second > 0 ? 100 : 0
+    return ((second - first) / first) * 100
+  }
+
+  const orderTrend = salesTrend.map((t) => t.orders)
+  const todayOrderCount = todayOrders.data?.length ?? 0
+  const yesterdayOrderCount = yesterdayOrders.data?.length ?? 0
+  const ordersChangePct =
+    yesterdayOrderCount > 0
+      ? ((todayOrderCount - yesterdayOrderCount) / yesterdayOrderCount) * 100
+      : todayOrderCount > 0
+        ? 100
+        : 0
+
   const statusCounts: Record<string, number> = {}
   for (const row of statusRows.data ?? []) {
     statusCounts[row.status] = (statusCounts[row.status] ?? 0) + 1
@@ -96,8 +138,11 @@ export async function fetchDashboardStats() {
 
   return {
     todaySales,
-    todayOrderCount: todayOrders.data?.length ?? 0,
+    todayOrderCount,
     salesChangePct,
+    ordersChangePct,
+    pendingChangePct: halfOverHalfPct(pendingTrend),
+    customersChangePct: halfOverHalfPct(customerTrend),
     pendingCount: pendingOrders.count ?? 0,
     totalOrders: allOrders.count ?? 0,
     lowStockCount: lowStock.count ?? 0,
@@ -105,6 +150,9 @@ export async function fetchDashboardStats() {
     recentOrders: (recentOrders.data as Order[]) ?? [],
     topProducts: (topProducts.data as Product[]) ?? [],
     salesTrend,
+    orderTrend,
+    pendingTrend,
+    customerTrend,
     statusCounts,
   }
 }

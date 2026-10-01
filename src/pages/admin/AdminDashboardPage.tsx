@@ -92,13 +92,43 @@ export default function AdminDashboardPage() {
           icon={DollarSign}
           label="Today's Sales"
           value={formatBDT(data.todaySales)}
-          color="#67A70E"
+          color="#22C55E"
           changePct={data.salesChangePct}
+          series={data.salesTrend.map((t) => t.sales)}
         />
-        <KpiCard icon={ShoppingBag} label="Today's Orders" value={String(data.todayOrderCount)} color="#217CCA" />
-        <KpiCard icon={Clock} label="Pending Orders" value={String(data.pendingCount)} color="#F49E09" />
-        <KpiCard icon={Users} label="Customers" value={String(data.customerCount)} color="#0B3F94" />
-        <KpiCard icon={AlertTriangle} label="Low Stock" value={String(data.lowStockCount)} color="#E23B3B" />
+        <KpiCard
+          icon={ShoppingBag}
+          label="Today's Orders"
+          value={String(data.todayOrderCount)}
+          color="#3B9BF0"
+          changePct={data.ordersChangePct}
+          series={data.orderTrend}
+        />
+        <KpiCard
+          icon={Clock}
+          label="Pending Orders"
+          value={String(data.pendingCount)}
+          color="#F4A609"
+          changePct={data.pendingChangePct}
+          series={data.pendingTrend}
+        />
+        <KpiCard
+          icon={Users}
+          label="Customers"
+          value={String(data.customerCount)}
+          color="#A974F5"
+          changePct={data.customersChangePct}
+          series={data.customerTrend}
+        />
+        {/* Low stock has no history to draw — it is a snapshot of what is short
+            right now, so the card carries the count and a link instead. */}
+        <KpiCard
+          icon={AlertTriangle}
+          label="Low Stock"
+          value={String(data.lowStockCount)}
+          color="#F2545B"
+          footnote="Products under 10 units"
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
@@ -278,42 +308,136 @@ export default function AdminDashboardPage() {
   )
 }
 
+/**
+ * One headline figure, lit in its own colour: a glowing icon tile, the change
+ * against the period before it, and the real series behind the number drawn as
+ * a neon sparkline.
+ */
 function KpiCard({
   icon: Icon,
   label,
   value,
   color,
   changePct,
+  series,
+  footnote,
 }: {
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
   label: string
   value: string
   color: string
   changePct?: number
+  series?: number[]
+  footnote?: string
 }) {
   const showChange = changePct !== undefined
   const isUp = (changePct ?? 0) >= 0
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-4">
-      <div className="flex items-start justify-between">
+    <div
+      className="relative overflow-hidden rounded-[20px] border p-4"
+      style={{
+        borderColor: `${color}3d`,
+        backgroundImage: `linear-gradient(150deg, ${color}26 0%, ${color}0d 42%, transparent 78%)`,
+        boxShadow: `0 18px 42px -26px ${color}, inset 0 1px 0 ${color}2e`,
+      }}
+    >
+      {/* The light the card is lit by, pooled behind its icon. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-6 -top-10 size-28 rounded-full blur-2xl"
+        style={{ background: color, opacity: 0.22 }}
+      />
+
+      <div className="relative flex items-start justify-between gap-2">
         <span
-          className="mb-3 flex size-10 items-center justify-center rounded-xl"
-          style={{ background: `${color}20` }}
+          className="flex size-10 shrink-0 items-center justify-center rounded-xl"
+          style={{
+            background: `linear-gradient(145deg, ${color}4d, ${color}1a)`,
+            boxShadow: `0 0 18px ${color}59, inset 0 1px 0 ${color}66`,
+          }}
         >
           <Icon className="size-5" style={{ color }} />
         </span>
         {showChange && (
           <span
-            className={`flex items-center gap-0.5 text-[11px] font-bold ${isUp ? "text-green-600" : "text-red-500"}`}
+            className="mt-1 flex items-center gap-0.5 whitespace-nowrap text-[11px] font-bold"
+            style={{ color: isUp ? "#22C55E" : "#F2545B" }}
           >
             {isUp ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
             {Math.abs(changePct ?? 0).toFixed(0)}%
           </span>
         )}
       </div>
-      <div className="font-heading text-xl font-extrabold tabular-nums text-text">{value}</div>
-      <div className="mt-0.5 text-xs text-muted">{label}</div>
+
+      <div className="relative mt-3 text-[12.5px] font-semibold text-muted">{label}</div>
+
+      <div className="relative mt-1 flex items-end justify-between gap-2">
+        <span className="font-heading text-[22px] font-extrabold tabular-nums leading-none text-text">
+          {value}
+        </span>
+        {series && series.length > 1 ? (
+          <Sparkline values={series} color={color} />
+        ) : (
+          footnote && <span className="pb-0.5 text-[11px] text-muted">{footnote}</span>
+        )}
+      </div>
     </div>
+  )
+}
+
+/** A smooth neon line over the card's own series. Purely decorative. */
+function Sparkline({ values, color }: { values: number[]; color: string }) {
+  const width = 92
+  const height = 34
+  const max = Math.max(...values)
+  const min = Math.min(...values)
+  const span = max - min || 1
+  const step = width / (values.length - 1)
+
+  const points = values.map((v, i) => ({
+    x: i * step,
+    // 3px of padding top and bottom so the glow is never clipped.
+    y: height - 3 - ((v - min) / span) * (height - 6),
+  }))
+
+  // Catmull-Rom through the points, as cubic beziers — a straight polyline
+  // reads as a chart, a curve reads as a pulse.
+  let d = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i - 1] ?? points[i]
+    const p1 = points[i]
+    const p2 = points[i + 1]
+    const p3 = points[i + 2] ?? p2
+    const c1x = p1.x + (p2.x - p0.x) / 6
+    const c1y = p1.y + (p2.y - p0.y) / 6
+    const c2x = p2.x - (p3.x - p1.x) / 6
+    const c2y = p2.y - (p3.y - p1.y) / 6
+    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`
+  }
+
+  const last = points[points.length - 1]
+
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      className="shrink-0 overflow-visible"
+      aria-hidden="true"
+    >
+      <path
+        d={d}
+        fill="none"
+        stroke={color}
+        strokeWidth={4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.35}
+        style={{ filter: "blur(5px)" }}
+      />
+      <path d={d} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={last.x} cy={last.y} r={2.6} fill={color} />
+    </svg>
   )
 }
