@@ -27,7 +27,7 @@ import {
   Truck,
   Users,
 } from "lucide-react"
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom"
 
 import { useSeo } from "@/hooks/use-seo"
 import { canAccessAdminPath } from "@/lib/admin-access"
@@ -74,6 +74,7 @@ export function AdminLayout() {
   const { data: siteContent } = useSiteContent()
   const logo = siteContent?.header_logo_url || "/logo.png"
   const navigate = useNavigate()
+  const location = useLocation()
   // The sidebar offers exactly what this role may open, from the same map the
   // route guard checks, so no link ever leads to a redirect.
   const visibleLinks = links.filter((link) => canAccessAdminPath(profile?.role, link.to))
@@ -84,7 +85,7 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-bg text-text">
+    <div className="rsp-admin flex min-h-screen text-text">
       {mobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
@@ -94,21 +95,32 @@ export function AdminLayout() {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-surface transition-all lg:sticky lg:top-0 lg:h-screen",
+          "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-surface transition-[width,transform] duration-300 ease-[cubic-bezier(.22,1,.36,1)] lg:sticky lg:top-0 lg:h-screen",
           collapsed ? "w-[76px]" : "w-[240px]",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b border-border px-4">
+        <div
+          className={cn(
+            "flex h-16 items-center border-b border-border px-3",
+            collapsed ? "justify-center" : "justify-between px-4",
+          )}
+        >
           {!collapsed && (
-            <Link to="/" className="flex items-center gap-2 no-underline">
-              <img src={logo} alt="Rising Sun Power BD" className="h-9 w-auto max-w-[150px] object-contain" />
+            <Link to="/" className="flex min-w-0 items-center gap-2 no-underline">
+              <img
+                src={logo}
+                alt="Rising Sun Power BD"
+                className="h-9 w-auto max-w-[150px] object-contain"
+              />
               <span className="font-heading text-sm font-extrabold text-text">Admin</span>
             </Link>
           )}
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="hidden size-8 items-center justify-center rounded-lg text-muted hover:bg-surface-2 lg:flex"
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="hidden size-9 items-center justify-center rounded-xl border border-border text-muted transition-colors hover:bg-surface-2 hover:text-text lg:flex"
           >
             {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
           </button>
@@ -121,10 +133,15 @@ export function AdminLayout() {
               to={link.to}
               end={link.end}
               onClick={() => setMobileOpen(false)}
+              // The label is the tooltip once the rail is collapsed to icons.
+              title={collapsed ? link.label : undefined}
               className={({ isActive }) =>
                 cn(
-                  "mb-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold no-underline transition-colors",
-                  isActive ? "bg-orange-500/12 text-orange-500" : "text-muted hover:bg-surface-2",
+                  "rsp-nav-item mb-1 flex items-center gap-3 rounded-xl py-2.5 text-sm font-semibold no-underline transition-[background-color,color,transform] duration-200",
+                  collapsed ? "justify-center px-0" : "px-3",
+                  isActive
+                    ? "bg-orange-500/12 text-orange-500 shadow-[inset_0_1px_0_rgba(255,255,255,.25)]"
+                    : "text-muted hover:translate-x-0.5 hover:bg-surface-2 hover:text-text",
                 )
               }
             >
@@ -137,7 +154,11 @@ export function AdminLayout() {
         <div className="border-t border-border p-3">
           <button
             onClick={handleSignOut}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-500/10"
+            title={collapsed ? "Sign out" : undefined}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-xl py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-500/10",
+              collapsed ? "justify-center px-0" : "px-3",
+            )}
           >
             <LogOut className="size-[18px] shrink-0" />
             {!collapsed && "Sign out"}
@@ -158,7 +179,8 @@ export function AdminLayout() {
         <div className="flex items-center justify-end gap-3 border-b border-border px-6 py-3">
           <span className="text-sm text-muted">{profile?.full_name}</span>
         </div>
-        <main className="flex-1 p-4 sm:p-6">
+        {/* Keyed on the path so each page plays the entrance animation. */}
+        <main key={location.pathname} className="rsp-page-enter flex-1 p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

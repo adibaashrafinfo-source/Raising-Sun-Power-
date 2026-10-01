@@ -197,7 +197,8 @@ export default function ProductDetailPage() {
         <span className="font-semibold text-text">{product.name}</span>
       </div>
 
-      <div className="grid items-start gap-8 sm:gap-11 lg:grid-cols-2">
+      <div className="rounded-[28px] border border-border bg-surface p-4 shadow-[var(--shadow)] sm:p-7 lg:p-9">
+        <div className="grid items-start gap-8 sm:gap-11 lg:grid-cols-2">
         <div>
           <div
             className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[22px] shadow-[var(--shadow-sm)]"
@@ -382,8 +383,9 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+      </div>
 
-      <div className="mt-11">
+      <div className="mt-8 rounded-[28px] border border-border bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-7">
         <Tabs defaultValue="description">
           <TabsList>
             <TabsTrigger value="description">Description</TabsTrigger>
