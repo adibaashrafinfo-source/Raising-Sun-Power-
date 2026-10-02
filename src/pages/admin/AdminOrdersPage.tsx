@@ -3,6 +3,7 @@ import { Download, Eye, Pencil, Search, Trash2, Wallet, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
+import { OrderCourierPanel } from "@/components/admin/OrderCourierPanel"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -245,6 +246,8 @@ function OrderDetailDialog({ order, onClose }: { order: Order | null; onClose: (
                   <span>{formatBDT(order.total)}</span>
                 </div>
               </div>
+
+              <OrderCourierPanel order={order} />
 
               <div className="flex items-center justify-between rounded-xl border border-border p-3">
                 <div>

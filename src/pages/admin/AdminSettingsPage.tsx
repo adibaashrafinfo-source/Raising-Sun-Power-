@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
+import { CourierIntegrationCard } from "@/components/admin/CourierIntegrationCard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -51,13 +52,16 @@ export default function AdminSettingsPage() {
     }
   }
 
-  if (isLoading) return <Skeleton className="h-64 w-full rounded-2xl" />
-
   return (
     <div className="flex flex-col gap-5">
       <h1 className="font-heading text-2xl font-extrabold text-text">Settings</h1>
 
-      <form onSubmit={handleSubmit} className="flex max-w-[560px] flex-col gap-5">
+      {isLoading && <Skeleton className="h-64 w-full max-w-[560px] rounded-2xl" />}
+
+      <form
+        onSubmit={handleSubmit}
+        className={`flex max-w-[560px] flex-col gap-5 ${isLoading ? "hidden" : ""}`}
+      >
         <div className="rounded-2xl border border-border bg-surface p-5">
           <div className="mb-4 font-heading text-base font-extrabold text-text">Payment methods</div>
           <div className="flex flex-col gap-3">
@@ -160,6 +164,12 @@ export default function AdminSettingsPage() {
           {updateSettings.isPending ? "Saving…" : "Save Settings"}
         </Button>
       </form>
+
+      {/* Its own form: the courier keys are saved to a different table, and the
+          Test Connection button must not submit the settings above. */}
+      <div className="max-w-[560px]">
+        <CourierIntegrationCard />
+      </div>
     </div>
   )
 }

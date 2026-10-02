@@ -41,6 +41,7 @@ const links = [
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/packages", label: "Packages", icon: Layers },
+  { to: "/admin/couriers", label: "Courier Tracking", icon: Truck },
   { to: "/admin/inventory/stock", label: "Stock", icon: Boxes },
   { to: "/admin/inventory/suppliers", label: "Suppliers", icon: Truck },
   { to: "/admin/inventory/purchases", label: "Purchases", icon: ClipboardList },

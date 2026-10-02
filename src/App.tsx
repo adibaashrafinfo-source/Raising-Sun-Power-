@@ -63,6 +63,7 @@ const AdminCmsPage = lazy(() => import("@/pages/admin/AdminCmsPage"))
 const AdminHeroSlidesPage = lazy(() => import("@/pages/admin/AdminHeroSlidesPage"))
 const AdminRoiSettingsPage = lazy(() => import("@/pages/admin/AdminRoiSettingsPage"))
 const AdminCalculatorPage = lazy(() => import("@/pages/admin/AdminCalculatorPage"))
+const AdminCourierPage = lazy(() => import("@/pages/admin/AdminCourierPage"))
 const AdminStaffPage = lazy(() => import("@/pages/admin/AdminStaffPage"))
 
 export default function App() {
@@ -167,6 +168,14 @@ export default function App() {
                 element={
                   <Suspense fallback={<PageFallback />}>
                     <AdminOrdersPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="couriers"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminCourierPage />
                   </Suspense>
                 }
               />
