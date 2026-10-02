@@ -199,6 +199,31 @@ export type CalculatorAppliance = {
   created_at: string
 }
 
+/**
+ * A courier's saved credentials. The API key and secret are deliberately absent
+ * from this type: the browser is not granted the columns, and only the edge
+ * functions (service role) ever read them.
+ */
+export type CourierSettings = {
+  id: string
+  provider: string
+  is_active: boolean
+  has_credentials: boolean
+  created_at: string
+  updated_at: string
+}
+
+/** The courier statuses we colour and filter on. */
+export const COURIER_STATUSES = [
+  "pending",
+  "in_review",
+  "delivered_approval_pending",
+  "partial_delivered",
+  "delivered",
+  "hold",
+  "cancelled",
+] as const
+
 export type ContactMessageStatus = "new" | "read"
 
 export type ContactMessageInsert = {
@@ -288,6 +313,12 @@ export type Order = OrderInsert & {
   id: string
   user_id: string | null
   courier_status: string | null
+  /** Courier integration — set once an order is booked with a courier. */
+  courier_provider?: string | null
+  consignment_id?: string | null
+  courier_tracking_code?: string | null
+  courier_status_updated_at?: string | null
+  sent_to_courier_at?: string | null
   paid_amount: number
   due_amount: number
   payment_status: PurchasePaymentStatus
