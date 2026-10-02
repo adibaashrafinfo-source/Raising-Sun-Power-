@@ -121,8 +121,23 @@ export async function steadfastFetch(
       body = { message: text.slice(0, 300) }
     }
 
+    // Logged (never the keys) so a rejection can be diagnosed from the
+    // function logs rather than guessed at from a generic message.
+    if (res.status >= 400) {
+      console.error(`Steadfast ${path} -> HTTP ${res.status}: ${text.slice(0, 500)}`)
+    }
+
     if (res.status === 401 || res.status === 403) {
-      throw new CourierError("Steadfast rejected the API key and secret. Check them in Settings.", 401)
+      // Steadfast's own wording matters here: the same key pair can pass
+      // /get_balance and still be refused for order creation, which reads very
+      // differently from "the keys are wrong".
+      const detail = String(body.message ?? body.error ?? "").trim()
+      throw new CourierError(
+        detail
+          ? `Steadfast refused this request (HTTP ${res.status}): ${detail}`
+          : `Steadfast refused this request (HTTP ${res.status}). The same keys pass the balance check, so the account may not have order-creation access enabled yet — check with Steadfast support.`,
+        401,
+      )
     }
     if (res.status >= 500) {
       throw new CourierError("Steadfast is not responding right now. Try again in a moment.", 503)

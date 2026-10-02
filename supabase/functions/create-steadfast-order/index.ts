@@ -81,16 +81,21 @@ Deno.serve(async (req) => {
       .slice(0, 400)
 
     const creds = await loadCredentials(admin)
+    const requestBody = {
+      invoice: order.order_number,
+      recipient_name: recipientName,
+      recipient_phone: recipientPhone,
+      recipient_address: recipientAddress,
+      cod_amount: codAmount,
+      note: note || `Order ${order.order_number}`,
+    }
+    // The payload (never the keys) is logged so a rejection can be read back
+    // against exactly what was sent.
+    console.log(`create_order payload: ${JSON.stringify(requestBody)}`)
+
     const { status, body } = await steadfastFetch("/create_order", creds, {
       method: "POST",
-      body: JSON.stringify({
-        invoice: order.order_number,
-        recipient_name: recipientName,
-        recipient_phone: recipientPhone,
-        recipient_address: recipientAddress,
-        cod_amount: codAmount,
-        note: note || `Order ${order.order_number}`,
-      }),
+      body: JSON.stringify(requestBody),
     })
 
     const consignment = (body.consignment ?? {}) as Record<string, unknown>
