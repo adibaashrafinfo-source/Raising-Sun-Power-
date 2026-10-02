@@ -132,6 +132,18 @@ export async function steadfastFetch(
       // /get_balance and still be refused for order creation, which reads very
       // differently from "the keys are wrong".
       const detail = String(body.message ?? body.error ?? "").trim()
+
+      // Its clearest refusal, and the one that is not about the keys at all:
+      // the merchant account itself has not been activated for booking.
+      if (/account is not active/i.test(detail)) {
+        throw new CourierError(
+          "Steadfast says this merchant account is not active yet, so it will not accept orders. " +
+            "The API keys themselves are fine — the balance check passes with them. " +
+            "Ask Steadfast support to activate the account for order booking, then try again.",
+          403,
+        )
+      }
+
       throw new CourierError(
         detail
           ? `Steadfast refused this request (HTTP ${res.status}): ${detail}`
