@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import {
   ArrowRight,
+  BadgeCheck,
   Headphones,
   Heart,
   Leaf,
@@ -186,7 +187,7 @@ export function FeaturedProducts() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.92fr_1.08fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.06fr]">
         <FeaturedCard item={featured} />
         <MiniCarousel products={products} />
       </div>
@@ -216,76 +217,107 @@ export function FeaturedProducts() {
   )
 }
 
+/** The small promises that hold for every product we sell. */
+const FEATURE_CHIPS = [
+  { icon: BadgeCheck, title: "100% Genuine", sub: "Brand sourced" },
+  { icon: Truck, title: "Nationwide", sub: "Courier delivery" },
+  { icon: ShieldCheck, title: "Brand-backed", sub: "Warranty cover" },
+]
+
+/**
+ * The lead product: its own photograph fills the card, dimmed from the left so
+ * the copy sits on the artwork rather than beside it. Text is white in both
+ * themes because it always sits over that darkened photo.
+ */
 function FeaturedCard({ item }: { item: FeaturedItem }) {
   const FEATURED = item
+
   return (
-    <div className="relative flex flex-col overflow-hidden rounded-[22px] border border-green-600/15 bg-[linear-gradient(155deg,#ecf8f0_0%,#f6fbf8_55%,#eef7f1_100%)] dark:bg-[linear-gradient(155deg,rgba(34,197,94,.10),rgba(34,197,94,.03))]">
-      {/* Copy on the left, product shot bleeding to the card edges on the right */}
-      <div className="grid flex-1 grid-cols-1 sm:grid-cols-[1fr_0.92fr]">
-        <div className="order-2 flex flex-col p-5 sm:order-1 sm:p-6 sm:pr-3">
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-gold-400 px-3 py-1.5 text-[12px] font-extrabold text-[#3d2f00]">
-            <Zap className="size-3.5 fill-current" /> {FEATURED.badge}
-          </span>
-          <span className="mt-4 text-[11.5px] font-bold uppercase tracking-[0.16em] text-muted">
-            {FEATURED.eyebrow}
-          </span>
-          <h3 className="mt-1.5 font-heading text-[clamp(20px,2.4vw,26px)] font-extrabold leading-[1.1] tracking-tight text-text">
-            {FEATURED.name}
-          </h3>
-          <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{FEATURED.tagline}</p>
+    <div className="relative isolate flex min-h-[460px] flex-col overflow-hidden rounded-[22px] border border-green-600/25 bg-[#071410] sm:min-h-[560px]">
+      <ShowcaseImage
+        src={FEATURED.image}
+        alt={FEATURED.name}
+        fit="cover"
+        className="absolute inset-0 -z-20 size-full"
+      />
+      {/* Dark on the left where the words are, clear on the right where the
+          product is — one gradient does both. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10"
+        style={{
+          background:
+            "linear-gradient(105deg, rgba(4,13,10,.97) 0%, rgba(4,13,10,.93) 34%, rgba(4,13,10,.62) 58%, rgba(4,13,10,.22) 100%)",
+        }}
+      />
 
-          <ul className="mt-3 flex flex-col gap-2">
-            {FEATURED.features.map((f) => (
-              <li key={f.text} className="flex items-center gap-2.5 text-[13.5px] font-semibold text-text">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-green-600 text-white">
-                  <f.icon className="size-3.5" />
-                </span>
-                {f.text}
-              </li>
-            ))}
-          </ul>
+      <div className="relative flex flex-1 flex-col p-5 sm:p-7">
+        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-green-600 px-3.5 py-1.5 text-[12px] font-extrabold text-white shadow-[0_8px_20px_rgba(22,163,74,.45)]">
+          <Zap className="size-3.5 fill-current" /> {FEATURED.badge}
+        </span>
 
-          <div className="mt-auto flex flex-wrap items-baseline gap-3 pt-4">
-            <span className="font-heading text-[clamp(24px,3vw,30px)] font-extrabold tabular-nums text-green-700 dark:text-green-500">
-              {formatBDT(FEATURED.price)}
-            </span>
-            {FEATURED.original > FEATURED.price && (
-              <span className="text-lg tabular-nums text-muted line-through">
-                {formatBDT(FEATURED.original)}
+        <span className="mt-5 text-[11.5px] font-bold uppercase tracking-[0.18em] text-white/55">
+          {FEATURED.eyebrow}
+        </span>
+        <h3 className="mt-1.5 max-w-[22ch] font-heading text-[clamp(22px,2.6vw,30px)] font-extrabold leading-[1.12] tracking-tight text-white">
+          {FEATURED.name}
+        </h3>
+        {FEATURED.tagline && (
+          <p className="mt-2.5 max-w-[42ch] text-[14px] leading-relaxed text-white/70">
+            {FEATURED.tagline}
+          </p>
+        )}
+
+        <ul className="mt-4 flex max-w-[34ch] flex-col gap-2.5">
+          {FEATURED.features.map((f) => (
+            <li key={f.text} className="flex items-start gap-2.5 text-[13.5px] font-semibold text-white">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-green-600/20 text-green-400 ring-1 ring-green-500/40">
+                <f.icon className="size-4" />
               </span>
-            )}
-          </div>
-        </div>
+              <span className="pt-1.5 leading-tight">{f.text}</span>
+            </li>
+          ))}
+        </ul>
 
-        {/* Full-bleed image column — fills the card's top-right corner */}
-        <div className="relative order-1 min-h-[200px] sm:order-2 sm:min-h-[300px]">
-          <ShowcaseImage
-            src={FEATURED.image}
-            alt={FEATURED.name}
-            fit="cover"
-            className="absolute inset-0 size-full"
-          />
-          <span className="absolute right-5 top-5 flex size-[86px] flex-col items-center justify-center rounded-full bg-green-700 text-center text-[9.5px] font-extrabold uppercase leading-tight tracking-wide text-white shadow-[0_8px_24px_rgba(0,0,0,.28)]">
-            <Leaf className="mb-0.5 size-3.5" />
-            Save Energy
-            <span className="my-1 h-px w-7 bg-white/40" />
-            Save Money
+        <div className="mt-auto flex flex-wrap items-baseline gap-3 pt-6">
+          <span className="font-heading text-[clamp(26px,3.4vw,34px)] font-extrabold tabular-nums text-green-400">
+            {formatBDT(FEATURED.price)}
           </span>
+          {FEATURED.original > FEATURED.price && (
+            <span className="text-lg tabular-nums text-white/45 line-through">
+              {formatBDT(FEATURED.original)}
+            </span>
+          )}
         </div>
-      </div>
 
-      {/* Bottom action row spans the full card width */}
-      <div className="grid grid-cols-1 gap-3 p-5 pt-0 sm:grid-cols-[1.1fr_0.9fr] sm:p-6 sm:pt-0">
-        <Link
-          to={FEATURED.href}
-          className="flex h-[46px] items-center justify-center gap-2 rounded-2xl bg-green-600 text-[15px] font-bold text-white no-underline shadow-[0_10px_26px_rgba(22,163,74,.3)] transition-all hover:-translate-y-0.5 hover:bg-green-700"
-        >
-          <ShoppingCart className="size-[18px]" /> Add to Cart <ArrowRight className="size-[18px]" />
-        </Link>
-        <div className="flex items-center justify-around gap-2 rounded-2xl border border-border bg-surface px-3 py-2.5">
-          <MiniAssurance icon={Settings} title="Free" sub="Installation Support" />
-          <span className="h-8 w-px bg-border" />
-          <MiniAssurance icon={ShieldCheck} title="25 Years" sub="Warranty" />
+        {/* Promises, sitting on the artwork like the rest of the card. */}
+        <div className="mt-4 hidden w-fit items-center gap-1 rounded-2xl border border-white/15 bg-black/35 p-1.5 backdrop-blur-md sm:flex">
+          {FEATURE_CHIPS.map((chip, i) => (
+            <div key={chip.title} className="flex items-center">
+              {i > 0 && <span className="mr-1 h-8 w-px bg-white/15" />}
+              <div className="flex items-center gap-2 px-2.5 py-1">
+                <chip.icon className="size-4 shrink-0 text-green-400" />
+                <div className="leading-tight">
+                  <div className="text-[11.5px] font-extrabold text-white">{chip.title}</div>
+                  <div className="text-[10.5px] text-white/60">{chip.sub}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-[1.05fr_0.95fr]">
+          <Link
+            to={FEATURED.href}
+            className="flex h-[50px] items-center justify-center gap-2 rounded-2xl bg-green-600 text-[15px] font-bold text-white no-underline shadow-[0_12px_30px_rgba(22,163,74,.4)] transition-all hover:-translate-y-0.5 hover:bg-green-500"
+          >
+            <ShoppingCart className="size-[18px]" /> Add to Cart <ArrowRight className="size-[18px]" />
+          </Link>
+          <div className="flex items-center justify-around gap-2 rounded-2xl border border-white/15 bg-black/35 px-3 py-2.5 backdrop-blur-md">
+            <MiniAssurance icon={Settings} title="Free" sub="Installation Support" />
+            <span className="h-8 w-px bg-white/15" />
+            <MiniAssurance icon={ShieldCheck} title="25 Years" sub="Warranty" />
+          </div>
         </div>
       </div>
     </div>
@@ -295,10 +327,10 @@ function FeaturedCard({ item }: { item: FeaturedItem }) {
 function MiniAssurance({ icon: Icon, title, sub }: { icon: typeof Settings; title: string; sub: string }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="size-5 shrink-0 text-green-700 dark:text-green-500" />
+      <Icon className="size-5 shrink-0 text-green-400" />
       <div className="leading-tight">
-        <div className="text-[12.5px] font-extrabold text-text">{title}</div>
-        <div className="text-[11.5px] text-muted">{sub}</div>
+        <div className="text-[12.5px] font-extrabold text-white">{title}</div>
+        <div className="text-[11.5px] text-white/60">{sub}</div>
       </div>
     </div>
   )
