@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useDashboardStats } from "@/hooks/use-admin"
-import { formatBDT } from "@/lib/utils"
+import { cn, formatBDT } from "@/lib/utils"
 import type { OrderStatus } from "@/types/database"
 
 const STATUS_META: Record<OrderStatus, { label: string; color: string }> = {
@@ -128,6 +128,7 @@ export default function AdminDashboardPage() {
           value={String(data.lowStockCount)}
           color="#F2545B"
           footnote="Products under 10 units"
+          className="col-span-2 lg:col-span-1"
         />
       </div>
 
@@ -321,6 +322,7 @@ function KpiCard({
   changePct,
   series,
   footnote,
+  className,
 }: {
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
   label: string
@@ -329,13 +331,14 @@ function KpiCard({
   changePct?: number
   series?: number[]
   footnote?: string
+  className?: string
 }) {
   const showChange = changePct !== undefined
   const isUp = (changePct ?? 0) >= 0
 
   return (
     <div
-      className="relative overflow-hidden rounded-[20px] border p-4"
+      className={cn("relative min-w-0 overflow-hidden rounded-[20px] border p-4", className)}
       style={{
         borderColor: `${color}3d`,
         backgroundImage: `linear-gradient(150deg, ${color}26 0%, ${color}0d 42%, transparent 78%)`,
@@ -379,7 +382,7 @@ function KpiCard({
         {series && series.length > 1 ? (
           <Sparkline values={series} color={color} />
         ) : (
-          footnote && <span className="pb-0.5 text-[11px] text-muted">{footnote}</span>
+          footnote && <span className="min-w-0 pb-0.5 text-right text-[11px] text-muted">{footnote}</span>
         )}
       </div>
     </div>
