@@ -204,8 +204,8 @@ export function QuotationBuilderDialog({ lead, onClose }: { lead: Lead; onClose:
             </div>
           </div>
 
-          <div className="rounded-xl border border-border">
-            <div className="grid grid-cols-[1fr_60px_56px_100px_100px_34px] gap-2 border-b border-border bg-surface-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted">
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <div className="min-w-[560px] grid grid-cols-[1fr_60px_56px_100px_100px_34px] gap-2 border-b border-border bg-surface-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted">
               <span>Item</span>
               <span className="text-right">Unit</span>
               <span className="text-right">Qty</span>
@@ -214,7 +214,7 @@ export function QuotationBuilderDialog({ lead, onClose }: { lead: Lead; onClose:
               <span />
             </div>
             {lines.map((line, i) => (
-              <div key={i} className="border-b border-border px-3 py-2 last:border-0">
+              <div key={i} className="min-w-[560px] border-b border-border px-3 py-2 last:border-0">
                 <div className="grid grid-cols-[1fr_60px_56px_100px_100px_34px] items-center gap-2">
                   <Input
                     value={line.product_name}

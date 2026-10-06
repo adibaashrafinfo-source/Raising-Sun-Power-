@@ -240,9 +240,9 @@ function NewPurchaseDialog({ open, onOpenChange }: { open: boolean; onOpenChange
 
           <div>
             <Label className="mb-2 block">Line items *</Label>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 overflow-x-auto">
               {items.map((item, i) => (
-                <div key={i} className="grid grid-cols-[1fr_80px_100px_32px] items-center gap-2">
+                <div key={i} className="grid min-w-[480px] grid-cols-[1fr_80px_100px_32px] items-center gap-2">
                   <select
                     value={item.productId}
                     onChange={(e) => updateItem(i, { productId: e.target.value })}
