@@ -1,7 +1,8 @@
 import { useState } from "react"
-import { Eye, X } from "lucide-react"
+import { Eye, FileText, X } from "lucide-react"
 import { toast } from "sonner"
 
+import { QuotationBuilderDialog } from "@/components/admin/QuotationBuilderDialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
@@ -109,6 +110,7 @@ export default function AdminLeadsPage() {
 function LeadDetailDialog({ lead, onClose }: { lead: Lead | null; onClose: () => void }) {
   const updateLead = useUpdateLead()
   const [notes, setNotes] = useState(lead?.admin_notes ?? "")
+  const [quoteFor, setQuoteFor] = useState<Lead | null>(null)
 
   const handleStatusChange = async (status: LeadStatus) => {
     if (!lead) return
@@ -199,10 +201,19 @@ function LeadDetailDialog({ lead, onClose }: { lead: Lead | null; onClose: () =>
                   Save Notes
                 </Button>
               </div>
+
+              <div className="flex justify-end border-t border-border pt-3">
+                <Button size="sm" onClick={() => setQuoteFor(lead)}>
+                  <FileText className="size-3.5" /> Build Quotation
+                </Button>
+              </div>
             </div>
           </>
         )}
       </DialogContent>
+      {quoteFor && (
+        <QuotationBuilderDialog lead={quoteFor} onClose={() => setQuoteFor(null)} />
+      )}
     </Dialog>
   )
 }

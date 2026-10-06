@@ -144,3 +144,19 @@ export async function fetchProductsByPlacement(flag: HomePlacement, limit = 8): 
   if (error) throw error
   return (data as unknown as Product[]) ?? []
 }
+
+/**
+ * Warranty + SERDA for a basket of product ids, used when checkout snapshots
+ * each order line. Returned as a Map keyed by product id so an unknown id is
+ * handled as absent rather than a null row sneaking into the invoice.
+ */
+export async function fetchProductMetaForOrder(
+  productIds: string[],
+): Promise<Map<string, { warranty_months: number; serda_serial_number: string | null }>> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, warranty_months, serda_serial_number")
+    .in("id", productIds)
+  if (error) throw error
+  return new Map((data ?? []).map((row) => [row.id, row]))
+}

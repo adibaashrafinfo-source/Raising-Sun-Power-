@@ -259,6 +259,7 @@ function ProductDialog({
           reorderLevel: String(product.reorder_level),
           warrantyMonths: String(product.warranty_months),
           hasSerialTracking: product.has_serial_tracking,
+          serdaSerialNumber: product.serda_serial_number ?? "",
           isActive: product.is_active,
           isBestSeller: product.is_best_seller,
           isNewArrival: product.is_new_arrival,
@@ -276,6 +277,7 @@ function ProductDialog({
           reorderLevel: "5",
           warrantyMonths: "0",
           hasSerialTracking: false,
+          serdaSerialNumber: "",
           isActive: true,
           isBestSeller: false,
           isNewArrival: false,
@@ -409,6 +411,7 @@ function ProductDialog({
         reorder_level: Number(values.reorderLevel),
         warranty_months: Number(values.warrantyMonths),
         has_serial_tracking: values.hasSerialTracking,
+        serda_serial_number: values.serdaSerialNumber?.trim() || null,
         is_active: values.isActive,
         is_best_seller: values.isBestSeller,
         is_new_arrival: values.isNewArrival,
@@ -500,6 +503,9 @@ function ProductDialog({
             </Field>
             <Field label="Warranty (months) *" error={errors.warrantyMonths?.message}>
               <Input type="number" {...register("warrantyMonths")} />
+            </Field>
+            <Field label="SERDA Serial Number" error={errors.serdaSerialNumber?.message}>
+              <Input placeholder="e.g. SERDA-2026-0421" {...register("serdaSerialNumber")} />
             </Field>
             <Field label="Badges (comma separated)">
               <Input placeholder="New, Best Seller" {...register("badges")} />

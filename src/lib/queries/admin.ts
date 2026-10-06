@@ -237,6 +237,7 @@ export type ProductUpsert = {
   reorder_level: number
   warranty_months: number
   has_serial_tracking: boolean
+  serda_serial_number: string | null
   is_active: boolean
   is_best_seller: boolean
   is_new_arrival: boolean
