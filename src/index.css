@@ -318,9 +318,16 @@
   }
 }
 
+/* Layered so a `fixed`/`sticky` utility on the same element still wins —
+   unlayered CSS outranks every Tailwind utility. */
+@layer components {
+  .rsp-glass-panel {
+    position: relative;
+  }
+}
+
 /* A floating pane of glass. */
 .rsp-glass-panel {
-  position: relative;
   isolation: isolate;
   background-color: transparent;
   background-image: var(--glass-panel-bg);

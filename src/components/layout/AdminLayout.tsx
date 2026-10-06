@@ -196,6 +196,7 @@ export function AdminLayout() {
         <header className="rsp-glass-panel m-3 flex h-14 items-center gap-3 rounded-2xl px-4 lg:hidden">
           <button
             onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
             className="flex size-9 items-center justify-center rounded-lg border border-border text-text"
           >
             <Menu className="size-[18px]" />
