@@ -1,9 +1,10 @@
 import { useState } from "react"
-import { Download, Eye, Pencil, Search, Trash2, Wallet, X } from "lucide-react"
+import { Download, Eye, Pencil, Search, Send, Trash2, Wallet, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { OrderCourierPanel } from "@/components/admin/OrderCourierPanel"
+import { courierStatusMeta } from "@/lib/courier-status"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -104,6 +105,7 @@ export default function AdminOrdersPage() {
                 <th className="px-4 py-3 font-semibold">Payment</th>
                 <th className="px-4 py-3 font-semibold">Due / Payment Status</th>
                 <th className="px-4 py-3 font-semibold">Order Status</th>
+                <th className="px-4 py-3 font-semibold">Courier</th>
                 <th className="px-4 py-3 font-semibold">Date</th>
                 <th className="px-4 py-3 text-right font-semibold">Actions</th>
               </tr>
@@ -141,6 +143,9 @@ export default function AdminOrdersPage() {
                         </option>
                       ))}
                     </select>
+                  </td>
+                  <td className="px-4 py-3">
+                    <CourierCell order={order} onReview={() => setSelected(order)} />
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-xs text-muted">
                     {new Date(order.created_at).toLocaleDateString()}
@@ -349,5 +354,34 @@ function RecordOrderPaymentDialog({ order, onClose }: { order: Order; onClose: (
         </form>
       </DialogContent>
     </Dialog>
+  )
+}
+
+
+/**
+ * Row-level courier chip for the admin orders list. Either the compact status
+ * pill if the order is already with the courier, or a one-click button that
+ * opens the order dialog where the send-to-courier flow lives.
+ */
+function CourierCell({ order, onReview }: { order: Order; onReview: () => void }) {
+  const isPickup = order.delivery_method === "pickup"
+  if (order.consignment_id) {
+    const meta = courierStatusMeta(order.courier_status)
+    return (
+      <div className="flex flex-col gap-0.5">
+        <span className={`w-fit rounded-full px-2 py-0.5 text-[11px] font-bold ${meta.className}`}>
+          {meta.label}
+        </span>
+        <span className="text-[11px] text-muted">{order.consignment_id}</span>
+      </div>
+    )
+  }
+  if (isPickup) {
+    return <span className="text-[11.5px] text-muted">Pick-up</span>
+  }
+  return (
+    <Button variant="outline" size="sm" onClick={onReview}>
+      <Send className="size-3.5" /> Send
+    </Button>
   )
 }

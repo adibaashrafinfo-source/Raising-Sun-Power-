@@ -39,6 +39,8 @@ import { useCartStore } from "@/store/cart-store"
 
 /** How far you have to scroll on an inner page before the nav row slides away. */
 const NAV_HIDE_AFTER = 80
+/** How many pixels of scroll must happen in one direction before the nav bar flips. */
+const NAV_HIDE_DEADBAND = 24
 
 export function Header() {
   const { theme, toggleTheme } = useTheme()
@@ -71,28 +73,61 @@ export function Header() {
   // bar slides away once the hero is behind you and comes back as you scroll up
   // into it; everywhere else only the nav row collapses as you scroll down, so
   // the logo, search and cart stay with you.
+  // Decides when to hide the bar. Rules:
+  //  1. Only crossings bigger than NAV_HIDE_DEADBAND switch state — otherwise
+  //     a 1-2px scroll jitter (smooth-scroll inertia, momentum trackpads)
+  //     would flip the nav on and off every frame and the page would appear
+  //     to shake as the content under it reflows.
+  //  2. The check is batched into one requestAnimationFrame tick so the
+  //     scroll event never does synchronous React work.
   useEffect(() => {
-    let last = window.scrollY
+    // The last position that caused a state change — the deadband is measured
+    // against this, not against the previous frame.
+    let lastDecisive = window.scrollY
+    let direction: "up" | "down" | null = null
+    let ticking = false
+
     const evaluate = () => {
+      ticking = false
       const y = window.scrollY
+
       if (isHome) {
         const hero = document.querySelector<HTMLElement>("[data-hero]")
         setIsHidden(hero ? y > hero.offsetTop + hero.offsetHeight : false)
         setIsNavHidden(false)
-      } else {
-        setIsHidden(false)
-        if (y <= NAV_HIDE_AFTER) setIsNavHidden(false)
-        else if (y > last) setIsNavHidden(true)
-        else if (y < last) setIsNavHidden(false)
+        return
       }
-      last = y
+
+      setIsHidden(false)
+      if (y <= NAV_HIDE_AFTER) {
+        setIsNavHidden(false)
+        lastDecisive = y
+        direction = null
+      } else {
+        const delta = y - lastDecisive
+        if (delta > NAV_HIDE_DEADBAND && direction !== "down") {
+          setIsNavHidden(true)
+          direction = "down"
+          lastDecisive = y
+        } else if (delta < -NAV_HIDE_DEADBAND && direction !== "up") {
+          setIsNavHidden(false)
+          direction = "up"
+          lastDecisive = y
+        }
+      }
     }
-    // Deferred so the first run is not a synchronous setState inside the effect.
+
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(evaluate)
+    }
+
     const raf = requestAnimationFrame(evaluate)
-    window.addEventListener("scroll", evaluate, { passive: true })
+    window.addEventListener("scroll", onScroll, { passive: true })
     return () => {
       cancelAnimationFrame(raf)
-      window.removeEventListener("scroll", evaluate)
+      window.removeEventListener("scroll", onScroll)
     }
   }, [isHome, location.pathname])
 

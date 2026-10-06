@@ -14,6 +14,7 @@ export const productSchema = z.object({
   reorderLevel: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0, "Enter a reorder level"),
   warrantyMonths: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0, "Enter warranty months"),
   hasSerialTracking: z.boolean(),
+  serdaSerialNumber: z.string().optional(),
   isActive: z.boolean(),
   isBestSeller: z.boolean(),
   isNewArrival: z.boolean(),

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { bdDivisions, districtsFor, upazilasFor } from "@/data/bd-geo"
 import { useCreateOrder, useSettings } from "@/hooks/use-checkout"
+import { fetchProductMetaForOrder } from "@/lib/queries/catalog"
 import { useSeo } from "@/hooks/use-seo"
 import { useAuth } from "@/lib/auth-provider"
 import { generateOrderNumber } from "@/lib/queries/checkout"
@@ -102,13 +103,24 @@ export default function CheckoutPage() {
       total,
       notes: values.notes || null,
     }
-    const orderItems: OrderItemInsert[] = items.map((item) => ({
-      product_id: item.id,
-      product_name: item.name,
-      unit_price: item.price,
-      qty: item.qty,
-      line_total: item.price * item.qty,
-    }))
+    // Snapshot warranty + SERDA onto every line so the invoice still reads
+    // correctly after the catalogue entry is edited (or deleted) later.
+    const productIds = items.map((item) => item.id).filter(Boolean)
+    const productMeta = productIds.length
+      ? await fetchProductMetaForOrder(productIds)
+      : new Map<string, { warranty_months: number; serda_serial_number: string | null }>()
+    const orderItems: OrderItemInsert[] = items.map((item) => {
+      const meta = productMeta.get(item.id)
+      return {
+        product_id: item.id,
+        product_name: item.name,
+        unit_price: item.price,
+        qty: item.qty,
+        line_total: item.price * item.qty,
+        warranty_months: meta?.warranty_months ?? null,
+        serda_serial_number: meta?.serda_serial_number ?? null,
+      }
+    })
 
     try {
       const created = await createOrder.mutateAsync({ order, items: orderItems })

@@ -47,6 +47,8 @@ export type Product = {
   unit: string
   cost_price: number
   warranty_months: number
+  /** The product-level SERDA tracking number (printed on invoices). */
+  serda_serial_number: string | null
   has_serial_tracking: boolean
   reorder_level: number
   is_active: boolean
@@ -284,6 +286,10 @@ export type OrderItemInsert = {
   unit_price: number
   qty: number
   line_total: number
+  /** Snapshotted from the product at checkout so the invoice reads correctly
+   *  even after the catalogue entry is edited later. */
+  warranty_months?: number | null
+  serda_serial_number?: string | null
 }
 
 export type OrderInsert = {

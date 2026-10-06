@@ -238,7 +238,9 @@ export default function SolarCalculatorPage() {
                 </span>
                 <div className="font-heading text-[28px] font-extrabold text-text">{result.inverterVA} VA</div>
                 <div className="mt-1 text-[13px] text-muted">Inverter</div>
-                <div className="mt-1.5 text-[12.5px] text-muted">30% safety headroom included</div>
+                <div className="mt-1.5 text-[12.5px] text-muted">
+                  ≈ {Math.round(result.inverterVA * 0.8)} W real power · 30% safety headroom included
+                </div>
               </div>
               <div className="rounded-[18px] border border-border bg-surface-2 p-6 text-center">
                 <span className="mb-3 inline-flex size-12 items-center justify-center rounded-2xl bg-green-500/16">
