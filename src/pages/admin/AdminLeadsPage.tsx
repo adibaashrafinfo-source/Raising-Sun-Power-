@@ -134,7 +134,7 @@ function LeadDetailDialog({ lead, onClose }: { lead: Lead | null; onClose: () =>
 
   return (
     <Dialog open={!!lead} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent showClose={false}>
+      <DialogContent showClose={false} className="max-h-[85vh] overflow-y-auto">
         {lead && (
           <>
             <div className="flex items-center justify-between">
@@ -155,7 +155,12 @@ function LeadDetailDialog({ lead, onClose }: { lead: Lead | null; onClose: () =>
               {lead.budget_range && <Row label="Budget" value={lead.budget_range} />}
               {lead.roof_type && <Row label="Roof" value={lead.roof_type} />}
               {lead.timeline && <Row label="Timeline" value={lead.timeline} />}
-              {lead.notes && <Row label="Customer notes" value={lead.notes} />}
+              {lead.notes && (
+                <div>
+                  <div className="mb-1 text-muted">Customer notes</div>
+                  <div className="whitespace-pre-wrap break-words font-semibold text-text">{lead.notes}</div>
+                </div>
+              )}
               {/* Wholesale enquiries name the products they want priced. */}
               {!!lead.interested_products?.length && (
                 <div>
@@ -221,8 +226,8 @@ function LeadDetailDialog({ lead, onClose }: { lead: Lead | null; onClose: () =>
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-3">
-      <span className="text-muted">{label}</span>
-      <span className="text-right font-semibold text-text">{value}</span>
+      <span className="shrink-0 text-muted">{label}</span>
+      <span className="min-w-0 break-words text-right font-semibold text-text">{value}</span>
     </div>
   )
 }
