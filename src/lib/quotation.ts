@@ -194,24 +194,23 @@ function lineNotesHtml(line: QuotationLine): string {
   return detailsRow + warrantyRow + sredaRow
 }
 
-/** Fills {{ADV_PCT}}/{{ADV_AMT}}/{{BAL_PCT}}/{{BAL_AMT}} placeholders in the
- *  terms text with the advance split configured for this quotation. */
-function termsHtml(input: QuotationInput, total: number): string {
-  if (!input.terms) return ""
-  const adv = input.savings?.advancePercent ?? 40
+/** The payment-split term, written out from the advance % and the total so
+ *  the sales team never edits amounts by hand. Empty when no advance is set. */
+export function paymentTermLine(advancePercent: number, total: number): string {
+  const adv = Math.min(100, Math.max(0, advancePercent))
+  if (adv <= 0) return ""
   const advAmt = Math.round((total * adv) / 100)
-  const balAmt = Math.round(total - advAmt)
-  return input.terms
-    .split("\n")
+  if (adv >= 100) return `Payment : 100% advance with work order (${formatBDT(advAmt)}).`
+  return `Payment : ${adv}% advance with work order (${formatBDT(advAmt)}), ${100 - adv}% on completion of installation and commissioning (${formatBDT(total - advAmt)}).`
+}
+
+function termsHtml(input: QuotationInput, total: number): string {
+  const payment = paymentTermLine(input.savings?.advancePercent ?? 0, total)
+  return [...(input.terms ?? "").split("\n"), payment]
     .map((line) => {
-      const filled = line
-        .replace(/\{\{ADV_PCT\}\}/g, String(adv))
-        .replace(/\{\{BAL_PCT\}\}/g, String(100 - adv))
-        .replace(/\{\{ADV_AMT\}\}/g, formatBDT(advAmt))
-        .replace(/\{\{BAL_AMT\}\}/g, formatBDT(balAmt))
-      if (!filled.trim()) return ""
-      const match = /^(.{1,32}?)\s*:\s+(.*)$/.exec(filled)
-      return `<div class="tl">${match ? `<b>${esc(match[1])}:</b> ${esc(match[2])}` : esc(filled)}</div>`
+      if (!line.trim()) return ""
+      const match = /^(.{1,32}?)\s*:\s+(.*)$/.exec(line)
+      return `<div class="tl">${match ? `<b>${esc(match[1])}:</b> ${esc(match[2])}` : esc(line)}</div>`
     })
     .join("")
 }
@@ -288,7 +287,8 @@ function quotationHtml(input: QuotationInput, qrDataUrl: string): string {
     .filter(Boolean)
     .join(" • ")
 
-  const termsBlock = input.terms ? `<h4>Terms &amp; conditions</h4>${termsHtml(input, total)}` : ""
+  const termsRows = termsHtml(input, total)
+  const termsBlock = termsRows ? `<h4>Terms &amp; conditions</h4>${termsRows}` : ""
   const notesBlock = input.notes ? `<h4 style="margin-top:10px">Notes</h4><p>${esc(input.notes)}</p>` : ""
 
   return `<!doctype html>
