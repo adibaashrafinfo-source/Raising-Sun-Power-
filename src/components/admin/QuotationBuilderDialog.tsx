@@ -20,6 +20,7 @@ import {
   PROJECT_CATEGORIES,
   PROJECT_SYSTEM_TYPES,
   type QuotationLine,
+  paymentTermLine,
   printQuotation,
   quotationTotals,
 } from "@/lib/quotation"
@@ -27,7 +28,7 @@ import { formatBDT, getErrorMessage } from "@/lib/utils"
 import type { Lead } from "@/types/database"
 
 const DEFAULT_TERMS =
-  "Warranty : as stated against each item above.\nWork completed : within the timeline agreed with the customer.\nPayment : {{ADV_PCT}}% advance with work order ({{ADV_AMT}}), {{BAL_PCT}}% on completion of installation and commissioning ({{BAL_AMT}})."
+  "Warranty : as stated against each item above.\nWork completed : within the timeline agreed with the customer."
 
 /** Lets the sales team price a wholesale enquiry and hand the buyer a PDF. */
 export function QuotationBuilderDialog({ lead, onClose }: { lead: Lead; onClose: () => void }) {
@@ -65,6 +66,7 @@ export function QuotationBuilderDialog({ lead, onClose }: { lead: Lead; onClose:
     discount: Number(fees.discount) || 0,
   }
   const { subtotal, vat, total } = quotationTotals({ lines, fees: feeNumbers, vatRate: Number(vatRate) || 0 })
+  const paymentLine = paymentTermLine(Number(savings.advancePercent) || 0, total)
 
   const updateLine = (index: number, patch: Partial<QuotationLine>) =>
     setLines((ls) => ls.map((line, i) => (i === index ? { ...line, ...patch } : line)))
@@ -347,17 +349,7 @@ export function QuotationBuilderDialog({ lead, onClose }: { lead: Lead; onClose:
               Show energy &amp; savings overview (needs Size in kWp above)
             </label>
             {showSavings && (
-              <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
-                <div>
-                  <Label className="mb-1.5 block">Advance with work order (%)</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={savings.advancePercent}
-                    onChange={(e) => setSavings((s) => ({ ...s, advancePercent: e.target.value }))}
-                  />
-                </div>
+              <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">
                 <div>
                   <Label className="mb-1.5 block">Peak sun hours/day</Label>
                   <Input
@@ -399,16 +391,30 @@ export function QuotationBuilderDialog({ lead, onClose }: { lead: Lead; onClose:
           </div>
 
           <div>
-            <Label className="mb-1.5 block">
-              Terms &amp; conditions (use {"{{ADV_PCT}}"}, {"{{ADV_AMT}}"}, {"{{BAL_PCT}}"}, {"{{BAL_AMT}}"} for the
-              payment split)
-            </Label>
+            <Label className="mb-1.5 block">Terms &amp; conditions</Label>
             <textarea
               value={terms}
               onChange={(e) => setTerms(e.target.value)}
-              rows={4}
+              rows={3}
               className="w-full resize-y rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3.5 py-2.5 text-sm text-text outline-none"
             />
+            <div className="mt-2.5 flex flex-wrap items-end gap-3">
+              <div className="w-40">
+                <Label className="mb-1.5 block">Advance with work order (%)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={savings.advancePercent}
+                  onChange={(e) => setSavings((s) => ({ ...s, advancePercent: e.target.value }))}
+                />
+              </div>
+              <p className="min-w-0 flex-1 pb-2 text-[12.5px] text-muted">
+                {paymentLine
+                  ? `Added to the terms automatically: ${paymentLine}`
+                  : "Set an advance % to add the payment split to the terms."}
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center justify-between rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm">
