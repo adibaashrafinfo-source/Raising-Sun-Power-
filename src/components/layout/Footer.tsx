@@ -16,6 +16,12 @@ const SOCIAL_BRAND: Record<string, string> = {
   TikTok: "#111827",
 }
 
+const TRUST_BADGES = [
+  { src: "/badges/dncc.jpg", alt: "Dhaka North City Corporation", className: "h-14 w-14 scale-[1.65] object-contain" },
+  { src: "/badges/sreda-stakeholder.png", alt: "SREDA Stakeholder #627", className: "h-12 w-auto object-contain" },
+  { src: "/badges/trustpilot.png", alt: "Review us on Trustpilot", className: "h-14 w-auto object-contain" },
+]
+
 const shopLinks = [
   { label: "Solar Packages", to: "/packages" },
   { label: "Solar Panels", to: "/category/solar-panels" },
@@ -132,8 +138,24 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Payment strip */}
+        {/* Registrations and reviews */}
         <div className="mt-7 flex flex-col items-center gap-3 rounded-2xl border border-[var(--footer-border)] bg-[var(--footer-card)] px-5 py-4 sm:flex-row sm:justify-between">
+          <span className="text-[13px] font-semibold text-[var(--footer-text)]">Registered &amp; trusted</span>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {TRUST_BADGES.map((badge) => (
+              <span
+                key={badge.src}
+                title={badge.alt}
+                className="flex h-[72px] items-center justify-center overflow-hidden rounded-xl bg-white px-2.5 shadow-[0_6px_16px_rgba(0,0,0,.18)]"
+              >
+                <img src={badge.src} alt={badge.alt} loading="lazy" className={badge.className} />
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Payment strip */}
+        <div className="mt-4 flex flex-col items-center gap-3 rounded-2xl border border-[var(--footer-border)] bg-[var(--footer-card)] px-5 py-4 sm:flex-row sm:justify-between">
           <span className="text-[13px] font-semibold text-[var(--footer-text)]">We accept</span>
           <div className="flex flex-wrap items-center gap-2.5">
             <PaymentBadge bg="#E2136E" color="#fff">bKash</PaymentBadge>
