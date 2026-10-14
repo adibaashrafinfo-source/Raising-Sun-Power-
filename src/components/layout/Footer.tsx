@@ -17,9 +17,9 @@ const SOCIAL_BRAND: Record<string, string> = {
 }
 
 const TRUST_BADGES = [
-  { src: "/badges/dncc.jpg", alt: "Dhaka North City Corporation", className: "h-14 w-14 scale-[1.65] object-contain" },
-  { src: "/badges/sreda-stakeholder.png", alt: "SREDA Stakeholder #627", className: "h-12 w-auto object-contain" },
-  { src: "/badges/trustpilot.png", alt: "Review us on Trustpilot", className: "h-14 w-auto object-contain" },
+  { src: "/badges/dncc.jpg", alt: "Dhaka North City Corporation", className: "h-20 w-20 scale-[1.65] object-contain" },
+  { src: "/badges/sreda-stakeholder.png", alt: "SREDA Stakeholder #627", className: "h-[68px] w-auto object-contain" },
+  { src: "/badges/trustpilot.png", alt: "Review us on Trustpilot", className: "h-20 w-auto object-contain" },
 ]
 
 const shopLinks = [
@@ -139,29 +139,18 @@ export function Footer() {
         </div>
 
         {/* Registrations and reviews */}
-        <div className="mt-7 flex flex-col items-center gap-3 rounded-2xl border border-[var(--footer-border)] bg-[var(--footer-card)] px-5 py-4 sm:flex-row sm:justify-between">
+        <div className="mt-7 flex flex-col items-center gap-4 rounded-2xl border border-[var(--footer-border)] bg-[var(--footer-card)] px-5 py-5">
           <span className="text-[13px] font-semibold text-[var(--footer-text)]">Registered &amp; trusted</span>
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-4">
             {TRUST_BADGES.map((badge) => (
               <span
                 key={badge.src}
                 title={badge.alt}
-                className="flex h-[72px] items-center justify-center overflow-hidden rounded-xl bg-white px-2.5 shadow-[0_6px_16px_rgba(0,0,0,.18)]"
+                className="flex h-24 items-center justify-center overflow-hidden rounded-xl bg-white px-3 shadow-[0_6px_16px_rgba(0,0,0,.18)]"
               >
                 <img src={badge.src} alt={badge.alt} loading="lazy" className={badge.className} />
               </span>
             ))}
-          </div>
-        </div>
-
-        {/* Payment strip */}
-        <div className="mt-4 flex flex-col items-center gap-3 rounded-2xl border border-[var(--footer-border)] bg-[var(--footer-card)] px-5 py-4 sm:flex-row sm:justify-between">
-          <span className="text-[13px] font-semibold text-[var(--footer-text)]">We accept</span>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <PaymentBadge bg="#E2136E" color="#fff">bKash</PaymentBadge>
-            <PaymentBadge bg="#EE6123" color="#fff">Nagad</PaymentBadge>
-            <PaymentBadge bg="#0B3F94" color="#fff">Bank</PaymentBadge>
-            <PaymentBadge bg="#67A70E" color="#fff">Cash on Delivery</PaymentBadge>
           </div>
         </div>
 
@@ -253,21 +242,3 @@ function ShopAddress({ name, address }: { name: string; address: string }) {
   )
 }
 
-function PaymentBadge({
-  bg,
-  color,
-  children,
-}: {
-  bg: string
-  color: string
-  children: React.ReactNode
-}) {
-  return (
-    <span
-      className="rounded-lg px-3 py-1.5 text-[11.5px] font-extrabold shadow-[0_4px_12px_rgba(0,0,0,.25)]"
-      style={{ background: bg, color }}
-    >
-      {children}
-    </span>
-  )
-}
