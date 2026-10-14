@@ -18,7 +18,7 @@ const SOCIAL_BRAND: Record<string, string> = {
 
 const TRUST_BADGES = [
   { src: "/badges/dncc.jpg", alt: "Dhaka North City Corporation", className: "h-20 w-20 scale-[1.65] object-contain" },
-  { src: "/badges/sreda-stakeholder.png", alt: "SREDA Stakeholder #627", className: "h-[68px] w-auto object-contain" },
+  { src: "/badges/sreda-stakeholder-000.png", alt: "SREDA Stakeholder 000", className: "h-[68px] w-auto object-contain" },
   { src: "/badges/trustpilot.png", alt: "Review us on Trustpilot", className: "h-20 w-auto object-contain" },
 ]
 
