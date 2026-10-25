@@ -258,7 +258,10 @@ export function Header() {
         isHidden ? "-translate-y-full" : "translate-y-0"
       }`}
     >
-      <div className="mx-auto flex max-w-[1280px] items-center gap-2 px-4 py-1.5 sm:px-6 lg:gap-4">
+      {/* .5" (≈48px) wider than the rest of the site on each side, reclaimed
+          from the page's own side margin, so the full menu row fits without
+          dropping items into the overflow "More" button. */}
+      <div className="mx-auto flex max-w-[1376px] items-center gap-2 px-4 py-1.5 sm:px-6 lg:gap-4">
         <button onClick={openMobileMenu} aria-label="Menu" className={`${iconButton} -ml-2 lg:hidden`}>
           <Menu className="size-[22px]" />
         </button>
