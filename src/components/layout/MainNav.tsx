@@ -22,10 +22,18 @@ export type NavItem = {
 }
 
 /** Room kept free for the "More" button once anything has to move into it. */
-const MORE_RESERVE = 48
+const MORE_RESERVE = 40
 
 const ITEM_CLASS =
-  "relative inline-flex items-center gap-1 whitespace-nowrap rounded-lg px-2 py-2 text-[12.5px] font-bold uppercase tracking-[0.02em] text-text no-underline transition-colors hover:text-orange-500 xl:px-3 xl:text-[13.5px]"
+  "relative inline-flex items-center gap-0.5 whitespace-nowrap rounded-lg px-1.5 py-2 text-[11.5px] font-bold uppercase tracking-[0.01em] text-text no-underline transition-colors hover:text-orange-500 xl:gap-1 xl:px-2 xl:text-[12.5px]"
+
+/** The "More" overflow panel sits in the portal root, outside the header's
+ *  forced-light scope, so it needs its own light styling to match the bar
+ *  rather than following the page theme (dark mode would otherwise hand it
+ *  the page's dark surface tokens while the header row stays light). */
+const MORE_PANEL_CLASS =
+  "min-w-[180px] rounded-2xl border border-black/10 bg-white p-1.5 text-black shadow-[0_24px_60px_rgba(0,0,0,.18)]"
+const MORE_ITEM_CLASS = "rounded-xl text-black hover:bg-black/[.05] focus:bg-black/[.05] data-[highlighted]:bg-black/[.05]"
 
 /**
  * The header's primary navigation. It stays on one line: the row measures
@@ -86,7 +94,7 @@ export function MainNav({
   const overflow = items.slice(limit)
 
   return (
-    <div ref={rowRef} className="flex items-center gap-0.5 overflow-hidden py-2">
+    <div ref={rowRef} className="flex items-center gap-0 overflow-hidden py-2">
       {visible.map((item) => {
         const isOpen = openKey === item.key
         return (
@@ -100,7 +108,7 @@ export function MainNav({
             <Link to={item.to} className={cn(ITEM_CLASS, isOpen && "text-orange-500")}>
               {item.label}
               {item.panel && (
-                <ChevronDown className={cn("size-[14px] transition-transform duration-200", isOpen && "rotate-180")} />
+                <ChevronDown className={cn("size-3 transition-transform duration-200", isOpen && "rotate-180")} />
               )}
               {item.badge && (
                 <span className="absolute -top-1.5 right-0.5">
@@ -116,10 +124,10 @@ export function MainNav({
           <DropdownMenuTrigger aria-label="More menu items" className={`${ITEM_CLASS} shrink-0 outline-none`}>
             <MoreHorizontal className="size-[18px]" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className={MORE_PANEL_CLASS}>
             {overflow.map((item) => (
-              <DropdownMenuItem key={item.key} asChild>
-                <Link to={item.to}>
+              <DropdownMenuItem key={item.key} asChild className={MORE_ITEM_CLASS}>
+                <Link to={item.to} className="flex items-center gap-2">
                   {item.label}
                   {item.badge && <MenuBadge label={item.badge} />}
                 </Link>
