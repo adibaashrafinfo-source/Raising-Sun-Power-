@@ -206,8 +206,14 @@ export async function deleteOrder(id: string): Promise<void> {
   const { error: returnsError } = await supabase.from("sales_returns").delete().eq("order_id", id)
   if (returnsError) throw returnsError
 
-  const { error } = await supabase.from("orders").delete().eq("id", id)
+  // Same as deleteProduct: a row-level security policy can filter the delete
+  // down to zero rows without PostgREST treating that as an error, so the
+  // deleted row is asked back for and an empty result is raised as a failure.
+  const { data, error } = await supabase.from("orders").delete().eq("id", id).select("id")
   if (error) throw error
+  if (!data || data.length === 0) {
+    throw new Error("Nothing was deleted — you may not have permission to delete this order.")
+  }
 
   await logActivity({ action: "delete", table_name: "orders", record_id: id })
 }
@@ -262,8 +268,15 @@ export async function upsertProduct(product: ProductUpsert): Promise<void> {
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  const { error } = await supabase.from("products").delete().eq("id", id)
+  // PostgREST returns 200 with an empty result when a row-level security
+  // policy filters a delete down to zero rows — no error, nothing deleted.
+  // Asking for the deleted row back is what turns that into a real failure
+  // instead of a false "deleted" toast.
+  const { data, error } = await supabase.from("products").delete().eq("id", id).select("id")
   if (error) throw error
+  if (!data || data.length === 0) {
+    throw new Error("Nothing was deleted — you may not have permission to delete this product.")
+  }
   await logActivity({ action: "delete", table_name: "products", record_id: id })
 }
 

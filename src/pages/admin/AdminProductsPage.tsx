@@ -81,8 +81,8 @@ export default function AdminProductsPage() {
     try {
       await deleteProduct.mutateAsync(product.id)
       toast.success("Product deleted")
-    } catch {
-      toast.error("Couldn't delete this product")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't delete this product"))
     }
   }
 
