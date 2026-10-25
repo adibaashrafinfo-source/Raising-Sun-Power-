@@ -90,39 +90,12 @@ export function CatalogProductCard({ product, view = "grid" }: { product: Produc
   }
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-[20px] border border-border bg-surface shadow-[var(--shadow-sm)] transition-[transform,box-shadow] duration-250 hover:-translate-y-1 hover:shadow-[var(--shadow)]">
+    <div className="group relative flex flex-col overflow-hidden rounded-[14px] border border-border bg-surface transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-orange-500/40 hover:shadow-[var(--shadow)]">
       <Link
         to={`/product/${product.slug}`}
-        className="relative flex aspect-square items-center justify-center overflow-hidden"
+        className="relative flex aspect-square items-center justify-center overflow-hidden bg-white"
         style={image ? undefined : { background: tint }}
       >
-        <span className="absolute left-3 top-3 flex gap-1.5">
-          {offPct && (
-            <span className="rounded-full bg-gradient-to-r from-orange-500 to-orange-400 px-2.5 py-1 text-[11px] font-extrabold text-white">
-              -{offPct}%
-            </span>
-          )}
-          {product.badges[0] && (
-            <span className="rounded-full bg-blue-700 px-2.5 py-1 text-[11px] font-extrabold text-white">
-              {product.badges[0]}
-            </span>
-          )}
-        </span>
-        <button
-          aria-label="Add to wishlist"
-          onClick={(e) => {
-            e.preventDefault()
-            toggleWishlist(product.id)
-          }}
-          className="absolute right-2.5 top-2.5 flex size-[34px] items-center justify-center rounded-full bg-white/70 backdrop-blur-md transition-transform hover:scale-110 dark:bg-black/30"
-        >
-          <Heart
-            className="size-[17px]"
-            stroke="#E23B3B"
-            fill={isWishlisted ? "#E23B3B" : "none"}
-            strokeWidth={1.75}
-          />
-        </button>
         {image ? (
           // Absolutely positioned so a tall or wide photo can never stretch the
           // card — every card in a row keeps the same square image box.
@@ -130,54 +103,69 @@ export function CatalogProductCard({ product, view = "grid" }: { product: Produc
             src={image}
             alt={product.name}
             loading="lazy"
-            className="absolute inset-0 size-full object-cover"
+            className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
           <ProductArt art={artForCategory(product.category?.slug)} />
         )}
-      </Link>
-      <div className="flex flex-1 flex-col gap-2 px-[15px] pb-[17px] pt-[15px]">
-        <div className="flex items-center gap-1.5">
-          <span className={cn("size-1.5 rounded-full", inStock ? "bg-green-600" : "bg-red-500")} />
-          <span className={cn("text-[11.5px] font-semibold", inStock ? "text-green-600" : "text-red-500")}>
-            {inStock ? "In Stock" : "Out of stock"}
+        <span className="absolute left-2 top-2 flex flex-wrap gap-1">
+          {offPct && (
+            <span className="rounded-md bg-red-500 px-1.5 py-0.5 text-[10.5px] font-extrabold text-white">
+              -{offPct}%
+            </span>
+          )}
+          {product.badges[0] && (
+            <span className="rounded-md bg-black px-1.5 py-0.5 text-[10.5px] font-extrabold uppercase text-white">
+              {product.badges[0]}
+            </span>
+          )}
+        </span>
+        <button
+          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          onClick={(e) => {
+            e.preventDefault()
+            toggleWishlist(product.id)
+          }}
+          className="absolute right-2 top-2 flex size-[30px] items-center justify-center rounded-full bg-white/85 shadow-sm transition-transform hover:scale-110 dark:bg-black/45"
+        >
+          <Heart className="size-[15px]" stroke="#E23B3B" fill={isWishlisted ? "#E23B3B" : "none"} strokeWidth={1.9} />
+        </button>
+        {!inStock && (
+          <span className="absolute inset-x-0 bottom-0 bg-black/70 py-1 text-center text-[11px] font-bold uppercase tracking-wide text-white">
+            Out of stock
           </span>
-          <span className="ml-auto text-[11.5px] text-muted">{product.category?.name}</span>
-        </div>
+        )}
+      </Link>
+      <div className="flex flex-1 flex-col gap-1 p-3">
+        {product.category?.name && (
+          <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted">
+            {product.category.name}
+          </span>
+        )}
         <Link
           to={`/product/${product.slug}`}
-          className="line-clamp-2 min-h-[38px] text-[14.5px] font-bold leading-tight text-text no-underline"
+          className="line-clamp-2 min-h-[36px] text-[13.5px] font-semibold leading-snug text-text no-underline hover:text-orange-500"
         >
           {product.name}
         </Link>
-        <div className="flex items-center gap-1">
-          <span className="flex items-center gap-0.5 text-gold-400">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} className="size-[13px] fill-current" />
-            ))}
-          </span>
-          <span className="text-xs text-muted">
-            {product.rating_avg} ({product.rating_count})
-          </span>
+        <div className="mt-auto flex items-end justify-between gap-2 pt-1.5">
+          <div className="min-w-0">
+            <div className="font-heading text-[16px] font-extrabold tabular-nums leading-tight text-orange-500">
+              {formatBDT(displayPrice)}
+            </div>
+            {isOnSale && (
+              <div className="text-[11.5px] tabular-nums text-muted line-through">{formatBDT(product.price)}</div>
+            )}
+          </div>
+          <button
+            onClick={handleAdd}
+            disabled={!inStock}
+            aria-label={`Add ${product.name} to cart`}
+            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#FFD60A] text-black transition-[transform,filter] hover:scale-105 hover:brightness-95 disabled:pointer-events-none disabled:opacity-40"
+          >
+            <ShoppingCart className="size-[16px]" />
+          </button>
         </div>
-        <div className="mt-0.5 flex min-h-[30px] items-baseline gap-2">
-          <span className="font-heading text-xl font-extrabold tabular-nums text-orange-500">
-            {formatBDT(displayPrice)}
-          </span>
-          {isOnSale && (
-            <span className="text-[13px] tabular-nums text-muted line-through">
-              {formatBDT(product.price)}
-            </span>
-          )}
-        </div>
-        <button
-          onClick={handleAdd}
-          disabled={!inStock}
-          className="mt-auto flex h-11 items-center justify-center gap-2 rounded-[13px] bg-gradient-to-r from-orange-500 to-orange-400 text-sm font-bold text-white shadow-[0_6px_18px_rgba(244,158,9,.32)] transition-all hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-45"
-        >
-          <ShoppingCart className="size-[17px]" />
-          {inStock ? "Add to Cart" : "Out of stock"}
-        </button>
       </div>
     </div>
   )

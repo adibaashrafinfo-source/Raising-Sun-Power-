@@ -20,7 +20,8 @@ export function DealsGrid() {
     .filter((p) => p.sale_price != null && p.sale_price < p.price)
     .map((p) => ({ product: p, off: Math.round(((p.price - p.sale_price!) / p.price) * 100) }))
     .sort((a, b) => b.off - a.off)
-    .slice(0, 9)
+    // The lead deal spans two columns and two rows, so six more fill the block.
+    .slice(0, 7)
 
   if (isLoading) {
     return (
@@ -70,7 +71,7 @@ function HeroDeal({ product, off }: { product: Parameters<typeof CatalogProductC
   return (
     <Link
       to={`/product/${product.slug}`}
-      className="group relative col-span-2 flex flex-col overflow-hidden rounded-[20px] border border-border bg-surface no-underline shadow-[var(--shadow-sm)] transition-[transform,box-shadow] duration-250 hover:-translate-y-1 hover:shadow-[var(--shadow)]"
+      className="group relative col-span-2 flex flex-col overflow-hidden rounded-[14px] border border-border bg-surface no-underline transition-[transform,box-shadow] duration-250 hover:-translate-y-0.5 hover:shadow-[var(--shadow)] lg:row-span-2"
     >
       <span className="absolute left-3 top-3 z-10 rounded-full bg-red-500 px-2.5 py-1 text-[11px] font-extrabold text-white">
         -{off}%

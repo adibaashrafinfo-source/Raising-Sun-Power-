@@ -4,7 +4,7 @@ import { Link } from "react-router-dom"
 import { CatalogProductCard } from "@/components/product/CatalogProductCard"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useProducts } from "@/hooks/use-catalog"
+import { useProducts, useProductsByPlacement } from "@/hooks/use-catalog"
 import { useNavCategories } from "@/lib/category-nav"
 import { cn } from "@/lib/utils"
 import { SectionHeader } from "@/pages/home/SectionHeader"
@@ -25,7 +25,9 @@ export function FeaturedTabs() {
     pageSize: PAGE_SIZE,
     categorySlug: active ?? undefined,
   })
-  const products = data?.products ?? []
+  // On "All", products the admin ticked "Featured" take the shelf.
+  const pinned = useProductsByPlacement("is_featured", PAGE_SIZE)
+  const products = active === null && pinned.data?.length ? pinned.data : (data?.products ?? [])
 
   return (
     <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-12">
@@ -80,7 +82,7 @@ function Tab({ label, active, onClick }: { label: string; active: boolean; onCli
       className={cn(
         "rounded-full border px-4 py-2 text-[13px] font-bold transition-colors",
         active
-          ? "border-orange-500 bg-orange-500 text-white"
+          ? "border-[#FFD60A] bg-[#FFD60A] text-black"
           : "border-border bg-surface text-muted hover:border-blue-500/40 hover:text-blue",
       )}
     >

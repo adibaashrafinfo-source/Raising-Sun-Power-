@@ -3,18 +3,15 @@ import { Reveal } from "@/components/ui/reveal"
 import { SEO_KEYWORDS, SITE_DESCRIPTION } from "@/data/company"
 import { useProducts, useProductsByPlacement } from "@/hooks/use-catalog"
 import { useSeo } from "@/hooks/use-seo"
-import { AllProductsSection } from "@/pages/home/AllProductsSection"
-import { BrandsStrip } from "@/pages/home/BrandsStrip"
-import { CtaBand } from "@/pages/home/CtaBand"
-import { FeaturedProducts } from "@/pages/home/FeaturedProducts"
 import { CategoryChips } from "@/pages/home/CategoryChips"
+import { CategoryProductSections } from "@/pages/home/CategoryProductSections"
 import { DealsGrid } from "@/pages/home/DealsGrid"
 import { FeaturedTabs } from "@/pages/home/FeaturedTabs"
 import { HeroSlider } from "@/pages/home/HeroSlider"
 import { NewsletterStrip } from "@/pages/home/NewsletterStrip"
+import { OurCategory } from "@/pages/home/OurCategory"
 import { PackagesSection } from "@/pages/home/PackagesSection"
 import { ProductGridSection } from "@/pages/home/ProductGridSection"
-import { TrustChips } from "@/pages/home/TrustChips"
 import { WhyChooseUs } from "@/pages/home/WhyChooseUs"
 
 export default function Home() {
@@ -24,53 +21,35 @@ export default function Home() {
     keywords: SEO_KEYWORDS,
   })
 
-  // Admin-pinned products win; when a section has none pinned we fall back to
-  // the automatic list so the homepage is never empty.
-  const pinnedBestSellers = useProductsByPlacement("is_best_seller", 4)
-  const pinnedNewArrivals = useProductsByPlacement("is_new_arrival", 4)
-  const autoBestSellers = useProducts({ sort: "rating", pageSize: 4 })
-  const autoNewArrivals = useProducts({ sort: "newest", pageSize: 4 })
-
+  // Admin-pinned best sellers win; with none pinned the top-rated list stands in
+  // so the shelf is never empty.
+  const pinnedBestSellers = useProductsByPlacement("is_best_seller", 8)
+  const autoBestSellers = useProducts({ sort: "rating", pageSize: 8 })
   const bestSellerProducts = pinnedBestSellers.data?.length
     ? pinnedBestSellers.data
     : (autoBestSellers.data?.products ?? [])
-  const newArrivalProducts = pinnedNewArrivals.data?.length
-    ? pinnedNewArrivals.data
-    : (autoNewArrivals.data?.products ?? [])
 
   return (
     <main>
       <HeroSlider />
       <Reveal><DealsGrid /></Reveal>
       <Reveal><CategoryChips /></Reveal>
-      <Reveal><TrustChips /></Reveal>
+      {/* Solar panels, inverters, batteries, charge controllers, then the rest. */}
+      <CategoryProductSections />
+      <Reveal><PackagesSection /></Reveal>
       <Reveal>
         <ProductGridSection
           kicker="Loved by installers"
-          kickerColor="#67A70E"
-          title="Best sellers this month"
+          kickerColor="#F49E09"
+          title="Best of Rising Sun"
           linkLabel="See more"
           products={bestSellerProducts}
           isLoading={pinnedBestSellers.isLoading || autoBestSellers.isLoading}
         />
       </Reveal>
-      <Reveal><PackagesSection /></Reveal>
-      <Reveal><FeaturedProducts /></Reveal>
+      <Reveal><OurCategory /></Reveal>
       <Reveal><FeaturedTabs /></Reveal>
-      <Reveal>
-        <ProductGridSection
-          kicker="Just landed"
-          kickerColor="#67A70E"
-          title="New arrivals"
-          linkLabel="Browse all"
-          products={newArrivalProducts}
-          isLoading={pinnedNewArrivals.isLoading || autoNewArrivals.isLoading}
-        />
-      </Reveal>
-      <Reveal><AllProductsSection /></Reveal>
-      <Reveal><BrandsStrip /></Reveal>
       <Reveal><WhyChooseUs /></Reveal>
-      <Reveal><CtaBand /></Reveal>
       <Reveal><NewsletterStrip /></Reveal>
       <FloatingWhatsAppButton />
     </main>
