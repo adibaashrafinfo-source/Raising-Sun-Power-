@@ -2,69 +2,61 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { ChevronDown, MoreHorizontal } from "lucide-react"
 import { Link } from "react-router-dom"
 
-import { MenuBadge } from "@/components/layout/MegaMenu"
+import { MenuBadge, type MenuPanelItem } from "@/components/layout/MegaMenu"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { MenuGroup } from "@/lib/category-tree"
+import { cn } from "@/lib/utils"
 
 export type NavItem = {
   key: string
   label: string
   to: string
-  /** Small pill after the label, e.g. HOT or FREE. */
+  /** Small pill over the label, e.g. HOT or FREE. */
   badge?: string
-  /** Set on a category item: hovering it opens that group's mega menu. */
-  group?: MenuGroup
+  /** Entries for the dropdown this item opens on hover. */
+  panel?: MenuPanelItem[]
 }
 
 /** Room kept free for the "More" button once anything has to move into it. */
-const MORE_RESERVE = 58
+const MORE_RESERVE = 48
 
 const ITEM_CLASS =
-  "inline-flex items-center gap-1 whitespace-nowrap rounded-[10px] px-1.5 py-1.5 text-[12.5px] font-semibold text-muted no-underline hover:bg-surface-2 hover:text-blue xl:gap-1.5 xl:px-2.5 xl:text-[13px]"
+  "relative inline-flex items-center gap-1 whitespace-nowrap rounded-lg px-2 py-2 text-[12.5px] font-bold uppercase tracking-[0.02em] text-text no-underline transition-colors hover:text-orange-500 xl:px-3 xl:text-[13.5px]"
 
 /**
- * The header's primary navigation row. Everything stays on a single line: the
- * row measures itself and whatever does not fit moves into a "More" dropdown,
- * so adding categories from the admin panel can never push links onto a second
- * line. The mega menu itself is rendered by the header, not from here, because
- * this row clips its own overflow.
+ * The header's primary navigation. It stays on one line: the row measures
+ * itself and anything that does not fit moves into a "More" dropdown, so adding
+ * categories from the admin panel can never wrap the bar. The dropdown panels
+ * are drawn by the header, because this row clips its own overflow.
  */
 export function MainNav({
   items,
-  leading,
-  hasMegaMenu,
-  onOpenGroup,
-  onCloseGroup,
+  openKey,
+  onOpen,
+  onClose,
 }: {
   items: NavItem[]
-  /** Always-visible element pinned to the left (the All Categories button). */
-  leading?: React.ReactNode
-  hasMegaMenu: boolean
-  onOpenGroup: (slug: string) => void
-  onCloseGroup: () => void
+  openKey: string | null
+  onOpen: (key: string, anchor: HTMLElement) => void
+  onClose: () => void
 }) {
   const rowRef = useRef<HTMLDivElement>(null)
   const [limit, setLimit] = useState(items.length)
-  // Bumped to force a fresh measuring pass. Resetting the limit alone is not
-  // enough: when nothing is in the "More" menu yet the limit does not change,
-  // so no render — and therefore no measurement — would follow a resize.
+  // Bumped to force a fresh measuring pass: when nothing is in "More" yet the
+  // limit does not change on resize, so no render (and no measuring) follows.
   const [pass, setPass] = useState(0)
 
-  // A width change starts the measurement over: every item goes back on the
-  // row (clipped, never wrapped) so the next pass can measure them all.
   useEffect(() => {
     const row = rowRef.current
     if (!row) return
-    const restart = () => {
+    const observer = new ResizeObserver(() => {
       setLimit(items.length)
       setPass((p) => p + 1)
-    }
-    const observer = new ResizeObserver(restart)
+    })
     observer.observe(row)
     return () => observer.disconnect()
   }, [items.length])
@@ -72,28 +64,20 @@ export function MainNav({
   useLayoutEffect(() => {
     const row = rowRef.current
     if (!row) return
-    const kids = Array.from(row.children) as HTMLElement[]
-    const itemEls = kids.filter((k) => k.dataset.nav === "item")
-    // Already sliced — the widths of the hidden items are unknown, so wait for
-    // the next full pass rather than measuring a partial row.
+    const itemEls = (Array.from(row.children) as HTMLElement[]).filter((k) => k.dataset.nav === "item")
+    // Already sliced: the hidden items' widths are unknown, so wait for a full pass.
     if (itemEls.length < items.length) return
 
     const total = row.clientWidth
-    // Read rather than assume: the gap is what actually separates the items.
     const gap = Number.parseFloat(getComputedStyle(row).columnGap) || 0
-    const leadWidth = kids
-      .filter((k) => k.dataset.nav === "lead")
-      .reduce((sum, k) => sum + k.offsetWidth + gap, 0)
-
     const fitCount = (reserve: number) => {
-      let used = leadWidth + reserve
+      let used = reserve
       for (let i = 0; i < itemEls.length; i++) {
         used += itemEls[i].offsetWidth + gap
         if (used > total) return i
       }
       return items.length
     }
-
     const fits = fitCount(0)
     setLimit(fits === items.length ? items.length : fitCount(MORE_RESERVE))
   }, [items, limit, pass])
@@ -102,34 +86,35 @@ export function MainNav({
   const overflow = items.slice(limit)
 
   return (
-    <div ref={rowRef} className="flex items-center gap-0.5 overflow-hidden py-1">
-      {leading && (
-        <div data-nav="lead" className="shrink-0">
-          {leading}
-        </div>
-      )}
-      {visible.map((item) => (
-        <div
-          key={item.key}
-          data-nav="item"
-          className="shrink-0"
-          onMouseEnter={hasMegaMenu && item.group ? () => onOpenGroup(item.group!.slug) : undefined}
-          onMouseLeave={hasMegaMenu && item.group ? onCloseGroup : undefined}
-        >
-          <Link to={item.to} className={ITEM_CLASS}>
-            {item.label}
-            {item.badge && <MenuBadge label={item.badge} />}
-            {hasMegaMenu && item.group && <ChevronDown className="size-[13px]" />}
-          </Link>
-        </div>
-      ))}
+    <div ref={rowRef} className="flex items-center gap-0.5 overflow-hidden py-2">
+      {visible.map((item) => {
+        const isOpen = openKey === item.key
+        return (
+          <div
+            key={item.key}
+            data-nav="item"
+            className="shrink-0"
+            onMouseEnter={item.panel ? (e) => onOpen(item.key, e.currentTarget) : undefined}
+            onMouseLeave={item.panel ? onClose : undefined}
+          >
+            <Link to={item.to} className={cn(ITEM_CLASS, isOpen && "text-orange-500")}>
+              {item.label}
+              {item.panel && (
+                <ChevronDown className={cn("size-[14px] transition-transform duration-200", isOpen && "rotate-180")} />
+              )}
+              {item.badge && (
+                <span className="absolute -top-1.5 right-0.5">
+                  <MenuBadge label={item.badge} />
+                </span>
+              )}
+            </Link>
+          </div>
+        )
+      })}
       {overflow.length > 0 && (
         <DropdownMenu>
-          <DropdownMenuTrigger
-            aria-label="More menu items"
-            className={`${ITEM_CLASS} shrink-0 outline-none`}
-          >
-            <MoreHorizontal className="size-[17px]" />
+          <DropdownMenuTrigger aria-label="More menu items" className={`${ITEM_CLASS} shrink-0 outline-none`}>
+            <MoreHorizontal className="size-[18px]" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {overflow.map((item) => (

@@ -1,24 +1,35 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
-  ChevronDown,
+  Calculator,
+  ClipboardCheck,
+  FileText,
   Heart,
+  Info,
   LayoutDashboard,
+  LogIn,
   LogOut,
   MapPin,
   Menu,
   Moon,
+  Newspaper,
   Package,
+  Phone,
+  Search,
   Settings,
   ShoppingCart,
+  Store,
   Sun,
+  TrendingUp,
+  Truck,
   User,
+  X,
+  Zap,
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { CategoryMenu } from "@/components/layout/CategoryMenu"
 import { MainNav, type NavItem } from "@/components/layout/MainNav"
-import { MegaMenu } from "@/components/layout/MegaMenu"
+import { MegaMenu, MENU_PANEL_WIDTH, type MenuPanelItem } from "@/components/layout/MegaMenu"
 import { SearchSuggest } from "@/components/search/SearchSuggest"
 import {
   DropdownMenu,
@@ -28,19 +39,88 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { usePackageCategories } from "@/hooks/use-packages"
+import { useSiteContent } from "@/hooks/use-site-content"
 import { isAdminRole } from "@/lib/admin-access"
 import { useAuth } from "@/lib/auth-provider"
-import { useSiteContent } from "@/hooks/use-site-content"
 import { useMenuGroups } from "@/lib/category-tree"
 import { clampLogoHeight, DEFAULT_LOGO_HEIGHT } from "@/lib/logo-size"
 import { signOut } from "@/lib/queries/auth"
 import { useTheme } from "@/lib/theme-provider"
+import { CategoryIcon } from "@/pages/home/CategoryIcon"
 import { useCartStore } from "@/store/cart-store"
 
-/** How far you have to scroll on an inner page before the nav row slides away. */
-const NAV_HIDE_AFTER = 80
-/** How many pixels of scroll must happen in one direction before the nav bar flips. */
-const NAV_HIDE_DEADBAND = 24
+const ICON = "size-[17px]"
+
+const CALCULATOR_PANEL: MenuPanelItem[] = [
+  {
+    key: "solar-calculator",
+    to: "/solar-calculator",
+    label: "Solar Calculator",
+    tagline: "Size a system for your load",
+    icon: <Calculator className={`${ICON} text-orange-500`} />,
+  },
+  {
+    key: "roi",
+    to: "/solar-roi-calculator",
+    label: "ROI Calculator",
+    tagline: "Savings and payback years",
+    icon: <TrendingUp className={`${ICON} text-green-500`} />,
+  },
+  {
+    key: "assessment",
+    to: "/solar-assessment",
+    label: "Free Solar Assessment",
+    tagline: "Book a site survey",
+    icon: <ClipboardCheck className={`${ICON} text-blue`} />,
+  },
+  {
+    key: "quotation",
+    to: "/get-quotation",
+    label: "Get Free Quotation",
+    tagline: "Priced for your project",
+    badge: "Free",
+    icon: <FileText className={`${ICON} text-orange-500`} />,
+  },
+]
+
+const SERVICES_PANEL: MenuPanelItem[] = [
+  {
+    key: "wholesale",
+    to: "/wholesale",
+    label: "Wholesale & Dealer",
+    tagline: "Bulk pricing for resellers",
+    icon: <Store className={`${ICON} text-orange-500`} />,
+  },
+  {
+    key: "track",
+    to: "/track-order",
+    label: "Track Order",
+    tagline: "Where your order is now",
+    icon: <Truck className={`${ICON} text-blue`} />,
+  },
+  {
+    key: "article",
+    to: "/blog",
+    label: "Articles",
+    tagline: "Solar guides and news",
+    icon: <Newspaper className={`${ICON} text-green-500`} />,
+  },
+  {
+    key: "about",
+    to: "/about",
+    label: "About Us",
+    tagline: "Who we are",
+    icon: <Info className={`${ICON} text-blue`} />,
+  },
+  {
+    key: "contact",
+    to: "/contact",
+    label: "Contact",
+    tagline: "Call, WhatsApp or visit",
+    icon: <Phone className={`${ICON} text-orange-500`} />,
+  },
+]
 
 export function Header() {
   const { theme, toggleTheme } = useTheme()
@@ -48,88 +128,63 @@ export function Header() {
   const navigate = useNavigate()
   const location = useLocation()
   const [isHidden, setIsHidden] = useState(false)
-  const [isNavHidden, setIsNavHidden] = useState(false)
-  const [openGroup, setOpenGroup] = useState<string | null>(null)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [open, setOpen] = useState<{ key: string; left: number } | null>(null)
   const menuGroups = useMenuGroups()
-  // The product page is dense enough without a full-width panel dropping over
-  // it, so the mega menu is switched off there.
-  const hasMegaMenu = !location.pathname.startsWith("/product/")
-  const [categoryOpen, setCategoryOpen] = useState(false)
-  const megaCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { data: packageCategories = [] } = usePackageCategories()
+  const headerRef = useRef<HTMLElement>(null)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isHome = location.pathname === "/"
 
-  const openMega = (slug: string) => {
-    if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current)
-    setCategoryOpen(false)
-    setOpenGroup(slug)
-  }
-  const scheduleCloseMega = () => {
-    if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current)
-    megaCloseTimer.current = setTimeout(() => setOpenGroup(null), 200)
+  // Panels and the search row close whenever the page changes.
+  const [lastPath, setLastPath] = useState(location.pathname)
+  if (lastPath !== location.pathname) {
+    setLastPath(location.pathname)
+    setOpen(null)
+    setSearchOpen(false)
   }
 
-  // Two different behaviours, because the homepage hero is the only place the
-  // whole bar can leave without costing you the search box: on the homepage the
-  // bar slides away once the hero is behind you and comes back as you scroll up
-  // into it; everywhere else only the nav row collapses as you scroll down, so
-  // the logo, search and cart stay with you.
-  // Decides when to hide the bar. Rules:
-  //  1. Only crossings bigger than NAV_HIDE_DEADBAND switch state — otherwise
-  //     a 1-2px scroll jitter (smooth-scroll inertia, momentum trackpads)
-  //     would flip the nav on and off every frame and the page would appear
-  //     to shake as the content under it reflows.
-  //  2. The check is batched into one requestAnimationFrame tick so the
-  //     scroll event never does synchronous React work.
+  const openPanel = (key: string, anchor: HTMLElement) => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+    const header = headerRef.current
+    if (!header) return
+    const bar = header.getBoundingClientRect()
+    const item = anchor.getBoundingClientRect()
+    const width = Math.min(MENU_PANEL_WIDTH, bar.width - 16)
+    const left = Math.min(Math.max(8, item.left - bar.left - 16), bar.width - width - 8)
+    setOpen({ key, left })
+  }
+  const scheduleClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+    closeTimer.current = setTimeout(() => setOpen(null), 180)
+  }
+
+  // On the homepage the bar slides away once the hero is behind you and comes
+  // back as you scroll up into it. Batched into one animation frame so the
+  // scroll handler never does synchronous React work.
   useEffect(() => {
-    // The last position that caused a state change — the deadband is measured
-    // against this, not against the previous frame.
-    let lastDecisive = window.scrollY
-    let direction: "up" | "down" | null = null
+    if (!isHome) {
+      setIsHidden(false)
+      return
+    }
     let ticking = false
-
     const evaluate = () => {
       ticking = false
-      const y = window.scrollY
-
-      if (isHome) {
-        const hero = document.querySelector<HTMLElement>("[data-hero]")
-        setIsHidden(hero ? y > hero.offsetTop + hero.offsetHeight : false)
-        setIsNavHidden(false)
-        return
-      }
-
-      setIsHidden(false)
-      if (y <= NAV_HIDE_AFTER) {
-        setIsNavHidden(false)
-        lastDecisive = y
-        direction = null
-      } else {
-        const delta = y - lastDecisive
-        if (delta > NAV_HIDE_DEADBAND && direction !== "down") {
-          setIsNavHidden(true)
-          direction = "down"
-          lastDecisive = y
-        } else if (delta < -NAV_HIDE_DEADBAND && direction !== "up") {
-          setIsNavHidden(false)
-          direction = "up"
-          lastDecisive = y
-        }
-      }
+      const hero = document.querySelector<HTMLElement>("[data-hero]")
+      setIsHidden(hero ? window.scrollY > hero.offsetTop + hero.offsetHeight : false)
     }
-
     const onScroll = () => {
       if (ticking) return
       ticking = true
       requestAnimationFrame(evaluate)
     }
-
     const raf = requestAnimationFrame(evaluate)
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener("scroll", onScroll)
     }
-  }, [isHome, location.pathname])
+  }, [isHome])
 
   const openCart = useCartStore((s) => s.openCart)
   const openMobileMenu = useCartStore((s) => s.openMobileMenu)
@@ -138,13 +193,26 @@ export function Header() {
   const headerLogo = siteContent?.header_logo_url || "/logo.png"
   const logoHeight = siteContent?.header_logo_height || DEFAULT_LOGO_HEIGHT
 
-  // One menu per top-level category, its items filed underneath. If the
-  // categories haven't loaded, a plain Products link stands in so the nav is
-  // never short of a way into the catalogue.
+  // Packages, then one menu per top-level category (its sub-categories become
+  // the panel), then the calculators and services. Categories come from the
+  // admin panel, so a new category shows up here without a deploy.
   const navItems = useMemo<NavItem[]>(() => {
     const items: NavItem[] = [
-      { key: "home", label: "Home", to: "/" },
-      { key: "packages", label: "Packages", to: "/packages", badge: "HOT" },
+      {
+        key: "packages",
+        label: "Packages",
+        to: "/packages",
+        badge: "HOT",
+        panel: packageCategories.length
+          ? packageCategories.map((cat) => ({
+              key: cat.id,
+              to: `/packages?category=${cat.slug}`,
+              label: cat.name,
+              tagline: cat.description,
+              icon: <Zap className={`${ICON} text-orange-500`} />,
+            }))
+          : undefined,
+      },
     ]
     if (menuGroups.length === 0) {
       items.push({ key: "products", label: "Products", to: "/products" })
@@ -155,26 +223,24 @@ export function Header() {
         label: group.name,
         to: `/category/${group.slug}`,
         badge: group.badge ?? undefined,
-        group,
+        panel: group.children.map((cat) => ({
+          key: cat.id,
+          to: `/category/${cat.slug}`,
+          label: cat.name,
+          tagline: cat.tagline,
+          badge: cat.badge,
+          icon: <CategoryIcon slug={cat.slug} className={ICON} />,
+        })),
       })
     }
     items.push(
-      { key: "solar-calculator", label: "Solar Calculator", to: "/solar-calculator", badge: "FREE" },
-      { key: "roi", label: "ROI Calculator", to: "/solar-roi-calculator" },
-      { key: "wholesale", label: "Wholesale", to: "/wholesale" },
-      { key: "article", label: "Article", to: "/blog" },
-      { key: "about", label: "About", to: "/about" },
-      { key: "contact", label: "Contact", to: "/contact" },
+      { key: "calculator", label: "Calculator", to: "/solar-calculator", badge: "FREE", panel: CALCULATOR_PANEL },
+      { key: "services", label: "Services", to: "/get-quotation", badge: "NEW", panel: SERVICES_PANEL },
     )
     return items
-  }, [menuGroups])
+  }, [menuGroups, packageCategories])
 
-  // A collapsed nav row must not leave its panels hanging open, so both are
-  // derived from it rather than being closed from an effect.
-  const showCategoryPanel = categoryOpen && !isNavHidden
-  const activeGroup = isNavHidden
-    ? undefined
-    : menuGroups.find((group) => group.slug === openGroup)
+  const openItem = open ? navItems.find((item) => item.key === open.key) : undefined
 
   const handleSignOut = async () => {
     await signOut()
@@ -182,57 +248,59 @@ export function Header() {
     navigate("/")
   }
 
+  const iconButton =
+    "relative flex size-10 shrink-0 items-center justify-center rounded-full text-text transition-colors hover:bg-black/[.05] active:scale-95"
+
   return (
     <header
+      ref={headerRef}
       className={`rsp-topbar sticky top-0 z-[60] border-b border-border transition-transform duration-300 ${
         isHidden ? "-translate-y-full" : "translate-y-0"
       }`}
     >
-      <div className="mx-auto flex max-w-[1280px] items-center gap-3 px-4 py-2 sm:px-6">
-        <button
-          onClick={openMobileMenu}
-          aria-label="Menu"
-          className="flex size-[38px] shrink-0 items-center justify-center rounded-xl border border-border bg-surface-2 text-text lg:hidden"
-        >
-          <Menu className="size-5" />
+      <div className="mx-auto flex max-w-[1280px] items-center gap-2 px-4 py-1.5 sm:px-6 lg:gap-4">
+        <button onClick={openMobileMenu} aria-label="Menu" className={`${iconButton} -ml-2 lg:hidden`}>
+          <Menu className="size-[22px]" />
         </button>
 
         <BrandLogo src={headerLogo} height={logoHeight} />
 
-        {/* Search — grows to fill row one */}
-        <div className="hidden min-w-0 flex-1 justify-center lg:flex">
-          <div className="w-full max-w-[460px]">
-            <SearchSuggest />
-          </div>
-        </div>
+        <nav aria-label="Main" className="hidden min-w-0 flex-1 lg:block">
+          <MainNav
+            items={navItems}
+            openKey={open?.key ?? null}
+            onOpen={openPanel}
+            onClose={scheduleClose}
+          />
+        </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-1 lg:ml-0">
           <button
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-            className="flex size-[38px] items-center justify-center rounded-xl border border-border bg-surface-2 text-text transition-colors hover:bg-surface-3 active:scale-95"
+            onClick={() => setSearchOpen((v) => !v)}
+            aria-label={searchOpen ? "Close search" : "Search"}
+            aria-expanded={searchOpen}
+            className={`${iconButton} hidden lg:flex`}
           >
+            {searchOpen ? <X className="size-[20px]" /> : <Search className="size-[20px]" />}
+          </button>
+          <button onClick={toggleTheme} aria-label="Toggle theme" className={iconButton}>
             {theme === "dark" ? (
-              <Sun className="size-[18px]" stroke="#F4D560" />
+              <Sun className="size-[20px]" stroke="#D9A400" />
             ) : (
-              <Moon className="size-[18px]" stroke="#0B3F94" />
+              <Moon className="size-[20px]" stroke="#0B3F94" />
             )}
           </button>
-          <button
-            onClick={openCart}
-            aria-label="Cart"
-            className="relative flex size-[38px] items-center justify-center rounded-xl border border-border bg-surface-2 text-text transition-colors hover:bg-surface-3 active:scale-95"
-          >
-            <ShoppingCart className="size-[18px]" />
+          <button onClick={openCart} aria-label="Cart" className={iconButton}>
+            <ShoppingCart className="size-[20px]" />
             {cartCount > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gradient-to-r from-orange-500 to-orange-400 px-1 text-[10.5px] font-bold text-white shadow-[0_2px_8px_rgba(244,158,9,.5)]">
+              <span className="absolute right-0.5 top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-orange-500 px-1 text-[10.5px] font-bold text-white">
                 {cartCount}
               </span>
             )}
           </button>
           {session ? (
             <DropdownMenu>
-              <DropdownMenuTrigger className="hidden h-[38px] items-center gap-2 rounded-xl border border-border bg-surface-2 px-3.5 text-[13px] font-semibold text-text outline-none transition-colors hover:bg-surface-3 lg:inline-flex">
+              <DropdownMenuTrigger className="ml-1 hidden h-9 items-center gap-1.5 rounded-full bg-[#FFD60A] px-4 text-[13px] font-bold text-black outline-none transition-[filter] hover:brightness-95 lg:inline-flex">
                 <User className="size-[16px]" />
                 {profile?.full_name?.split(" ")[0] ?? "Account"}
               </DropdownMenuTrigger>
@@ -275,57 +343,30 @@ export function Header() {
           ) : (
             <Link
               to="/login"
-              className="hidden h-[38px] items-center gap-2 rounded-xl border border-border bg-surface-2 px-3.5 text-[13px] font-semibold text-text no-underline transition-colors hover:bg-surface-3 lg:inline-flex"
+              className="ml-1 hidden h-9 items-center gap-1.5 rounded-full bg-[#FFD60A] px-4 text-[13px] font-bold text-black no-underline transition-[filter] hover:brightness-95 lg:inline-flex"
             >
-              <User className="size-[16px]" />
+              <LogIn className="size-[16px]" />
               Login
             </Link>
           )}
         </div>
       </div>
 
-      {/* Row two — primary navigation. It collapses on inner pages as you
-          scroll, which is why the panels below are siblings of it rather than
-          children: this row hides its own overflow. */}
-      <div
-        className={`hidden overflow-hidden transition-[max-height,opacity] duration-300 lg:block ${
-          isNavHidden ? "max-h-0 opacity-0" : "max-h-[56px] border-t border-border opacity-100"
-        }`}
-      >
-        <div className="mx-auto max-w-[1280px] px-4 sm:px-6">
-          <MainNav
-            items={navItems}
-            hasMegaMenu={hasMegaMenu}
-            onOpenGroup={openMega}
-            onCloseGroup={scheduleCloseMega}
-            leading={
-              /* Three-line button — the categories used to sit on the homepage,
-                 they now open from here. */
-              <button
-                onClick={() => {
-                  setOpenGroup(null)
-                  setCategoryOpen((v) => !v)
-                }}
-                aria-expanded={categoryOpen}
-                className="mr-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-[10px] border border-border bg-surface-2 px-2.5 py-1.5 text-[12.5px] font-bold text-text transition-colors hover:bg-surface-3 xl:mr-1.5 xl:text-[13px]"
-              >
-                <Menu className="size-[16px]" />
-                Categories
-                <ChevronDown
-                  className={`size-[13px] transition-transform duration-200 ${categoryOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-            }
-          />
+      {searchOpen && (
+        <div className="hidden border-t border-border lg:block">
+          <div className="mx-auto max-w-[680px] px-6 py-3">
+            <SearchSuggest onNavigate={() => setSearchOpen(false)} />
+          </div>
         </div>
-      </div>
-      {showCategoryPanel && <CategoryMenu onClose={() => setCategoryOpen(false)} />}
-      {hasMegaMenu && activeGroup && (
+      )}
+
+      {open && openItem?.panel && (
         <MegaMenu
-          group={activeGroup}
-          onClose={() => setOpenGroup(null)}
-          onMouseEnter={() => openMega(activeGroup.slug)}
-          onMouseLeave={scheduleCloseMega}
+          items={openItem.panel}
+          left={open.left}
+          onClose={() => setOpen(null)}
+          onMouseEnter={() => closeTimer.current && clearTimeout(closeTimer.current)}
+          onMouseLeave={scheduleClose}
         />
       )}
     </header>
@@ -345,7 +386,7 @@ function BrandLogo({ src, height }: { src: string; height: number }) {
   const size = clampLogoHeight(height)
 
   return (
-    <Link to="/" className="flex min-w-0 items-center gap-2.5 no-underline">
+    <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2.5 no-underline">
       <span
         className={
           isWide

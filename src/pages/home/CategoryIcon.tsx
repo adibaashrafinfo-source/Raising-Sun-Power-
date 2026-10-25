@@ -50,7 +50,7 @@ const COLORS: Record<string, string> = {
   "portable-power-station": "#217CCA",
 }
 
-export function CategoryIcon({ slug }: { slug: string }) {
+export function CategoryIcon({ slug, className = "size-[26px]" }: { slug: string; className?: string }) {
   const Icon = ICONS[slug] ?? Boxes
-  return <Icon className="size-[26px]" style={{ color: COLORS[slug] }} />
+  return <Icon className={className} style={{ color: COLORS[slug] ?? "#F49E09" }} />
 }

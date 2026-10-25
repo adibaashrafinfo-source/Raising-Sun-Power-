@@ -30,8 +30,11 @@
   --surface: #ffffff;
   --surface-2: #eef3fa;
   --surface-3: #e3effb;
-  --text: #0a1b33;
-  --muted: #566379;
+  /* Light mode reads in deep black, one size up. --fs scales every font size:
+     the named sizes below and each text-[…px] utility multiply by it. */
+  --text: #000000;
+  --muted: #262626;
+  --fs: 1.08;
   --border: #e1e8f2;
   --blue: #217cca;
   --blue-strong: #0b3f94;
@@ -46,9 +49,9 @@
 
   /* Footer follows the active theme (light by default, deep navy in dark). */
   --footer-bg: linear-gradient(180deg, rgba(245, 248, 253, 0) 0%, rgba(227, 237, 250, 0.72) 45%, rgba(218, 231, 247, 0.9) 100%);
-  --footer-heading: #0a1b33;
-  --footer-text: #3f5069;
-  --footer-muted: #5d6e88;
+  --footer-heading: #000000;
+  --footer-text: #111111;
+  --footer-muted: #262626;
   --footer-border: rgba(10, 27, 51, 0.12);
   --footer-card: rgba(10, 27, 51, 0.035);
   --footer-accent: #0b3f94;
@@ -84,8 +87,8 @@
 
   /* Hero surface — light by default so the section follows the theme. */
   --hero-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(245, 248, 253, 0.35) 60%, rgba(245, 248, 253, 0) 100%);
-  --hero-text: #0a1b33;
-  --hero-muted: #45566e;
+  --hero-text: #000000;
+  --hero-muted: #1f1f1f;
   --hero-accent: #2a6b08;
   --hero-highlight: linear-gradient(120deg, #2a6b08, #d98700);
   --hero-chip-bg: rgba(10, 27, 51, 0.05);
@@ -104,6 +107,7 @@
   --surface-3: #1c2a47;
   --text: #eaf1fb;
   --muted: #93a2bc;
+  --fs: 1;
   --border: #233150;
   --blue: #4b9be6;
   --blue-strong: #217cca;
@@ -163,8 +167,8 @@
   --surface: #ffffff;
   --surface-2: #f2f6fc;
   --surface-3: #e5edf8;
-  --text: #0a1b33;
-  --muted: #566379;
+  --text: #000000;
+  --muted: #262626;
   --border: #e1e8f2;
   --blue: #217cca;
   --blue-strong: #0b3f94;
@@ -176,6 +180,17 @@
 @theme inline {
   --font-heading: "Poppins", sans-serif;
   --font-body: "Inter", sans-serif;
+
+  --text-xs: calc(0.75rem * var(--fs));
+  --text-sm: calc(0.875rem * var(--fs));
+  --text-base: calc(1rem * var(--fs));
+  --text-lg: calc(1.125rem * var(--fs));
+  --text-xl: calc(1.25rem * var(--fs));
+  --text-2xl: calc(1.5rem * var(--fs));
+  --text-3xl: calc(1.875rem * var(--fs));
+  --text-4xl: calc(2.25rem * var(--fs));
+  --text-5xl: calc(3rem * var(--fs));
+  --text-6xl: calc(3.75rem * var(--fs));
 
   --color-navy-900: var(--rsp-navy-900);
   --color-blue-700: var(--rsp-blue-700);
