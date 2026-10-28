@@ -51,7 +51,7 @@ import {
   fetchSuppliers,
   markContactMessageRead,
   recordCustomerPayment,
-  setOrderSpecialDiscount,
+  setOrderDiscount,
   recordSupplierPayment,
   transferStock,
   updateLead,
@@ -83,10 +83,10 @@ export function useUpdateOrderStatus() {
   })
 }
 
-export function useSetOrderSpecialDiscount() {
+export function useSetOrderDiscount() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ order, amount }: { order: Order; amount: number }) => setOrderSpecialDiscount(order, amount),
+    mutationFn: ({ order, amount }: { order: Order; amount: number }) => setOrderDiscount(order, amount),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-orders"] })
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] })

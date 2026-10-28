@@ -67,7 +67,6 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta, qrData
     month: "short",
     year: "numeric",
   })
-  const special = Number(order.special_discount ?? 0)
   const address = [order.address_line, order.upazila, order.district, order.division]
     .filter(Boolean)
     .join(", ")
@@ -185,7 +184,7 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta, qrData
     <tbody>${rows}</tbody>
     <tfoot>
       <tr>
-        <td colspan="3" rowspan="${2 + (order.discount > 0 ? 1 : 0) + (special > 0 ? 1 : 0) + (order.delivery_charge > 0 ? 1 : 0)}"></td>
+        <td colspan="3" rowspan="${2 + (order.discount > 0 ? 1 : 0) + (order.delivery_charge > 0 ? 1 : 0)}"></td>
         <td class="sum-label">Subtotal</td>
         <td class="num">${esc(formatBDT(order.subtotal))}</td>
       </tr>
@@ -195,17 +194,12 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta, qrData
           : ""
       }
       ${
-        special > 0
-          ? `<tr><td class="sum-label">Special discount</td><td class="num">-${esc(formatBDT(special))}</td></tr>`
-          : ""
-      }
-      ${
         order.delivery_charge > 0
           ? `<tr><td class="sum-label">Delivery</td><td class="num">${esc(formatBDT(order.delivery_charge))}</td></tr>`
           : ""
       }
       <tr class="grand">
-        <td class="sum-label">${special > 0 ? "Total after discount" : "Total"}</td>
+        <td class="sum-label">${order.discount > 0 ? "Total after discount" : "Total"}</td>
         <td class="num">${esc(formatBDT(order.total))}</td>
       </tr>
     </tfoot>
@@ -285,7 +279,7 @@ async function buildInvoiceQr(order: Order, items: OrderItem[], meta: InvoiceMet
       status: order.status,
       payment: order.payment_method,
       total: Number(order.total),
-      special_discount: Number(order.special_discount ?? 0),
+      discount: Number(order.discount),
       paid: Number(order.paid_amount ?? 0),
       due: Number(order.due_amount ?? 0),
       consignment: order.consignment_id ?? null,

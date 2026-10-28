@@ -328,8 +328,6 @@ export type Order = OrderInsert & {
   paid_amount: number
   due_amount: number
   payment_status: PurchasePaymentStatus
-  /** Flat amount the admin took off the order by hand; already inside `total`. */
-  special_discount?: number
   created_at: string
   updated_at: string
 }
