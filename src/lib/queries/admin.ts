@@ -218,6 +218,34 @@ export async function deleteOrder(id: string): Promise<void> {
   await logActivity({ action: "delete", table_name: "orders", record_id: id })
 }
 
+/**
+ * Takes a flat special discount off an order. `total` already includes any
+ * earlier special discount, so the undiscounted base is rebuilt from it; due
+ * and payment status follow the same rule the insert trigger uses. Returns the
+ * updated row so the open dialog can show the new figures straight away.
+ */
+export async function setOrderSpecialDiscount(order: Order, amount: number): Promise<Order> {
+  const current = order.special_discount ?? 0
+  const base = Number(order.total) + current
+  const discount = Math.min(Math.max(Math.round(amount * 100) / 100, 0), base)
+  const total = base - discount
+  const paid = Number(order.paid_amount)
+  const due = Math.max(total - paid, 0)
+  const paymentStatus = due <= 0 ? "paid" : paid > 0 ? "partial" : "due"
+
+  const { data, error } = await supabase
+    .from("orders")
+    .update({ special_discount: discount, total, due_amount: due, payment_status: paymentStatus })
+    .eq("id", order.id)
+    .select("*")
+    .maybeSingle()
+  if (error) throw error
+  if (!data) throw new Error("Nothing was updated — you may not have permission to edit this order.")
+
+  await logActivity({ action: "update", table_name: "orders", record_id: order.id })
+  return data as Order
+}
+
 // ---------- Products ----------
 export async function fetchAllProductsAdmin(): Promise<Product[]> {
   const { data, error } = await supabase

@@ -16,7 +16,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useAllOrders, useDeleteOrder, useRecordCustomerPayment, useUpdateOrderStatus } from "@/hooks/use-admin"
+import {
+  useAllOrders,
+  useDeleteOrder,
+  useRecordCustomerPayment,
+  useSetOrderSpecialDiscount,
+  useUpdateOrderStatus,
+} from "@/hooks/use-admin"
 import { useOrderItems, useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { invoiceMetaFrom, printInvoice } from "@/lib/invoice"
@@ -182,11 +188,15 @@ export default function AdminOrdersPage() {
   )
 }
 
-function OrderDetailDialog({ order, onClose }: { order: Order | null; onClose: () => void }) {
-  const { data: items = [] } = useOrderItems(order?.id)
+function OrderDetailDialog({ order: selected, onClose }: { order: Order | null; onClose: () => void }) {
+  const { data: items = [] } = useOrderItems(selected?.id)
   const { data: settings } = useSettings()
   const { data: cms } = useSiteContent()
   const [payOpen, setPayOpen] = useState(false)
+  // The row handed in is a snapshot; after a discount is saved the fresh row
+  // replaces it here so every figure in the dialog (and the invoice) updates.
+  const [fresh, setFresh] = useState<Order | null>(null)
+  const order = fresh && fresh.id === selected?.id ? fresh : selected
 
   const downloadInvoice = () => {
     if (!order) return
@@ -246,11 +256,10 @@ function OrderDetailDialog({ order, onClose }: { order: Order | null; onClose: (
                     <span className="font-semibold">{formatBDT(item.line_total)}</span>
                   </div>
                 ))}
-                <div className="mt-2 flex justify-between border-t border-border pt-2 font-bold">
-                  <span>Total</span>
-                  <span>{formatBDT(order.total)}</span>
-                </div>
+                <OrderTotals order={order} />
               </div>
+
+              <SpecialDiscountForm key={`${order.id}-${order.special_discount ?? 0}`} order={order} onSaved={setFresh} />
 
               <OrderCourierPanel order={order} />
 
@@ -383,5 +392,76 @@ function CourierCell({ order, onReview }: { order: Order; onReview: () => void }
     <Button variant="outline" size="sm" onClick={onReview}>
       <Send className="size-3.5" /> Send
     </Button>
+  )
+}
+
+/** Subtotal, each discount, delivery and the amount the customer actually owes. */
+function OrderTotals({ order }: { order: Order }) {
+  const special = order.special_discount ?? 0
+  const row = (label: string, value: string, tone = "text-muted") => (
+    <div className={`flex justify-between py-0.5 text-[13px] ${tone}`}>
+      <span>{label}</span>
+      <span>{value}</span>
+    </div>
+  )
+  return (
+    <div className="mt-2 border-t border-border pt-2">
+      {row("Subtotal", formatBDT(order.subtotal))}
+      {order.discount > 0 && row("Discount", `− ${formatBDT(order.discount)}`)}
+      {special > 0 && row("Special discount", `− ${formatBDT(special)}`, "font-semibold text-green-600")}
+      {order.delivery_charge > 0 && row("Delivery", formatBDT(order.delivery_charge))}
+      <div className="mt-1 flex justify-between border-t border-border pt-2 font-bold">
+        <span>{special > 0 ? "Total after discount" : "Total"}</span>
+        <span>{formatBDT(order.total)}</span>
+      </div>
+    </div>
+  )
+}
+
+function SpecialDiscountForm({ order, onSaved }: { order: Order; onSaved: (order: Order) => void }) {
+  const setDiscount = useSetOrderSpecialDiscount()
+  const current = order.special_discount ?? 0
+  const [value, setValue] = useState(current > 0 ? String(current) : "")
+  const amount = Number(value) || 0
+  const base = Number(order.total) + current
+  const preview = Math.max(base - Math.min(Math.max(amount, 0), base), 0)
+
+  const save = async () => {
+    if (amount < 0 || amount > base) {
+      toast.error(`Discount must be between ৳0 and ${formatBDT(base)}`)
+      return
+    }
+    try {
+      const updated = await setDiscount.mutateAsync({ order, amount })
+      onSaved(updated)
+      toast.success(amount > 0 ? "Special discount applied" : "Special discount removed")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't apply the discount"))
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-border p-3">
+      <Label className="mb-1.5 block text-xs font-semibold text-muted">Special discount (৳)</Label>
+      <div className="flex items-center gap-2">
+        <Input
+          type="number"
+          min="0"
+          max={base}
+          inputMode="decimal"
+          placeholder="0"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+        <Button size="sm" onClick={save} disabled={setDiscount.isPending || amount === current}>
+          {setDiscount.isPending ? "Saving…" : "Apply"}
+        </Button>
+      </div>
+      {amount !== current && (
+        <p className="mt-2 text-xs text-muted">
+          Total after discount: <b className="text-text">{formatBDT(preview)}</b>
+        </p>
+      )}
+    </div>
   )
 }

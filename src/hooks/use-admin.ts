@@ -51,6 +51,7 @@ import {
   fetchSuppliers,
   markContactMessageRead,
   recordCustomerPayment,
+  setOrderSpecialDiscount,
   recordSupplierPayment,
   transferStock,
   updateLead,
@@ -64,7 +65,7 @@ import {
   upsertProduct,
   upsertSupplier,
 } from "@/lib/queries/admin"
-import type { LeadStatus, OrderStatus, ProfileRole } from "@/types/database"
+import type { LeadStatus, Order, OrderStatus, ProfileRole } from "@/types/database"
 
 export function useDashboardStats() {
   return useQuery({ queryKey: ["admin-dashboard"], queryFn: fetchDashboardStats })
@@ -79,6 +80,17 @@ export function useUpdateOrderStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: OrderStatus }) => updateOrderStatus(id, status),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-orders"] }),
+  })
+}
+
+export function useSetOrderSpecialDiscount() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ order, amount }: { order: Order; amount: number }) => setOrderSpecialDiscount(order, amount),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] })
+    },
   })
 }
 
