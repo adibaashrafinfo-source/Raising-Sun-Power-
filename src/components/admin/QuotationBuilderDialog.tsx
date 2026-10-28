@@ -329,7 +329,7 @@ export function QuotationBuilderDialog({ lead, onClose }: { lead: Lead; onClose:
               onChange={(v) => setFees((f) => ({ ...f, other_charges: v }))}
             />
             <FeeField
-              label="Discount"
+              label="Special discount"
               value={fees.discount}
               onChange={(v) => setFees((f) => ({ ...f, discount: v }))}
             />

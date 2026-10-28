@@ -411,7 +411,7 @@ function quotationHtml(input: QuotationInput, qrDataUrl: string): string {
       ${feeRow("Other charges", input.fees.other_charges)}
       ${
         input.fees.discount > 0
-          ? `<tr><td class="sum-label">Discount</td><td class="num">-${esc(formatBDT(input.fees.discount))}</td></tr>`
+          ? `<tr><td class="sum-label">Special discount</td><td class="num">-${esc(formatBDT(input.fees.discount))}</td></tr>`
           : ""
       }
       ${vat > 0 ? `<tr><td class="sum-label">VAT (${esc(input.vatRate)}%)</td><td class="num">${esc(formatBDT(vat))}</td></tr>` : ""}

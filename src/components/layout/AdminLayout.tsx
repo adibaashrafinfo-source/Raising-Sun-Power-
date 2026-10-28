@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  FilePlus2,
   LayoutDashboard,
   GalleryHorizontal,
   Landmark,
@@ -39,6 +40,7 @@ import { cn } from "@/lib/utils"
 const links = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
+  { to: "/admin/quotations", label: "New Quotation", icon: FilePlus2 },
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/packages", label: "Packages", icon: Layers },
   { to: "/admin/couriers", label: "Courier Tracking", icon: Truck },
