@@ -219,23 +219,22 @@ export async function deleteOrder(id: string): Promise<void> {
 }
 
 /**
- * Takes a flat special discount off an order. `total` already includes any
- * earlier special discount, so the undiscounted base is rebuilt from it; due
- * and payment status follow the same rule the insert trigger uses. Returns the
- * updated row so the open dialog can show the new figures straight away.
+ * Sets the order's discount to a flat amount (any coupon discount is replaced).
+ * total = subtotal - discount + delivery; due and payment status follow the
+ * same rule the insert trigger uses. Returns the updated row so the open
+ * dialog and invoice show the new figures straight away.
  */
-export async function setOrderSpecialDiscount(order: Order, amount: number): Promise<Order> {
-  const current = order.special_discount ?? 0
-  const base = Number(order.total) + current
-  const discount = Math.min(Math.max(Math.round(amount * 100) / 100, 0), base)
-  const total = base - discount
+export async function setOrderDiscount(order: Order, amount: number): Promise<Order> {
+  const subtotal = Number(order.subtotal)
+  const discount = Math.min(Math.max(Math.round(amount * 100) / 100, 0), subtotal)
+  const total = subtotal - discount + Number(order.delivery_charge)
   const paid = Number(order.paid_amount)
   const due = Math.max(total - paid, 0)
   const paymentStatus = due <= 0 ? "paid" : paid > 0 ? "partial" : "due"
 
   const { data, error } = await supabase
     .from("orders")
-    .update({ special_discount: discount, total, due_amount: due, payment_status: paymentStatus })
+    .update({ discount, total, due_amount: due, payment_status: paymentStatus })
     .eq("id", order.id)
     .select("*")
     .maybeSingle()

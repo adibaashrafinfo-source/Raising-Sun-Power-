@@ -20,7 +20,7 @@ import {
   useAllOrders,
   useDeleteOrder,
   useRecordCustomerPayment,
-  useSetOrderSpecialDiscount,
+  useSetOrderDiscount,
   useUpdateOrderStatus,
 } from "@/hooks/use-admin"
 import { useOrderItems, useSettings } from "@/hooks/use-checkout"
@@ -259,7 +259,7 @@ function OrderDetailDialog({ order: selected, onClose }: { order: Order | null; 
                 <OrderTotals order={order} />
               </div>
 
-              <SpecialDiscountForm key={`${order.id}-${order.special_discount ?? 0}`} order={order} onSaved={setFresh} />
+              <SpecialDiscountForm key={`${order.id}-${order.discount}`} order={order} onSaved={setFresh} />
 
               <OrderCourierPanel order={order} />
 
@@ -397,7 +397,7 @@ function CourierCell({ order, onReview }: { order: Order; onReview: () => void }
 
 /** Subtotal, each discount, delivery and the amount the customer actually owes. */
 function OrderTotals({ order }: { order: Order }) {
-  const special = order.special_discount ?? 0
+  const discount = Number(order.discount)
   const row = (label: string, value: string, tone = "text-muted") => (
     <div className={`flex justify-between py-0.5 text-[13px] ${tone}`}>
       <span>{label}</span>
@@ -407,11 +407,10 @@ function OrderTotals({ order }: { order: Order }) {
   return (
     <div className="mt-2 border-t border-border pt-2">
       {row("Subtotal", formatBDT(order.subtotal))}
-      {order.discount > 0 && row("Discount", `− ${formatBDT(order.discount)}`)}
-      {special > 0 && row("Special discount", `− ${formatBDT(special)}`, "font-semibold text-green-600")}
+      {discount > 0 && row("Discount", `− ${formatBDT(discount)}`, "font-semibold text-green-600")}
       {order.delivery_charge > 0 && row("Delivery", formatBDT(order.delivery_charge))}
       <div className="mt-1 flex justify-between border-t border-border pt-2 font-bold">
-        <span>{special > 0 ? "Total after discount" : "Total"}</span>
+        <span>{discount > 0 ? "Total after discount" : "Total"}</span>
         <span>{formatBDT(order.total)}</span>
       </div>
     </div>
@@ -419,22 +418,22 @@ function OrderTotals({ order }: { order: Order }) {
 }
 
 function SpecialDiscountForm({ order, onSaved }: { order: Order; onSaved: (order: Order) => void }) {
-  const setDiscount = useSetOrderSpecialDiscount()
-  const current = order.special_discount ?? 0
+  const setDiscount = useSetOrderDiscount()
+  const current = Number(order.discount)
   const [value, setValue] = useState(current > 0 ? String(current) : "")
   const amount = Number(value) || 0
-  const base = Number(order.total) + current
-  const preview = Math.max(base - Math.min(Math.max(amount, 0), base), 0)
+  const base = Number(order.subtotal)
+  const preview = base - Math.min(Math.max(amount, 0), base) + Number(order.delivery_charge)
 
   const save = async () => {
     if (amount < 0 || amount > base) {
-      toast.error(`Discount must be between ৳0 and ${formatBDT(base)}`)
+      toast.error(`Discount must be between ৳0 and ${formatBDT(base)} (the products subtotal)`)
       return
     }
     try {
       const updated = await setDiscount.mutateAsync({ order, amount })
       onSaved(updated)
-      toast.success(amount > 0 ? "Special discount applied" : "Special discount removed")
+      toast.success(amount > 0 ? "Discount applied" : "Discount removed")
     } catch (err) {
       toast.error(getErrorMessage(err, "Couldn't apply the discount"))
     }
