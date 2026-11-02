@@ -210,7 +210,7 @@ export default function ProductDetailPage() {
               </span>
             )}
             {images[activeImage] ? (
-              <img src={images[activeImage]} alt={product.name} className="size-full object-cover" />
+              <img src={images[activeImage]} alt={product.name} className="size-full object-contain" />
             ) : (
               <ProductArt art={art} className="h-[184px] w-[230px]" />
             )}
@@ -224,7 +224,7 @@ export default function ProductDetailPage() {
                   className="flex aspect-square flex-1 items-center justify-center overflow-hidden rounded-2xl border-2 transition-colors"
                   style={{ borderColor: i === activeImage ? "var(--blue)" : "var(--border)" }}
                 >
-                  <img src={img} alt="" className="size-full object-cover" />
+                  <img src={img} alt="" className="size-full object-contain" />
                 </button>
               ))}
             </div>
@@ -360,7 +360,7 @@ export default function ProductDetailPage() {
           {product.datasheet_url && (
             <Button asChild variant="outline" size="lg" className="mt-2.5 w-full">
               <a href={product.datasheet_url} target="_blank" rel="noreferrer" download>
-                <Download className="size-[17px]" /> Download Datasheet (PDF)
+                <Download className="size-[17px]" /> Download Datasheet
               </a>
             </Button>
           )}
@@ -413,7 +413,7 @@ export default function ProductDetailPage() {
               <Button asChild variant="outline" className="mb-4">
                 <a href={product.datasheet_url} target="_blank" rel="noreferrer" download>
                   <Download className="size-[17px]" />
-                  Download Datasheet (PDF)
+                  Download Datasheet
                 </a>
               </Button>
             )}

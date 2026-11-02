@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import {
   adjustStock,
+  createAdminInvoice,
   createExpense,
   createPurchase,
   createPurchaseReturn,
@@ -16,6 +17,7 @@ import {
   deleteProduct,
   deletePurchase,
   deleteSupplier,
+  fetchAdminInvoices,
   fetchAllBrands,
   fetchAllCategories,
   fetchAllCoupons,
@@ -73,6 +75,23 @@ export function useDashboardStats() {
 
 export function useAllOrders(filters: { status?: OrderStatus; search?: string }) {
   return useQuery({ queryKey: ["admin-orders", filters], queryFn: () => fetchAllOrders(filters) })
+}
+
+export function useAdminInvoices() {
+  // Keyed under "admin-orders" so recording a payment or editing an order refreshes this list too.
+  return useQuery({ queryKey: ["admin-orders", "invoices"], queryFn: fetchAdminInvoices })
+}
+
+export function useCreateAdminInvoice() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: createAdminInvoice,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-stock"] })
+    },
+  })
 }
 
 export function useUpdateOrderStatus() {

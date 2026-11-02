@@ -1,63 +1,36 @@
-import { useMemo, useState } from "react"
-import { FileDown, Loader2, Plus, Search, Trash2 } from "lucide-react"
+import { useState } from "react"
+import { FileDown, Loader2, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useAllProductsAdmin } from "@/hooks/use-admin"
+import { QuotationProductList } from "@/components/admin/QuotationProductList"
 import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { invoiceMetaFrom } from "@/lib/invoice"
 import { officesFrom } from "@/lib/offices"
-import { type QuotationLine, printQuotation, quotationTotals } from "@/lib/quotation"
+import { type QuotationLine, lineFromProduct, printQuotation, quotationTotals } from "@/lib/quotation"
 import { formatBDT, getErrorMessage } from "@/lib/utils"
-import type { Product } from "@/types/database"
 
 const DEFAULT_TERMS =
   "Warranty : as stated against each item above.\nWork completed : within the timeline agreed with the customer."
 
 type Line = QuotationLine & { key: string }
 
-const warrantyText = (months: number | null | undefined) => {
-  if (!months || months <= 0) return undefined
-  if (months % 12 === 0) return months === 12 ? "1 year" : `${months / 12} years`
-  return `${months} months`
-}
-
-const toLine = (product: Product): Line => ({
-  key: `${product.id}-${Date.now()}`,
-  product_name: product.name,
-  qty: 1,
-  unit_price: product.sale_price != null && product.sale_price < product.price ? product.sale_price : product.price,
-  unit: "pcs",
-  warranty: warrantyText(product.warranty_months),
-  sreda_serial: product.serda_serial_number ?? undefined,
-})
-
 /** Admin builds a quotation from scratch — for a customer who phoned in a requirement. */
 export default function AdminQuotationPage() {
-  const { data: products = [], isLoading } = useAllProductsAdmin()
   const { data: settings } = useSettings()
   const { data: cms } = useSiteContent()
 
   const [customer, setCustomer] = useState({ name: "", phone: "", email: "", company: "", location: "" })
   const [lines, setLines] = useState<Line[]>([])
-  const [query, setQuery] = useState("")
   const [fees, setFees] = useState({ service: "", installation: "", delivery: "", other: "", discount: "" })
   const [vatRate, setVatRate] = useState("")
   const [validUntil, setValidUntil] = useState("")
   const [notes, setNotes] = useState("")
   const [terms, setTerms] = useState(DEFAULT_TERMS)
   const [printing, setPrinting] = useState(false)
-
-  const matches = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return products
-      .filter((p) => p.status !== "archived")
-      .filter((p) => !q || p.name.toLowerCase().includes(q) || (p.category?.name ?? "").toLowerCase().includes(q))
-      .slice(0, 60)
-  }, [products, query])
 
   const feeNumbers = {
     service_charge: Number(fees.service) || 0,
@@ -138,36 +111,11 @@ export default function AdminQuotationPage() {
 
         <section className="rounded-2xl border border-border bg-surface p-4">
           <h2 className="mb-3 font-heading text-base font-bold text-text">Products</h2>
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
-            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products…" className="pl-9" />
-          </div>
-          <div className="mt-2.5 max-h-[260px] overflow-y-auto rounded-[var(--radius-sm)] border border-border">
-            {isLoading ? (
-              <p className="p-4 text-center text-[13px] text-muted">Loading products…</p>
-            ) : matches.length === 0 ? (
-              <p className="p-4 text-center text-[13px] text-muted">No products match that search.</p>
-            ) : (
-              matches.map((product) => (
-                <button
-                  key={product.id}
-                  type="button"
-                  onClick={() => setLines((ls) => [...ls, toLine(product)])}
-                  className="flex w-full items-center gap-2.5 border-b border-border px-3 py-2.5 text-left last:border-0 hover:bg-surface-2"
-                >
-                  <Plus className="size-4 shrink-0 text-blue" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13.5px] font-medium text-text">{product.name}</span>
-                    {product.category?.name && <span className="text-[11.5px] text-muted">{product.category.name}</span>}
-                    {product.status === "draft" && <span className="ml-2 text-[11.5px] text-orange-500">draft</span>}
-                  </span>
-                  <span className="shrink-0 text-[13px] font-semibold tabular-nums text-text">
-                    {formatBDT(product.sale_price != null && product.sale_price < product.price ? product.sale_price : product.price)}
-                  </span>
-                </button>
-              ))
-            )}
-          </div>
+          <QuotationProductList
+            onPick={(product) =>
+              setLines((ls) => [...ls, { ...lineFromProduct(product), key: `${product.id}-${Date.now()}` }])
+            }
+          />
         </section>
       </div>
 
@@ -182,23 +130,21 @@ export default function AdminQuotationPage() {
           </div>
           {lines.length === 0 && <p className="p-6 text-center text-sm text-muted">Click a product above to add it.</p>}
           {lines.map((line) => (
-            <div key={line.key} className="grid grid-cols-[1fr_70px_110px_110px_34px] items-center gap-2 border-b border-border px-3 py-2 last:border-0">
-              <div className="min-w-0">
-                <div className="truncate text-sm font-medium text-text">{line.product_name}</div>
-                {(line.warranty || line.sreda_serial) && (
-                  <div className="truncate text-[11.5px] text-muted">
-                    {line.warranty && `Warranty: ${line.warranty}`}
-                    {line.warranty && line.sreda_serial && " · "}
-                    {line.sreda_serial && `SREDA: ${line.sreda_serial}`}
-                  </div>
-                )}
+            <div key={line.key} className="border-b border-border px-3 py-2 last:border-0">
+              <div className="grid grid-cols-[1fr_70px_110px_110px_34px] items-center gap-2">
+                <div className="min-w-0 truncate text-sm font-medium text-text">{line.product_name}</div>
+                <Input type="number" min="1" value={line.qty} className="text-right" onChange={(e) => updateLine(line.key, { qty: Number(e.target.value) || 0 })} />
+                <Input type="number" min="0" value={line.unit_price} className="text-right" onChange={(e) => updateLine(line.key, { unit_price: Number(e.target.value) || 0 })} />
+                <span className="text-right text-sm font-semibold tabular-nums text-text">{formatBDT(line.qty * line.unit_price)}</span>
+                <button type="button" aria-label="Remove line" onClick={() => setLines((ls) => ls.filter((l) => l.key !== line.key))} className="text-muted hover:text-red-500">
+                  <Trash2 className="size-4" />
+                </button>
               </div>
-              <Input type="number" min="1" value={line.qty} className="text-right" onChange={(e) => updateLine(line.key, { qty: Number(e.target.value) || 0 })} />
-              <Input type="number" min="0" value={line.unit_price} className="text-right" onChange={(e) => updateLine(line.key, { unit_price: Number(e.target.value) || 0 })} />
-              <span className="text-right text-sm font-semibold tabular-nums text-text">{formatBDT(line.qty * line.unit_price)}</span>
-              <button type="button" aria-label="Remove line" onClick={() => setLines((ls) => ls.filter((l) => l.key !== line.key))} className="text-muted hover:text-red-500">
-                <Trash2 className="size-4" />
-              </button>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                <Input value={line.warranty ?? ""} onChange={(e) => updateLine(line.key, { warranty: e.target.value })} placeholder="Official Warranty" aria-label="Official Warranty" />
+                <Input value={line.service_warranty ?? ""} onChange={(e) => updateLine(line.key, { service_warranty: e.target.value })} placeholder="Official Service Warranty" aria-label="Official Service Warranty" />
+                <Input value={line.replacement_warranty ?? ""} onChange={(e) => updateLine(line.key, { replacement_warranty: e.target.value })} placeholder="Official Replacement Warranty" aria-label="Official Replacement Warranty" />
+              </div>
             </div>
           ))}
         </div>

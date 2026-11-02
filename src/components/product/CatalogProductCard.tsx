@@ -103,7 +103,7 @@ export function CatalogProductCard({ product, view = "grid" }: { product: Produc
             src={image}
             alt={product.name}
             loading="lazy"
-            className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="absolute inset-0 size-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
           <ProductArt art={artForCategory(product.category?.slug)} />
