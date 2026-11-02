@@ -227,17 +227,18 @@ export async function deleteOrder(id: string): Promise<void> {
 export async function setOrderDiscount(order: Order, amount: number): Promise<Order> {
   const subtotal = Number(order.subtotal)
   const discount = Math.min(Math.max(Math.round(amount * 100) / 100, 0), subtotal)
-  const total = subtotal - discount + Number(order.delivery_charge)
+  // An invoice with VAT charges it on what is left after the discount.
+  const vatPercent = Number(order.vat_percent ?? 0)
+  const vat = vatPercent > 0 ? Math.round(((subtotal - discount) * vatPercent) / 100 * 100) / 100 : 0
+  const total = subtotal - discount + vat + Number(order.delivery_charge)
   const paid = Number(order.paid_amount)
   const due = Math.max(total - paid, 0)
   const paymentStatus = due <= 0 ? "paid" : paid > 0 ? "partial" : "due"
 
-  const { data, error } = await supabase
-    .from("orders")
-    .update({ discount, total, due_amount: due, payment_status: paymentStatus })
-    .eq("id", order.id)
-    .select("*")
-    .maybeSingle()
+  const patch: Record<string, unknown> = { discount, total, due_amount: due, payment_status: paymentStatus }
+  if (vatPercent > 0) patch.vat_amount = vat
+
+  const { data, error } = await supabase.from("orders").update(patch).eq("id", order.id).select("*").maybeSingle()
   if (error) throw error
   if (!data) throw new Error("Nothing was updated — you may not have permission to edit this order.")
 
@@ -248,15 +249,16 @@ export async function setOrderDiscount(order: Order, amount: number): Promise<Or
 // ---------- Admin-made invoices ----------
 // An invoice raised by hand (phone or walk-in sale) is stored as an order whose
 // number starts INV-, so it shares the orders table's payments, stock and
-// reporting instead of needing a second ledger.
+// reporting instead of needing a second ledger. Needs rsp_quotations_invoices.sql.
 
 export type AdminInvoiceInput = {
   number: string
-  customer: { name: string; phone: string; address: string; area: string }
+  customer: { name: string; phone: string; email: string; company: string; address: string; area: string }
   lines: { product_id: string | null; name: string; qty: number; unit_price: number; warranty_months?: number | null; serda_serial_number?: string | null }[]
   discount: number
   delivery: number
   vatPercent: number
+  dueDate: string
   notes: string
   deliveryMethod: "pickup" | "courier"
   payment: { amount: number; method: FinancePaymentMethod; date: string; note: string } | null
@@ -269,50 +271,44 @@ export function newInvoiceNumber(): string {
   return `INV-${stamp}-${crypto.randomUUID().slice(0, 4).toUpperCase()}`
 }
 
+/** items = sum of lines; VAT is charged on items minus the discount; total = items − discount + VAT + delivery. */
 export function invoiceTotals(input: Pick<AdminInvoiceInput, "lines" | "discount" | "delivery" | "vatPercent">) {
   const items = input.lines.reduce((sum, l) => sum + l.qty * l.unit_price, 0)
   const discount = Math.min(Math.max(input.discount, 0), items)
   const vat = Math.round(((items - discount) * Math.max(input.vatPercent, 0)) / 100 * 100) / 100
-  const subtotal = items + vat
-  const total = subtotal - discount + Math.max(input.delivery, 0)
-  return { items, discount, vat, subtotal, total }
+  const total = items - discount + vat + Math.max(input.delivery, 0)
+  return { items, discount, vat, subtotal: items, total }
 }
 
-export async function createAdminInvoice(input: AdminInvoiceInput): Promise<{ order: Order; warning: string | null }> {
+function invoiceRow(input: AdminInvoiceInput) {
   const t = invoiceTotals(input)
-  if (input.payment && input.payment.amount > t.total) {
-    throw new Error(`The payment (${input.payment.amount}) is more than the invoice total (${t.total}).`)
+  return {
+    t,
+    row: {
+      order_number: input.number.trim(),
+      guest_name: input.customer.name.trim(),
+      guest_phone: input.customer.phone.trim(),
+      customer_email: input.customer.email.trim() || null,
+      customer_company: input.customer.company.trim() || null,
+      division: "—",
+      district: input.customer.area.trim() || "—",
+      address_line: input.customer.address.trim() || "—",
+      delivery_method: input.deliveryMethod,
+      subtotal: t.subtotal,
+      delivery_charge: Math.max(input.delivery, 0),
+      discount: t.discount,
+      vat_percent: Math.max(input.vatPercent, 0),
+      vat_amount: t.vat,
+      total: t.total,
+      due_date: input.dueDate || null,
+      notes: input.notes.trim() || null,
+    },
   }
+}
 
-  const id = crypto.randomUUID()
-  const orderRow = {
-    id,
-    order_number: input.number.trim(),
-    user_id: null,
-    guest_name: input.customer.name.trim(),
-    guest_phone: input.customer.phone.trim(),
-    status: "pending",
-    payment_method: "cod",
-    payment_reference: null,
-    payment_sender_number: null,
-    division: "—",
-    district: input.customer.area.trim() || "—",
-    upazila: null,
-    address_line: input.customer.address.trim() || "—",
-    landmark: null,
-    delivery_method: input.deliveryMethod,
-    subtotal: t.subtotal,
-    delivery_charge: Math.max(input.delivery, 0),
-    discount: t.discount,
-    coupon_id: null,
-    total: t.total,
-    notes: input.notes.trim() || null,
-  }
-  const { error: orderError } = await supabase.from("orders").insert(orderRow)
-  if (orderError) throw orderError
-
-  const itemRows = input.lines.map((l) => ({
-    order_id: id,
+const invoiceItemRows = (orderId: string, lines: AdminInvoiceInput["lines"]) =>
+  lines.map((l) => ({
+    order_id: orderId,
     product_id: l.product_id,
     product_name: l.name,
     unit_price: l.unit_price,
@@ -321,19 +317,29 @@ export async function createAdminInvoice(input: AdminInvoiceInput): Promise<{ or
     warranty_months: l.warranty_months ?? null,
     serda_serial_number: l.serda_serial_number ?? null,
   }))
-  if (t.vat > 0) {
-    itemRows.push({
-      order_id: id,
-      product_id: null,
-      product_name: `VAT (${input.vatPercent}%)`,
-      unit_price: t.vat,
-      qty: 1,
-      line_total: t.vat,
-      warranty_months: null,
-      serda_serial_number: null,
-    })
+
+export async function createAdminInvoice(input: AdminInvoiceInput): Promise<{ order: Order; warning: string | null }> {
+  const { t, row } = invoiceRow(input)
+  if (input.payment && input.payment.amount > t.total) {
+    throw new Error(`The payment (${input.payment.amount}) is more than the invoice total (${t.total}).`)
   }
-  const { error: itemsError } = await supabase.from("order_items").insert(itemRows)
+
+  const id = crypto.randomUUID()
+  const { error: orderError } = await supabase.from("orders").insert({
+    ...row,
+    id,
+    user_id: null,
+    status: "pending",
+    payment_method: "cod",
+    payment_reference: null,
+    payment_sender_number: null,
+    upazila: null,
+    landmark: null,
+    coupon_id: null,
+  })
+  if (orderError) throw orderError
+
+  const { error: itemsError } = await supabase.from("order_items").insert(invoiceItemRows(id, input.lines))
   if (itemsError) {
     // No half-made invoice: take the empty order back out.
     await supabase.from("orders").delete().eq("id", id)
@@ -365,17 +371,46 @@ export async function createAdminInvoice(input: AdminInvoiceInput): Promise<{ or
 
   await logActivity({ action: "insert", table_name: "orders", record_id: id })
   const { data } = await supabase.from("orders").select("*").eq("id", id).maybeSingle()
-  const now = new Date().toISOString()
-  const order = (data as Order | null) ?? ({
-    ...orderRow,
-    courier_status: null,
-    paid_amount: 0,
-    due_amount: t.total,
-    payment_status: "due",
-    created_at: now,
-    updated_at: now,
-  } as unknown as Order)
-  return { order, warning }
+  if (!data) throw new Error("The invoice was saved but couldn't be read back — refresh the list.")
+  return { order: data as Order, warning }
+}
+
+/**
+ * Edits an invoice: customer, items, charges, due date, notes. Payments already
+ * collected stay; due and payment status are recalculated against them. Stock
+ * that was already deducted is not adjusted — change it from Stock.
+ */
+export async function updateAdminInvoice(order: Order, input: AdminInvoiceInput): Promise<Order> {
+  const { t, row } = invoiceRow(input)
+  const paid = Number(order.paid_amount)
+  const due = Math.max(t.total - paid, 0)
+  const paymentStatus = due <= 0 ? "paid" : paid > 0 ? "partial" : "due"
+
+  const { data: updated, error } = await supabase
+    .from("orders")
+    .update({ ...row, due_amount: due, payment_status: paymentStatus })
+    .eq("id", order.id)
+    .select("*")
+    .maybeSingle()
+  if (error) throw error
+  if (!updated) throw new Error("Nothing was updated — you may not have permission to edit this invoice.")
+
+  // Items are replaced wholesale. Needs the order_items delete policy from
+  // rsp_quotations_invoices.sql — without it the delete would silently remove nothing.
+  const { data: removed, error: deleteError } = await supabase
+    .from("order_items")
+    .delete()
+    .eq("order_id", order.id)
+    .select("id")
+  if (deleteError) throw deleteError
+  if (!removed || removed.length === 0) {
+    throw new Error("The old items couldn't be replaced — run rsp_quotations_invoices.sql in Supabase first.")
+  }
+  const { error: itemsError } = await supabase.from("order_items").insert(invoiceItemRows(order.id, input.lines))
+  if (itemsError) throw itemsError
+
+  await logActivity({ action: "update", table_name: "orders", record_id: order.id })
+  return updated as Order
 }
 
 export async function fetchAdminInvoices(): Promise<Order[]> {

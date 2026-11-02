@@ -85,6 +85,11 @@ function invoiceHtml(
   const paid = Number(order.paid_amount ?? 0)
   const due = Number(order.due_amount ?? 0)
   const paidInFull = due <= 0 && Number(order.total) > 0
+  const vat = Number(order.vat_amount ?? 0)
+  const dueDate = order.due_date
+    ? new Date(order.due_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+    : ""
+  const overdue = manual && !paidInFull && !!order.due_date && new Date(order.due_date).getTime() < Date.now() - 86_400_000
   const paymentRows = payments
     .map(
       (p) => `
@@ -203,7 +208,9 @@ function invoiceHtml(
     <div>
       <div class="label">Billed to</div>
       <div><b>${esc(order.guest_name)}</b></div>
+      ${order.customer_company ? `<div>${esc(order.customer_company)}</div>` : ""}
       <div>${esc(order.guest_phone)}</div>
+      ${order.customer_email ? `<div>${esc(order.customer_email)}</div>` : ""}
       <div class="muted">${esc(address)}</div>
       ${order.landmark ? `<div class="muted">${esc(order.landmark)}</div>` : ""}
     </div>
@@ -212,6 +219,7 @@ function invoiceHtml(
       <div>Payment: <b>${manual ? (paidInFull ? "Paid" : paid > 0 ? "Partly paid" : "Unpaid") : esc(PAYMENT_LABELS[order.payment_method] ?? order.payment_method)}</b></div>
       <div>Delivery: <b>${esc(DELIVERY_LABELS[order.delivery_method] ?? order.delivery_method)}</b></div>
       <div>Status: <b>${esc(titleCase(order.status))}</b></div>
+      ${manual && dueDate ? `<div>Due date: <b${overdue ? ' style="color:#b42318"' : ""}>${esc(dueDate)}${overdue ? " (overdue)" : ""}</b></div>` : ""}
       ${order.payment_reference ? `<div class="muted">Ref: ${esc(order.payment_reference)}</div>` : ""}
     </div>
   </div>
@@ -229,13 +237,18 @@ function invoiceHtml(
     <tbody>${rows}</tbody>
     <tfoot>
       <tr>
-        <td colspan="3" rowspan="${2 + (order.discount > 0 ? 1 : 0) + (order.delivery_charge > 0 ? 1 : 0) + (paid > 0 ? 1 : 0) + (due > 0 ? 1 : 0)}"></td>
+        <td colspan="3" rowspan="${2 + (vat > 0 ? 1 : 0) + (order.discount > 0 ? 1 : 0) + (order.delivery_charge > 0 ? 1 : 0) + (paid > 0 ? 1 : 0) + (due > 0 ? 1 : 0)}"></td>
         <td class="sum-label">Subtotal</td>
         <td class="num">${esc(formatBDT(order.subtotal))}</td>
       </tr>
       ${
         order.discount > 0
           ? `<tr><td class="sum-label">Discount</td><td class="num">-${esc(formatBDT(order.discount))}</td></tr>`
+          : ""
+      }
+      ${
+        vat > 0
+          ? `<tr><td class="sum-label">VAT (${esc(Number(order.vat_percent ?? 0))}%)</td><td class="num">${esc(formatBDT(vat))}</td></tr>`
           : ""
       }
       ${
@@ -401,4 +414,76 @@ function formatWarranty(months: number | null | undefined): string | null {
     return years === 1 ? "Warranty: 1 year" : `Warranty: ${years} years`
   }
   return `Warranty: ${months} months`
+}
+
+
+/**
+ * A money receipt for one collected payment: how much, how, against which
+ * invoice, and what is still owed after it.
+ */
+export async function printReceipt(
+  order: Order,
+  payment: CustomerPayment,
+  meta: InvoiceMeta,
+  balanceAfter: number,
+): Promise<void> {
+  const fmtDate = (d: string) =>
+    new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8" />
+<title>Receipt ${esc(order.order_number)} — ${esc(COMPANY.name)}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 28px; font: 14px/1.6 "Helvetica Neue", Arial, sans-serif; color: #14213a; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #217CCA; padding-bottom: 14px; }
+  .logo { height: 50px; margin-bottom: 4px; }
+  h1 { margin: 0; font-size: 24px; letter-spacing: 3px; text-transform: uppercase; color: #217CCA; text-align: right; }
+  .muted { color: #5a6b85; }
+  table { width: 100%; border-collapse: collapse; margin-top: 22px; }
+  td { padding: 9px 4px; border-bottom: 1px solid #e8edf5; }
+  td:first-child { color: #5a6b85; width: 40%; }
+  .amount td { font-size: 20px; font-weight: 800; color: #2a6b08; border-top: 2px solid #14213a; }
+  .sign { margin-top: 60px; display: flex; justify-content: space-between; font-size: 12px; color: #5a6b85; }
+  .sign div { width: 200px; border-top: 1px solid #14213a; padding-top: 5px; text-align: center; }
+  @page { size: A4; margin: 14mm; }
+  @media print { body { padding: 0; } }
+</style></head><body>
+  <div class="head">
+    <div>
+      ${meta.logoUrl ? `<img class="logo" src="${esc(meta.logoUrl)}" alt="" />` : ""}
+      <div><b>${esc(COMPANY.name)}</b></div>
+      <div class="muted">Call: ${esc(meta.phone)} · ${esc(meta.email)}</div>
+    </div>
+    <div><h1>Money receipt</h1><div class="muted" style="text-align:right">Date: <b>${esc(fmtDate(payment.payment_date))}</b></div></div>
+  </div>
+  <table>
+    <tr><td>Received from</td><td><b>${esc(order.guest_name)}</b>${order.customer_company ? ` — ${esc(order.customer_company)}` : ""}</td></tr>
+    <tr><td>Phone</td><td>${esc(order.guest_phone)}</td></tr>
+    <tr><td>Against invoice</td><td><b>${esc(order.order_number)}</b> (total ${esc(formatBDT(Number(order.total)))})</td></tr>
+    <tr><td>Payment method</td><td>${esc(METHOD_LABELS[payment.payment_method] ?? payment.payment_method)}</td></tr>
+    ${payment.reference_note ? `<tr><td>Reference</td><td>${esc(payment.reference_note)}</td></tr>` : ""}
+    <tr class="amount"><td>Amount received</td><td>${esc(formatBDT(Number(payment.amount)))}</td></tr>
+    <tr><td>In words</td><td>${esc(amountInWords(Number(payment.amount)))}</td></tr>
+    <tr><td>Balance after this payment</td><td><b>${esc(formatBDT(Math.max(balanceAfter, 0)))}</b>${balanceAfter <= 0 ? " — paid in full" : ""}</td></tr>
+  </table>
+  <div class="sign"><div>Customer</div><div>Received by<br />for ${esc(COMPANY.name)}</div></div>
+</body></html>`
+
+  const frame = document.createElement("iframe")
+  frame.setAttribute("aria-hidden", "true")
+  frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;"
+  document.body.appendChild(frame)
+  const cleanUp = () => frame.remove()
+  frame.onload = () => {
+    const win = frame.contentWindow
+    if (!win) return cleanUp()
+    win.focus()
+    win.print()
+    win.addEventListener("afterprint", cleanUp)
+    setTimeout(cleanUp, 60_000)
+  }
+  const doc = frame.contentWindow?.document
+  if (!doc) return cleanUp()
+  doc.open()
+  doc.write(html)
+  doc.close()
 }

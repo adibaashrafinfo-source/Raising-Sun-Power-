@@ -1,35 +1,88 @@
 import { useState } from "react"
-import { FileDown, Loader2, Trash2 } from "lucide-react"
+import { ArrowLeft, FileDown, FileText, Loader2, Receipt, Save, Trash2 } from "lucide-react"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 
+import { QuotationProductList } from "@/components/admin/QuotationProductList"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { QuotationProductList } from "@/components/admin/QuotationProductList"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useQuotation, useSaveQuotation } from "@/hooks/use-quotations"
 import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { invoiceMetaFrom } from "@/lib/invoice"
 import { officesFrom } from "@/lib/offices"
 import { type QuotationLine, lineFromProduct, printQuotation, quotationTotals } from "@/lib/quotation"
+import {
+  newQuotationNumber,
+  QUOTATION_STATUSES,
+  type QuotationDraft,
+  type QuotationRecord,
+  type QuotationStatus,
+} from "@/lib/queries/quotations"
 import { formatBDT, getErrorMessage } from "@/lib/utils"
 
 const DEFAULT_TERMS =
   "Warranty : as stated against each item above.\nWork completed : within the timeline agreed with the customer."
 
+const selectClass =
+  "h-11 w-full rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3 text-sm text-text outline-none"
+
 type Line = QuotationLine & { key: string }
 
-/** Admin builds a quotation from scratch — for a customer who phoned in a requirement. */
+const today = () => new Date().toISOString().slice(0, 10)
+const longDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+const withKeys = (lines: QuotationLine[]): Line[] => lines.map((l, i) => ({ ...l, key: `l-${i}-${Date.now()}` }))
+const num = (v: number) => (v ? String(v) : "")
+
+/** Opens a saved quotation, or starts a new one — for a customer who phoned in a requirement. */
 export default function AdminQuotationPage() {
+  const { id } = useParams<{ id: string }>()
+  const { data: record, isLoading } = useQuotation(id)
+
+  if (id && isLoading) {
+    return <Skeleton className="h-96 w-full rounded-2xl" />
+  }
+  if (id && !record) {
+    return (
+      <div className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-muted">
+        That quotation doesn't exist (or you don't have access).{" "}
+        <Link to="/admin/quotations" className="font-semibold text-blue">
+          Back to quotations
+        </Link>
+      </div>
+    )
+  }
+  // Keyed so switching between quotations resets the form to the new record.
+  return <QuotationEditor key={record?.id ?? "new"} record={record ?? null} />
+}
+
+function QuotationEditor({ record }: { record: QuotationRecord | null }) {
+  const navigate = useNavigate()
+  const save = useSaveQuotation()
   const { data: settings } = useSettings()
   const { data: cms } = useSiteContent()
 
-  const [customer, setCustomer] = useState({ name: "", phone: "", email: "", company: "", location: "" })
-  const [lines, setLines] = useState<Line[]>([])
-  const [fees, setFees] = useState({ service: "", installation: "", delivery: "", other: "", discount: "" })
-  const [vatRate, setVatRate] = useState("")
-  const [validUntil, setValidUntil] = useState("")
-  const [notes, setNotes] = useState("")
-  const [terms, setTerms] = useState(DEFAULT_TERMS)
+  const [number, setNumber] = useState(record?.number ?? newQuotationNumber)
+  const [quoteDate, setQuoteDate] = useState(record?.quote_date ?? today())
+  const [validUntil, setValidUntil] = useState(record?.valid_until ?? "")
+  const [status, setStatus] = useState<QuotationStatus>(record?.status ?? "draft")
+  const [customer, setCustomer] = useState(
+    record?.customer ?? { name: "", phone: "", email: "", company: "", location: "" },
+  )
+  const [lines, setLines] = useState<Line[]>(() => withKeys(record?.lines ?? []))
+  const [fees, setFees] = useState({
+    service: num(record?.fees?.service_charge ?? 0),
+    installation: num(record?.fees?.installation_charge ?? 0),
+    delivery: num(record?.fees?.delivery_cost ?? 0),
+    other: num(record?.fees?.other_charges ?? 0),
+    discount: num(record?.fees?.discount ?? 0),
+  })
+  const [vatRate, setVatRate] = useState(num(record?.vat_percent ?? 0))
+  const [notes, setNotes] = useState(record?.notes ?? "")
+  const [terms, setTerms] = useState(record ? (record.terms ?? "") : DEFAULT_TERMS)
   const [printing, setPrinting] = useState(false)
 
   const feeNumbers = {
@@ -45,25 +98,56 @@ export default function AdminQuotationPage() {
   const updateLine = (key: string, patch: Partial<QuotationLine>) =>
     setLines((ls) => ls.map((l) => (l.key === key ? { ...l, ...patch } : l)))
 
-  const download = async () => {
+  const plainLines = () => lines.map(({ key: _key, ...line }) => line)
+
+  const validate = () => {
     if (!customer.name.trim() || !customer.phone.trim()) {
       toast.error("Customer name and phone are required.")
-      return
+      return false
     }
     if (lines.length === 0) {
       toast.error("Add at least one product.")
-      return
+      return false
     }
+    if (!number.trim()) {
+      toast.error("Quotation number is required.")
+      return false
+    }
+    return true
+  }
+
+  const draft = (): QuotationDraft => ({
+    number,
+    quoteDate,
+    validUntil,
+    status,
+    customer,
+    lines: plainLines(),
+    fees: feeNumbers,
+    vatPercent: vat,
+    notes,
+    terms,
+  })
+
+  /** Saves and returns the stored record, or null after showing why it couldn't. */
+  const persist = async (): Promise<QuotationRecord | null> => {
+    if (!validate()) return null
+    try {
+      return await save.mutateAsync({ draft: draft(), id: record?.id })
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't save the quotation."))
+      return null
+    }
+  }
+
+  const print = async () => {
+    if (!validate()) return
     setPrinting(true)
     try {
-      const now = new Date()
-      const stamp = now.toISOString().slice(0, 10).replace(/-/g, "")
       await printQuotation({
-        ref: `QT-${stamp}-${crypto.randomUUID().slice(0, 4).toUpperCase()}`,
-        date: now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
-        validUntil: validUntil
-          ? new Date(validUntil).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
-          : undefined,
+        ref: number,
+        date: longDate(quoteDate),
+        validUntil: validUntil ? longDate(validUntil) : undefined,
         customer: {
           name: customer.name.trim(),
           phone: customer.phone.trim(),
@@ -71,7 +155,7 @@ export default function AdminQuotationPage() {
           company: customer.company.trim() || null,
           location: customer.location.trim() || null,
         },
-        lines: lines.map(({ key: _key, ...line }) => line),
+        lines: plainLines(),
         fees: feeNumbers,
         vatRate: vat,
         notes: notes.trim() || undefined,
@@ -86,13 +170,65 @@ export default function AdminQuotationPage() {
     }
   }
 
+  const onSave = async () => {
+    const saved = await persist()
+    if (!saved) return
+    toast.success(`Quotation ${saved.number} saved`)
+    if (!record) navigate(`/admin/quotations/${saved.id}`, { replace: true })
+  }
+
+  const onSaveAndDownload = async () => {
+    const saved = await persist()
+    if (!saved) return
+    toast.success(`Quotation ${saved.number} saved`)
+    await print()
+    if (!record) navigate(`/admin/quotations/${saved.id}`, { replace: true })
+  }
+
+  const onConvert = async () => {
+    const saved = await persist()
+    if (!saved) return
+    navigate("/admin/invoices/new", { state: { quotation: saved } })
+  }
+
+  const busy = save.isPending || printing
+
   return (
     <div className="flex flex-col gap-5">
-      <div>
-        <h1 className="font-heading text-2xl font-extrabold text-text">New Quotation</h1>
-        <p className="mt-0.5 text-sm text-muted">
-          Pick products from the catalogue, add the customer, and download a quotation PDF.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <Link to="/admin/quotations" className="mb-1 inline-flex items-center gap-1 text-[13px] font-semibold text-blue no-underline">
+            <ArrowLeft className="size-3.5" /> All quotations
+          </Link>
+          <h1 className="font-heading text-2xl font-extrabold text-text">{record ? "Edit Quotation" : "New Quotation"}</h1>
+          <p className="mt-0.5 text-sm text-muted">
+            Pick products from the catalogue, add the customer, then save and download the PDF.
+          </p>
+        </div>
+        <div className="grid w-full grid-cols-2 gap-3 sm:w-auto sm:grid-cols-4">
+          <div>
+            <Label className="mb-1.5 block">Number</Label>
+            <Input value={number} onChange={(e) => setNumber(e.target.value)} />
+          </div>
+          <div>
+            <Label className="mb-1.5 block">Date</Label>
+            <Input type="date" value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} />
+          </div>
+          <div>
+            <Label className="mb-1.5 block">Valid until</Label>
+            <Input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />
+          </div>
+          <div>
+            <Label className="mb-1.5 block">Status</Label>
+            <select value={status} onChange={(e) => setStatus(e.target.value as QuotationStatus)} className={selectClass}>
+              {QUOTATION_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -140,10 +276,11 @@ export default function AdminQuotationPage() {
                   <Trash2 className="size-4" />
                 </button>
               </div>
-              <div className="mt-2 grid grid-cols-3 gap-2">
+              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <Input value={line.warranty ?? ""} onChange={(e) => updateLine(line.key, { warranty: e.target.value })} placeholder="Official Warranty" aria-label="Official Warranty" />
                 <Input value={line.service_warranty ?? ""} onChange={(e) => updateLine(line.key, { service_warranty: e.target.value })} placeholder="Official Service Warranty" aria-label="Official Service Warranty" />
                 <Input value={line.replacement_warranty ?? ""} onChange={(e) => updateLine(line.key, { replacement_warranty: e.target.value })} placeholder="Official Replacement Warranty" aria-label="Official Replacement Warranty" />
+                <Input value={line.sreda_serial ?? ""} onChange={(e) => updateLine(line.key, { sreda_serial: e.target.value })} placeholder="SREDA serial no." aria-label="SREDA serial number" />
               </div>
             </div>
           ))}
@@ -159,11 +296,8 @@ export default function AdminQuotationPage() {
           <Field label="Special discount (৳)" type="number" value={fees.discount} onChange={(v) => setFees((f) => ({ ...f, discount: v }))} />
           <Field label="VAT (%)" type="number" value={vatRate} onChange={setVatRate} />
         </div>
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <Field label="Valid until" type="date" value={validUntil} onChange={setValidUntil} />
-          <div className="sm:col-span-2">
-            <Field label="Notes (printed on the quotation)" value={notes} onChange={setNotes} />
-          </div>
+        <div className="mt-3">
+          <Field label="Notes (printed on the quotation)" value={notes} onChange={setNotes} />
         </div>
         <div className="mt-3">
           <Label className="mb-1.5 block">Terms &amp; conditions</Label>
@@ -181,10 +315,21 @@ export default function AdminQuotationPage() {
           <div className="text-xs text-muted">Subtotal {formatBDT(subtotal)}</div>
           <div className="font-heading text-lg font-extrabold text-text">Total {formatBDT(total)}</div>
         </div>
-        <Button onClick={download} disabled={printing}>
-          {printing ? <Loader2 className="size-4 animate-spin" /> : <FileDown className="size-4" />}
-          {printing ? "Opening…" : "Download Quotation PDF"}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={onConvert} disabled={busy}>
+            <Receipt className="size-4" /> Convert to invoice
+          </Button>
+          <Button variant="outline" onClick={print} disabled={busy}>
+            <FileText className="size-4" /> PDF only
+          </Button>
+          <Button variant="outline" onClick={onSave} disabled={busy}>
+            <Save className="size-4" /> Save
+          </Button>
+          <Button onClick={onSaveAndDownload} disabled={busy}>
+            {busy ? <Loader2 className="size-4 animate-spin" /> : <FileDown className="size-4" />}
+            Save &amp; download PDF
+          </Button>
+        </div>
       </div>
     </div>
   )

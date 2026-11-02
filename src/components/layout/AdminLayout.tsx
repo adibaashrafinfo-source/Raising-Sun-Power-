@@ -42,7 +42,7 @@ const links = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/invoices", label: "Invoices", icon: FileText },
-  { to: "/admin/quotations", label: "New Quotation", icon: FilePlus2 },
+  { to: "/admin/quotations", label: "Quotations", icon: FilePlus2 },
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/packages", label: "Packages", icon: Layers },
   { to: "/admin/couriers", label: "Courier Tracking", icon: Truck },
