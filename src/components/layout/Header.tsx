@@ -286,6 +286,14 @@ export function Header() {
           >
             {searchOpen ? <X className="size-[20px]" /> : <Search className="size-[20px]" />}
           </button>
+          <Link
+            to="/solar-calculator"
+            aria-label="Solar Calculator"
+            title="Solar Calculator"
+            className={`${iconButton} no-underline`}
+          >
+            <Calculator className="size-[20px] text-orange-500" />
+          </Link>
           <button onClick={toggleTheme} aria-label="Toggle theme" className={iconButton}>
             {theme === "dark" ? (
               <Sun className="size-[20px]" stroke="#D9A400" />
