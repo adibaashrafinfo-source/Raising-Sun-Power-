@@ -11,6 +11,7 @@ import { COMPANY } from "@/data/company"
 import type { InvoiceMeta } from "@/lib/invoice"
 import type { Office } from "@/lib/offices"
 import { formatBDT } from "@/lib/utils"
+import type { Product } from "@/types/database"
 
 export const PROJECT_CATEGORIES = ["Residential Project", "Commercial Project"] as const
 export const PROJECT_SYSTEM_TYPES = [
@@ -139,7 +140,7 @@ function numberToWords(n: number): string {
 }
 
 /** "৭৫,০০০.৫০" → "Seventy-Five Thousand Taka and Fifty Paisa Only" */
-function amountInWords(total: number): string {
+export function amountInWords(total: number): string {
   const safe = Math.max(0, Math.round(total * 100) / 100)
   const taka = Math.floor(safe)
   const paisa = Math.round((safe - taka) * 100)
@@ -180,9 +181,9 @@ async function buildQuotationQr(input: QuotationInput): Promise<string> {
 function lineNotesHtml(line: QuotationLine): string {
   const warrantyBits = [
     line.guarantee ? `<span>Guarantee: ${esc(line.guarantee)}</span>` : "",
-    line.warranty ? `<span>Warranty: ${esc(line.warranty)}</span>` : "",
-    line.service_warranty ? `<span>Service warranty: ${esc(line.service_warranty)}</span>` : "",
-    line.replacement_warranty ? `<span>Replacement warranty: ${esc(line.replacement_warranty)}</span>` : "",
+    line.warranty ? `<span>Official Warranty: ${esc(line.warranty)}</span>` : "",
+    line.service_warranty ? `<span>Official Service Warranty: ${esc(line.service_warranty)}</span>` : "",
+    line.replacement_warranty ? `<span>Official Replacement Warranty: ${esc(line.replacement_warranty)}</span>` : "",
   ]
     .filter(Boolean)
     .join("")
@@ -471,4 +472,27 @@ export async function printQuotation(input: QuotationInput): Promise<void> {
   doc.open()
   doc.write(quotationHtml(input, qr))
   doc.close()
+}
+
+/** Months → "1 year", "2 years", "18 months"; blank when the product has none. */
+export function warrantyLabel(months: number | null | undefined): string | undefined {
+  if (!months || months <= 0) return undefined
+  if (months % 12 === 0) return months === 12 ? "1 year" : `${months / 12} years`
+  return `${months} months`
+}
+
+/** The price a customer pays today: the sale price when one is running. */
+export const currentPrice = (product: Product) =>
+  product.sale_price != null && product.sale_price < product.price ? product.sale_price : product.price
+
+/** A quotation line for a catalogue product: today's price, its warranty and SREDA serial prefilled. */
+export function lineFromProduct(product: Product): QuotationLine {
+  return {
+    product_name: product.name,
+    qty: 1,
+    unit_price: currentPrice(product),
+    unit: "pcs",
+    warranty: warrantyLabel(product.warranty_months),
+    sreda_serial: product.serda_serial_number ?? undefined,
+  }
 }

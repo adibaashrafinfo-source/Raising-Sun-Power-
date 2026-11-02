@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { QuotationProductList } from "@/components/admin/QuotationProductList"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useSettings } from "@/hooks/use-checkout"
@@ -20,6 +21,7 @@ import {
   PROJECT_CATEGORIES,
   PROJECT_SYSTEM_TYPES,
   type QuotationLine,
+  lineFromProduct,
   paymentTermLine,
   printQuotation,
   quotationTotals,
@@ -206,6 +208,13 @@ export function QuotationBuilderDialog({ lead, onClose }: { lead: Lead; onClose:
             </div>
           </div>
 
+          <div className="rounded-xl border border-border p-3.5">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+              Add from the product list
+            </div>
+            <QuotationProductList onPick={(product) => setLines((ls) => [...ls, lineFromProduct(product)])} />
+          </div>
+
           <div className="overflow-x-auto rounded-xl border border-border">
             <div className="min-w-[560px] grid grid-cols-[1fr_60px_56px_100px_100px_34px] gap-2 border-b border-border bg-surface-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted">
               <span>Item</span>
@@ -278,17 +287,17 @@ export function QuotationBuilderDialog({ lead, onClose }: { lead: Lead; onClose:
                       <Input
                         value={line.warranty ?? ""}
                         onChange={(e) => updateLine(i, { warranty: e.target.value })}
-                        placeholder="Warranty, e.g. 25 years"
+                        placeholder="Official Warranty"
                       />
                       <Input
                         value={line.service_warranty ?? ""}
                         onChange={(e) => updateLine(i, { service_warranty: e.target.value })}
-                        placeholder="Service warranty"
+                        placeholder="Official Service Warranty"
                       />
                       <Input
                         value={line.replacement_warranty ?? ""}
                         onChange={(e) => updateLine(i, { replacement_warranty: e.target.value })}
-                        placeholder="Replacement warranty"
+                        placeholder="Official Replacement Warranty"
                       />
                     </div>
                     <Input

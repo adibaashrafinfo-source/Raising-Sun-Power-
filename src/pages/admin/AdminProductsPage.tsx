@@ -42,6 +42,7 @@ import {
 } from "@/hooks/use-admin"
 import { uploadProductImage } from "@/lib/queries/admin"
 import {
+  DATASHEET_ACCEPT,
   DatasheetRejectedError,
   deleteDatasheet,
   uploadDatasheet,
@@ -657,10 +658,10 @@ function ProductDialog({
 
           {(hasDatasheetSupport || !product) && (
             <div>
-              <Label className="mb-1 block">Product Datasheet (PDF)</Label>
+              <Label className="mb-1 block">Product Datasheet</Label>
               <p className="mb-2.5 text-xs text-muted">
-                Optional. PDF only, up to 10&nbsp;MB — customers get a download button on the
-                product page.
+                Optional. PDF, Word, Excel, PowerPoint, ZIP or image, up to 60&nbsp;MB —
+                customers get a download button on the product page.
               </p>
               {datasheet ? (
                 <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-border bg-surface-2 px-3.5 py-2.5">
@@ -680,7 +681,7 @@ function ProductDialog({
                     {uploadingDatasheet ? "Uploading…" : "Replace"}
                     <input
                       type="file"
-                      accept="application/pdf,.pdf"
+                      accept={DATASHEET_ACCEPT}
                       className="hidden"
                       onChange={handleDatasheetUpload}
                       disabled={uploadingDatasheet}
@@ -697,10 +698,10 @@ function ProductDialog({
               ) : (
                 <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-border px-3.5 py-3 text-[13px] font-semibold text-muted hover:bg-surface-2">
                   <Upload className="size-4" />
-                  {uploadingDatasheet ? "Uploading…" : "Upload PDF datasheet"}
+                  {uploadingDatasheet ? "Uploading…" : "Upload datasheet"}
                   <input
                     type="file"
-                    accept="application/pdf,.pdf"
+                    accept={DATASHEET_ACCEPT}
                     className="hidden"
                     onChange={handleDatasheetUpload}
                     disabled={uploadingDatasheet}

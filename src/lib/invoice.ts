@@ -3,7 +3,8 @@ import QRCode from "qrcode"
 import { COMPANY } from "@/data/company"
 import type { Office } from "@/lib/offices"
 import { formatBDT } from "@/lib/utils"
-import type { Order, OrderItem } from "@/types/database"
+import { amountInWords } from "@/lib/quotation"
+import type { CustomerPayment, Order, OrderItem } from "@/types/database"
 
 export type InvoiceMeta = {
   offices: Office[]
@@ -61,14 +62,48 @@ function esc(value: unknown): string {
     .replace(/"/g, "&quot;")
 }
 
-function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta, qrDataUrl = ""): string {
+/** Invoices an admin raises by hand are numbered INV-…; web orders are RSP-…. */
+export const isAdminInvoice = (order: Pick<Order, "order_number">) => order.order_number.startsWith("INV-")
+
+const METHOD_LABELS: Record<string, string> = {
+  cash: "Cash",
+  bkash: "bKash",
+  nagad: "Nagad",
+  bank: "Bank transfer",
+  card: "Card",
+  cod: "Cash on Delivery",
+}
+
+function invoiceHtml(
+  order: Order,
+  items: OrderItem[],
+  meta: InvoiceMeta,
+  qrDataUrl = "",
+  payments: CustomerPayment[] = [],
+): string {
+  const manual = isAdminInvoice(order)
+  const paid = Number(order.paid_amount ?? 0)
+  const due = Number(order.due_amount ?? 0)
+  const paidInFull = due <= 0 && Number(order.total) > 0
+  const paymentRows = payments
+    .map(
+      (p) => `
+        <tr>
+          <td>${esc(new Date(p.payment_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }))}</td>
+          <td>${esc(METHOD_LABELS[p.payment_method] ?? p.payment_method)}</td>
+          <td>${esc(p.reference_note ?? "")}</td>
+          <td class="num">${esc(formatBDT(Number(p.amount)))}</td>
+        </tr>`,
+    )
+    .join("")
+
   const date = new Date(order.created_at ?? Date.now()).toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   })
   const address = [order.address_line, order.upazila, order.district, order.division]
-    .filter(Boolean)
+    .filter((part) => part && part !== "—")
     .join(", ")
 
   const rows = items
@@ -124,13 +159,23 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta, qrData
   th.num { text-align: right; }
   tfoot td { border-bottom: none; padding: 5px 10px; }
   tfoot tr:first-child td { padding-top: 12px; }
-  .sum-label { text-align: right; color: #5a6b85; }
+  .sum-label { text-align: right; color: #5a6b85; white-space: nowrap; }
   tfoot .grand td { border-top: 2px solid #14213a; padding-top: 9px; font-size: 17px;
                     font-weight: 800; color: #F49E09; }
   .note { margin-top: 20px; background: #fff7e8; border: 1px solid #f6dfae; border-radius: 8px;
           padding: 10px 12px; font-size: 12px; }
   footer { margin-top: 26px; border-top: 1px solid #e8edf5; padding-top: 12px; font-size: 11.5px; }
   footer div + div { margin-top: 3px; }
+  .words { margin-top: 14px; font-size: 12px; color: #5a6b85; }
+  .words b { display: block; color: #14213a; font-size: 12.5px; margin-top: 2px; }
+  .status { display: inline-block; margin-top: 12px; padding: 4px 12px; border-radius: 6px; font-weight: 800;
+            letter-spacing: 1.4px; font-size: 12px; border: 2px solid; }
+  .status.paid { color: #2a6b08; border-color: #2a6b08; }
+  .status.partial { color: #a8620a; border-color: #a8620a; }
+  .status.unpaid { color: #b42318; border-color: #b42318; }
+  table.pay { margin-top: 16px; }
+  .sign { display: flex; justify-content: space-between; gap: 40px; margin-top: 46px; font-size: 12px; color: #5a6b85; }
+  .sign div { width: 200px; border-top: 1px solid #14213a; padding-top: 5px; text-align: center; }
   .qr { display: block; margin-top: 10px; margin-left: auto; width: 120px; height: 120px; }
   @page { size: A4; margin: 14mm; }
   @media print { body { padding: 0; } }
@@ -164,7 +209,7 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta, qrData
     </div>
     <div>
       <div class="label">Order details</div>
-      <div>Payment: <b>${esc(PAYMENT_LABELS[order.payment_method] ?? order.payment_method)}</b></div>
+      <div>Payment: <b>${manual ? (paidInFull ? "Paid" : paid > 0 ? "Partly paid" : "Unpaid") : esc(PAYMENT_LABELS[order.payment_method] ?? order.payment_method)}</b></div>
       <div>Delivery: <b>${esc(DELIVERY_LABELS[order.delivery_method] ?? order.delivery_method)}</b></div>
       <div>Status: <b>${esc(titleCase(order.status))}</b></div>
       ${order.payment_reference ? `<div class="muted">Ref: ${esc(order.payment_reference)}</div>` : ""}
@@ -184,7 +229,7 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta, qrData
     <tbody>${rows}</tbody>
     <tfoot>
       <tr>
-        <td colspan="3" rowspan="${2 + (order.discount > 0 ? 1 : 0) + (order.delivery_charge > 0 ? 1 : 0)}"></td>
+        <td colspan="3" rowspan="${2 + (order.discount > 0 ? 1 : 0) + (order.delivery_charge > 0 ? 1 : 0) + (paid > 0 ? 1 : 0) + (due > 0 ? 1 : 0)}"></td>
         <td class="sum-label">Subtotal</td>
         <td class="num">${esc(formatBDT(order.subtotal))}</td>
       </tr>
@@ -202,13 +247,48 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta, qrData
         <td class="sum-label">${order.discount > 0 ? "Total after discount" : "Total"}</td>
         <td class="num">${esc(formatBDT(order.total))}</td>
       </tr>
+      ${
+        paid > 0
+          ? `<tr><td class="sum-label">Paid</td><td class="num">-${esc(formatBDT(paid))}</td></tr>`
+          : ""
+      }
+      ${
+        due > 0
+          ? `<tr class="grand"><td class="sum-label">Balance due</td><td class="num">${esc(formatBDT(due))}</td></tr>`
+          : ""
+      }
     </tfoot>
   </table>
 
-  <div class="note">
+  <div class="words">Amount in words<b>${esc(amountInWords(Number(order.total)))}</b></div>
+  <div class="status ${paidInFull ? "paid" : paid > 0 ? "partial" : "unpaid"}">
+    ${paidInFull ? "PAID IN FULL" : paid > 0 ? "PARTLY PAID" : "UNPAID"}
+  </div>
+
+  ${
+    paymentRows
+      ? `<table class="pay"><thead><tr><th>Payment date</th><th>Method</th><th>Reference</th><th class="num">Amount</th></tr></thead><tbody>${paymentRows}</tbody></table>`
+      : ""
+  }
+
+  ${
+    order.notes && manual
+      ? `<div class="note"><b>Notes / terms:</b> ${esc(order.notes)}</div>`
+      : ""
+  }
+  ${
+    manual || order.delivery_charge > 0
+      ? ""
+      : `<div class="note">
     Delivery charge is not included in this invoice. It is calculated for your address and
     added to the quotation our team sends you before dispatch.
-  </div>
+  </div>`
+  }
+  ${
+    manual
+      ? `<div class="sign"><div>Customer signature</div><div>Authorized signature<br />for ${esc(COMPANY.name)}</div></div>`
+      : ""
+  }
 
   <footer>
     ${offices}
@@ -218,7 +298,7 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta, qrData
       ${meta.facebook ? `Facebook: <b>${esc(meta.facebook)}</b>` : ""}
     </div>
     <div class="muted" style="margin-top:8px">
-      This is a computer-generated invoice and needs no signature. Thank you for your order.
+      ${manual ? "Thank you for your business." : "This is a computer-generated invoice and needs no signature. Thank you for your order."}
     </div>
   </footer>
 </body>
@@ -230,7 +310,12 @@ function invoiceHtml(order: Order, items: OrderItem[], meta: InvoiceMeta, qrData
  * dialog, where "Save as PDF" gives the customer a file. Printing beats
  * shipping a PDF library for one page, and it works on both mobile browsers.
  */
-export async function printInvoice(order: Order, items: OrderItem[], meta: InvoiceMeta): Promise<void> {
+export async function printInvoice(
+  order: Order,
+  items: OrderItem[],
+  meta: InvoiceMeta,
+  payments: CustomerPayment[] = [],
+): Promise<void> {
   const frame = document.createElement("iframe")
   frame.setAttribute("aria-hidden", "true")
   frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;"
@@ -256,7 +341,7 @@ export async function printInvoice(order: Order, items: OrderItem[], meta: Invoi
   const doc = frame.contentWindow?.document
   if (!doc) return cleanUp()
   doc.open()
-  doc.write(invoiceHtml(order, items, meta, qrDataUrl))
+  doc.write(invoiceHtml(order, items, meta, qrDataUrl, payments))
   doc.close()
 }
 

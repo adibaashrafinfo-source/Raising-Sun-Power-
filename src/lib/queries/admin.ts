@@ -245,6 +245,149 @@ export async function setOrderDiscount(order: Order, amount: number): Promise<Or
   return data as Order
 }
 
+// ---------- Admin-made invoices ----------
+// An invoice raised by hand (phone or walk-in sale) is stored as an order whose
+// number starts INV-, so it shares the orders table's payments, stock and
+// reporting instead of needing a second ledger.
+
+export type AdminInvoiceInput = {
+  number: string
+  customer: { name: string; phone: string; address: string; area: string }
+  lines: { product_id: string | null; name: string; qty: number; unit_price: number; warranty_months?: number | null; serda_serial_number?: string | null }[]
+  discount: number
+  delivery: number
+  vatPercent: number
+  notes: string
+  deliveryMethod: "pickup" | "courier"
+  payment: { amount: number; method: FinancePaymentMethod; date: string; note: string } | null
+  deductStock: boolean
+}
+
+export function newInvoiceNumber(): string {
+  const d = new Date()
+  const stamp = `${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`
+  return `INV-${stamp}-${crypto.randomUUID().slice(0, 4).toUpperCase()}`
+}
+
+export function invoiceTotals(input: Pick<AdminInvoiceInput, "lines" | "discount" | "delivery" | "vatPercent">) {
+  const items = input.lines.reduce((sum, l) => sum + l.qty * l.unit_price, 0)
+  const discount = Math.min(Math.max(input.discount, 0), items)
+  const vat = Math.round(((items - discount) * Math.max(input.vatPercent, 0)) / 100 * 100) / 100
+  const subtotal = items + vat
+  const total = subtotal - discount + Math.max(input.delivery, 0)
+  return { items, discount, vat, subtotal, total }
+}
+
+export async function createAdminInvoice(input: AdminInvoiceInput): Promise<{ order: Order; warning: string | null }> {
+  const t = invoiceTotals(input)
+  if (input.payment && input.payment.amount > t.total) {
+    throw new Error(`The payment (${input.payment.amount}) is more than the invoice total (${t.total}).`)
+  }
+
+  const id = crypto.randomUUID()
+  const orderRow = {
+    id,
+    order_number: input.number.trim(),
+    user_id: null,
+    guest_name: input.customer.name.trim(),
+    guest_phone: input.customer.phone.trim(),
+    status: "pending",
+    payment_method: "cod",
+    payment_reference: null,
+    payment_sender_number: null,
+    division: "—",
+    district: input.customer.area.trim() || "—",
+    upazila: null,
+    address_line: input.customer.address.trim() || "—",
+    landmark: null,
+    delivery_method: input.deliveryMethod,
+    subtotal: t.subtotal,
+    delivery_charge: Math.max(input.delivery, 0),
+    discount: t.discount,
+    coupon_id: null,
+    total: t.total,
+    notes: input.notes.trim() || null,
+  }
+  const { error: orderError } = await supabase.from("orders").insert(orderRow)
+  if (orderError) throw orderError
+
+  const itemRows = input.lines.map((l) => ({
+    order_id: id,
+    product_id: l.product_id,
+    product_name: l.name,
+    unit_price: l.unit_price,
+    qty: l.qty,
+    line_total: l.qty * l.unit_price,
+    warranty_months: l.warranty_months ?? null,
+    serda_serial_number: l.serda_serial_number ?? null,
+  }))
+  if (t.vat > 0) {
+    itemRows.push({
+      order_id: id,
+      product_id: null,
+      product_name: `VAT (${input.vatPercent}%)`,
+      unit_price: t.vat,
+      qty: 1,
+      line_total: t.vat,
+      warranty_months: null,
+      serda_serial_number: null,
+    })
+  }
+  const { error: itemsError } = await supabase.from("order_items").insert(itemRows)
+  if (itemsError) {
+    // No half-made invoice: take the empty order back out.
+    await supabase.from("orders").delete().eq("id", id)
+    throw itemsError
+  }
+
+  let warning: string | null = null
+  if (input.payment && input.payment.amount > 0) {
+    try {
+      await recordCustomerPayment({
+        order_id: id,
+        amount: input.payment.amount,
+        payment_method: input.payment.method,
+        payment_date: input.payment.date,
+        reference_note: input.payment.note.trim() || null,
+        currentDue: t.total,
+      })
+    } catch (err) {
+      warning = `Invoice created, but the payment wasn't recorded: ${err instanceof Error ? err.message : "unknown error"}`
+    }
+  }
+  if (input.deductStock) {
+    try {
+      await updateOrderStatus(id, "confirmed")
+    } catch (err) {
+      warning = `${warning ? `${warning} ` : ""}Invoice created, but stock wasn't deducted: ${err instanceof Error ? err.message : "unknown error"}`
+    }
+  }
+
+  await logActivity({ action: "insert", table_name: "orders", record_id: id })
+  const { data } = await supabase.from("orders").select("*").eq("id", id).maybeSingle()
+  const now = new Date().toISOString()
+  const order = (data as Order | null) ?? ({
+    ...orderRow,
+    courier_status: null,
+    paid_amount: 0,
+    due_amount: t.total,
+    payment_status: "due",
+    created_at: now,
+    updated_at: now,
+  } as unknown as Order)
+  return { order, warning }
+}
+
+export async function fetchAdminInvoices(): Promise<Order[]> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .like("order_number", "INV-%")
+    .order("created_at", { ascending: false })
+  if (error) throw error
+  return data ?? []
+}
+
 // ---------- Products ----------
 export async function fetchAllProductsAdmin(): Promise<Product[]> {
   const { data, error } = await supabase
@@ -308,8 +451,10 @@ export async function deleteProduct(id: string): Promise<void> {
 }
 
 // Product photos are optimised in the browser first — see uploadImageToBucket.
+// Any size is accepted: the picture is scaled down to fit a 1200px square and
+// centred on it, so product cards (which are square) show the whole product.
 export function uploadProductImage(file: File): Promise<UploadedImage> {
-  return uploadImageToBucket("product-images", file, { maxDimension: 1600, maxBytes: 300_000 })
+  return uploadImageToBucket("product-images", file, { maxDimension: 1200, maxBytes: 350_000, square: true })
 }
 
 // ---------- Categories ----------

@@ -18,12 +18,20 @@ export type CompressOptions = {
   maxBytes?: number
   /** Starting encoder quality (0–1). */
   quality?: number
+  /**
+   * Fit the whole picture onto a square canvas (white behind a JPEG,
+   * transparent behind a WebP) instead of keeping its own proportions. Product
+   * cards and galleries show images in square frames, so a square file is shown
+   * whole rather than cropped at the edges.
+   */
+  square?: boolean
 }
 
 const DEFAULTS = {
   maxDimension: 1600,
   maxBytes: 300_000,
   quality: 0.86,
+  square: false,
 } satisfies Required<CompressOptions>
 
 /** Quality ladder tried in order until the result fits under `maxBytes`. */
@@ -47,7 +55,7 @@ export async function compressImage(
   file: File,
   options: CompressOptions = {},
 ): Promise<CompressResult> {
-  const { maxDimension, maxBytes, quality } = { ...DEFAULTS, ...options }
+  const { maxDimension, maxBytes, quality, square } = { ...DEFAULTS, ...options }
   const unchanged: CompressResult = { file, originalSize: file.size, compressed: false }
 
   if (!file.type.startsWith("image/") || PASSTHROUGH.has(file.type)) return unchanged
@@ -58,17 +66,23 @@ export async function compressImage(
     const width = Math.max(1, Math.round(bitmap.width * scale))
     const height = Math.max(1, Math.round(bitmap.height * scale))
 
-    const canvas = document.createElement("canvas")
-    canvas.width = width
-    canvas.height = height
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return unchanged
-    ctx.drawImage(bitmap, 0, 0, width, height)
-    if ("close" in bitmap) bitmap.close()
-
     // WebP keeps transparency and still compresses hard; JPEG is the safer,
     // most universally decodable choice for everything else.
     const type = MAY_HAVE_ALPHA.has(file.type) ? "image/webp" : "image/jpeg"
+
+    const side = Math.max(width, height)
+    const canvas = document.createElement("canvas")
+    canvas.width = square ? side : width
+    canvas.height = square ? side : height
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return unchanged
+    // A JPEG has no alpha, so anything transparent would turn black.
+    if (type === "image/jpeg") {
+      ctx.fillStyle = "#ffffff"
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+    }
+    ctx.drawImage(bitmap, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height)
+    if ("close" in bitmap) bitmap.close()
 
     const ladder = QUALITY_STEPS.filter((step) => step <= quality)
     let blob: Blob | null = null
@@ -78,8 +92,9 @@ export async function compressImage(
     }
     if (!blob) return unchanged
 
-    // Re-encoding an already-small or already-efficient file can make it bigger.
-    if (blob.size >= file.size) return unchanged
+    // Re-encoding an already-small or already-efficient file can make it bigger —
+    // but a square fit is a change of shape the admin asked for, so it stays.
+    if (!square && blob.size >= file.size) return unchanged
 
     const ext = blob.type === "image/webp" ? "webp" : "jpg"
     const base = file.name.replace(/\.[^.]+$/, "") || "image"

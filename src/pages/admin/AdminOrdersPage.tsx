@@ -289,7 +289,7 @@ function OrderDetailDialog({ order: selected, onClose }: { order: Order | null; 
   )
 }
 
-function RecordOrderPaymentDialog({ order, onClose }: { order: Order; onClose: () => void }) {
+export function RecordOrderPaymentDialog({ order, onClose }: { order: Order; onClose: () => void }) {
   const recordPayment = useRecordCustomerPayment()
   const [amount, setAmount] = useState(String(order.due_amount))
   const [method, setMethod] = useState<FinancePaymentMethod>("cash")
