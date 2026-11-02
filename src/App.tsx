@@ -42,6 +42,7 @@ const AdminLayout = lazy(() =>
 const AdminDashboardPage = lazy(() => import("@/pages/admin/AdminDashboardPage"))
 const AdminOrdersPage = lazy(() => import("@/pages/admin/AdminOrdersPage"))
 const AdminQuotationPage = lazy(() => import("@/pages/admin/AdminQuotationPage"))
+const AdminQuotationsPage = lazy(() => import("@/pages/admin/AdminQuotationsPage"))
 const AdminInvoicesPage = lazy(() => import("@/pages/admin/AdminInvoicesPage"))
 const AdminInvoiceNewPage = lazy(() => import("@/pages/admin/AdminInvoiceNewPage"))
 const AdminProductsPage = lazy(() => import("@/pages/admin/AdminProductsPage"))
@@ -191,7 +192,31 @@ export default function App() {
                 }
               />
               <Route
+                path="invoices/:id/edit"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminInvoiceNewPage />
+                  </Suspense>
+                }
+              />
+              <Route
                 path="quotations"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminQuotationsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="quotations/new"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminQuotationPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="quotations/:id"
                 element={
                   <Suspense fallback={<PageFallback />}>
                     <AdminQuotationPage />

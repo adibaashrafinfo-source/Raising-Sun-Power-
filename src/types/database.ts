@@ -328,6 +328,12 @@ export type Order = OrderInsert & {
   paid_amount: number
   due_amount: number
   payment_status: PurchasePaymentStatus
+  /** Invoice fields (admin-made INV- orders); need rsp_quotations_invoices.sql. */
+  due_date?: string | null
+  vat_percent?: number
+  vat_amount?: number
+  customer_email?: string | null
+  customer_company?: string | null
   created_at: string
   updated_at: string
 }

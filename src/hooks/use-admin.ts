@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   adjustStock,
   createAdminInvoice,
+  type AdminInvoiceInput,
+  updateAdminInvoice,
   createExpense,
   createPurchase,
   createPurchaseReturn,
@@ -90,6 +92,17 @@ export function useCreateAdminInvoice() {
       queryClient.invalidateQueries({ queryKey: ["admin-orders"] })
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] })
       queryClient.invalidateQueries({ queryKey: ["admin-stock"] })
+    },
+  })
+}
+
+export function useUpdateAdminInvoice() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ order, input }: { order: Order; input: AdminInvoiceInput }) => updateAdminInvoice(order, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] })
     },
   })
 }

@@ -1,13 +1,15 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ArrowLeft, FileDown, Loader2, Plus, Save, Trash2 } from "lucide-react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 
 import { QuotationProductList } from "@/components/admin/QuotationProductList"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useCreateAdminInvoice } from "@/hooks/use-admin"
+import { useAdminInvoices, useCreateAdminInvoice, useUpdateAdminInvoice } from "@/hooks/use-admin"
+import { useSetQuotationStatus } from "@/hooks/use-quotations"
+import type { QuotationRecord } from "@/lib/queries/quotations"
 import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { invoiceMetaFrom, printInvoice } from "@/lib/invoice"
@@ -42,22 +44,90 @@ const selectClass =
 /** Raise an invoice by hand: customer, products, charges, and the payment collected now. */
 export default function AdminInvoiceNewPage() {
   const navigate = useNavigate()
+  const { id: editId } = useParams()
+  const location = useLocation()
+  const fromQuotation = (location.state as { quotation?: QuotationRecord } | null)?.quotation ?? null
   const create = useCreateAdminInvoice()
+  const update = useUpdateAdminInvoice()
+  const setQuoteStatus = useSetQuotationStatus()
+  const { data: invoices = [], isLoading: loadingInvoices } = useAdminInvoices()
+  const editing = editId ? invoices.find((o) => o.id === editId) ?? null : null
   const { data: settings } = useSettings()
   const { data: cms } = useSiteContent()
 
   const [number, setNumber] = useState(newInvoiceNumber)
-  const [customer, setCustomer] = useState({ name: "", phone: "", address: "", area: "" })
+  const [customer, setCustomer] = useState({ name: "", phone: "", email: "", company: "", address: "", area: "" })
   const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "courier">("pickup")
   const [lines, setLines] = useState<Line[]>([])
   const [custom, setCustom] = useState({ name: "", price: "" })
   const [discount, setDiscount] = useState("")
   const [delivery, setDelivery] = useState("")
   const [vat, setVat] = useState("")
+  const [dueDate, setDueDate] = useState("")
   const [notes, setNotes] = useState("")
   const [pay, setPay] = useState({ amount: "", method: "cash" as FinancePaymentMethod, note: "" })
   const [payDate, setPayDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [deductStock, setDeductStock] = useState(true)
+
+  // Prefill: from a quotation (convert) or from the invoice being edited.
+  useEffect(() => {
+    if (editing) {
+      setNumber(editing.order_number)
+      setCustomer({
+        name: editing.guest_name,
+        phone: editing.guest_phone,
+        email: editing.customer_email ?? "",
+        company: editing.customer_company ?? "",
+        address: editing.address_line === "—" ? "" : editing.address_line,
+        area: editing.district === "—" ? "" : editing.district,
+      })
+      setDeliveryMethod(editing.delivery_method === "courier" ? "courier" : "pickup")
+      setDiscount(Number(editing.discount) ? String(editing.discount) : "")
+      setDelivery(Number(editing.delivery_charge) ? String(editing.delivery_charge) : "")
+      setVat(Number(editing.vat_percent) ? String(editing.vat_percent) : "")
+      setDueDate(editing.due_date ?? "")
+      setNotes(editing.notes ?? "")
+      fetchOrderItems(editing.id)
+        .then((items) =>
+          setLines(
+            items.map((i) => ({
+              key: i.id,
+              product_id: i.product_id,
+              name: i.product_name,
+              qty: Number(i.qty),
+              unit_price: Number(i.unit_price),
+              warranty_months: i.warranty_months ?? null,
+              serda_serial_number: i.serda_serial_number ?? null,
+            })),
+          ),
+        )
+        .catch((err) => toast.error(getErrorMessage(err, "Couldn't load the invoice items")))
+    } else if (fromQuotation) {
+      const q = fromQuotation
+      setCustomer({ name: q.customer.name, phone: q.customer.phone, email: q.customer.email ?? "", company: q.customer.company ?? "", address: q.customer.location ?? "", area: "" })
+      const extra = (name: string, price: number): Line[] =>
+        price > 0 ? [{ key: `x-${name}`, product_id: null, name, qty: 1, unit_price: price, warranty_months: null, serda_serial_number: null }] : []
+      setLines([
+        ...q.lines.map((l, i) => ({
+          key: `q-${i}`,
+          product_id: null,
+          name: l.product_name,
+          qty: l.qty,
+          unit_price: l.unit_price,
+          warranty_months: null,
+          serda_serial_number: l.sreda_serial ?? null,
+        })),
+        ...extra("Service charge", q.fees.service_charge),
+        ...extra("Installation charge", q.fees.installation_charge),
+        ...extra("Other charges", q.fees.other_charges),
+      ])
+      setDelivery(q.fees.delivery_cost ? String(q.fees.delivery_cost) : "")
+      setDiscount(q.fees.discount ? String(q.fees.discount) : "")
+      setVat(q.vat_percent ? String(q.vat_percent) : "")
+      setNotes([q.notes, q.terms].filter(Boolean).join("\n\n"))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editing?.id, fromQuotation?.id])
 
   const totals = invoiceTotals({
     lines,
@@ -66,7 +136,7 @@ export default function AdminInvoiceNewPage() {
     vatPercent: Number(vat) || 0,
   })
   const paying = Number(pay.amount) || 0
-  const balance = Math.max(totals.total - paying, 0)
+  const editingBalance = Math.max(totals.total - (editing ? Number(editing.paid_amount) : paying), 0)
 
   const updateLine = (key: string, patch: Partial<Line>) =>
     setLines((ls) => ls.map((l) => (l.key === key ? { ...l, ...patch } : l)))
@@ -102,19 +172,33 @@ export default function AdminInvoiceNewPage() {
       return
     }
     try {
-      const { order, warning } = await create.mutateAsync({
+      const input = {
         number,
         customer,
         lines,
         discount: Number(discount) || 0,
         delivery: Number(delivery) || 0,
         vatPercent: Number(vat) || 0,
+        dueDate,
         notes,
         deliveryMethod,
         payment: paying > 0 ? { amount: paying, method: pay.method, date: payDate, note: pay.note } : null,
         deductStock,
-      })
-      toast.success(`Invoice ${order.order_number} created`)
+      }
+      let order: Awaited<ReturnType<typeof create.mutateAsync>>["order"]
+      let warning: string | null = null
+      if (editing) {
+        order = await update.mutateAsync({ order: editing, input })
+        toast.success(`Invoice ${order.order_number} updated`)
+      } else {
+        ;({ order, warning } = await create.mutateAsync(input))
+        toast.success(`Invoice ${order.order_number} created`)
+        if (fromQuotation) {
+          await setQuoteStatus
+            .mutateAsync({ id: fromQuotation.id, status: "converted", invoiceId: order.id })
+            .catch(() => toast.warning("Invoice created, but the quotation couldn't be marked converted."))
+        }
+      }
       if (warning) toast.warning(warning, { duration: 9000 })
       if (andDownload) {
         const [items, payments] = await Promise.all([fetchOrderItems(order.id), fetchOrderPayments(order.id)])
@@ -126,7 +210,10 @@ export default function AdminInvoiceNewPage() {
     }
   }
 
-  const busy = create.isPending
+  if (editId && loadingInvoices) return <p className="p-8 text-center text-sm text-muted">Loading…</p>
+  if (editId && !editing) return <p className="p-8 text-center text-sm text-muted">Invoice not found.</p>
+
+  const busy = create.isPending || update.isPending
 
   return (
     <div className="flex flex-col gap-5">
@@ -135,11 +222,12 @@ export default function AdminInvoiceNewPage() {
           <Link to="/admin/invoices" className="mb-1 inline-flex items-center gap-1 text-[13px] font-semibold text-blue no-underline">
             <ArrowLeft className="size-3.5" /> All invoices
           </Link>
-          <h1 className="font-heading text-2xl font-extrabold text-text">New Invoice</h1>
+          <h1 className="font-heading text-2xl font-extrabold text-text">{editing ? "Edit Invoice" : "New Invoice"}</h1>
+          {fromQuotation && !editing && <p className="mt-1 text-xs text-muted">From quotation {fromQuotation.number}</p>}
         </div>
         <div className="w-full sm:w-56">
           <Label className="mb-1.5 block">Invoice number</Label>
-          <Input value={number} onChange={(e) => setNumber(e.target.value)} />
+          <Input value={number} onChange={(e) => setNumber(e.target.value)} disabled={!!editing} />
         </div>
       </div>
 
@@ -154,6 +242,14 @@ export default function AdminInvoiceNewPage() {
             <div>
               <Label className="mb-1.5 block">Phone *</Label>
               <Input value={customer.phone} onChange={(e) => setCustomer((c) => ({ ...c, phone: e.target.value }))} />
+            </div>
+            <div>
+              <Label className="mb-1.5 block">Email</Label>
+              <Input type="email" value={customer.email} onChange={(e) => setCustomer((c) => ({ ...c, email: e.target.value }))} />
+            </div>
+            <div>
+              <Label className="mb-1.5 block">Company</Label>
+              <Input value={customer.company} onChange={(e) => setCustomer((c) => ({ ...c, company: e.target.value }))} />
             </div>
             <div className="sm:col-span-2">
               <Label className="mb-1.5 block">Address</Label>
@@ -245,6 +341,10 @@ export default function AdminInvoiceNewPage() {
               <Input type="number" min="0" value={delivery} onChange={(e) => setDelivery(e.target.value)} />
             </div>
           </div>
+          <div className="mt-3 sm:w-1/2">
+            <Label className="mb-1.5 block">Payment due date</Label>
+            <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          </div>
           <Label className="mb-1.5 mt-3 block">Notes / terms (printed on the invoice)</Label>
           <textarea
             value={notes}
@@ -255,6 +355,15 @@ export default function AdminInvoiceNewPage() {
           />
         </section>
 
+        {editing ? (
+          <section className="rounded-2xl border border-border bg-surface p-4">
+            <h2 className="mb-2 font-heading text-base font-bold text-text">Payments</h2>
+            <p className="text-sm text-muted">
+              Already collected: <b className="text-text">{formatBDT(Number(editing.paid_amount))}</b>. Payments aren't changed
+              here — use <b>Collect</b> on the invoice list. Stock already deducted is not adjusted; change it from Stock.
+            </p>
+          </section>
+        ) : (
         <section className="rounded-2xl border border-border bg-surface p-4">
           <h2 className="mb-3 font-heading text-base font-bold text-text">Payment collected now</h2>
           <div className="grid grid-cols-2 gap-3">
@@ -289,6 +398,7 @@ export default function AdminInvoiceNewPage() {
             Deduct stock now (marks the order confirmed)
           </label>
         </section>
+        )}
       </div>
 
       <div className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface px-4 py-3">
@@ -302,17 +412,18 @@ export default function AdminInvoiceNewPage() {
           <div className="font-heading text-lg font-extrabold text-text">
             Total {formatBDT(totals.total)}
             <span className="ml-3 text-sm font-semibold text-muted">
-              Paid {formatBDT(paying)} · Due <span className={balance > 0 ? "text-red-500" : "text-green-600"}>{formatBDT(balance)}</span>
+              Paid {formatBDT(editing ? Number(editing.paid_amount) : paying)} · Due{" "}
+              <span className={editingBalance > 0 ? "text-red-500" : "text-green-600"}>{formatBDT(editingBalance)}</span>
             </span>
           </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => submit(false)} disabled={busy}>
-            <Save className="size-4" /> Create invoice
+            <Save className="size-4" /> {editing ? "Save changes" : "Create invoice"}
           </Button>
           <Button onClick={() => submit(true)} disabled={busy}>
             {busy ? <Loader2 className="size-4 animate-spin" /> : <FileDown className="size-4" />}
-            Create &amp; download PDF
+            {editing ? "Save & download PDF" : "Create & download PDF"}
           </Button>
         </div>
       </div>
