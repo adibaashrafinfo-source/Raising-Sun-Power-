@@ -47,6 +47,7 @@ const ACCESS: Record<AdminRole, "*" | string[]> = {
   staff: ["/admin/inventory", "/admin/finance"],
   sales: [
     "/admin/orders",
+    "/admin/billing",
     "/admin/invoices",
     "/admin/quotations",
     "/admin/couriers",
@@ -55,7 +56,7 @@ const ACCESS: Record<AdminRole, "*" | string[]> = {
     "/admin/messages",
     "/admin/coupons",
   ],
-  accountant: ["/admin/finance", "/admin/inventory/reports", "/admin/orders", "/admin/invoices"],
+  accountant: ["/admin/finance", "/admin/inventory/reports", "/admin/orders", "/admin/billing", "/admin/invoices", "/admin/quotations"],
   delivery: ["/admin/orders", "/admin/couriers"],
   content_editor: [
     "/admin/products",
