@@ -1126,6 +1126,33 @@ function formPanel(){
    +'<div class="g4" style="margin-top:12px"><label class="f">Guarantee<input class="in" data-p="guarantee" value="'+esc(d.guarantee)+'"></label><label class="f">Warranty<input class="in" data-p="warranty" value="'+esc(d.warranty)+'"></label><label class="f">Service warranty<input class="in" data-p="service" value="'+esc(d.service)+'"></label><label class="f">Replacement warranty<input class="in" data-p="replacement" value="'+esc(d.replacement)+'"></label></div>'
    +'<div class="actions" style="margin-top:14px"><button class="btn primary" data-act="panel-save">Save item</button><button class="btn" data-act="panel-close">Cancel</button></div></div>';
 }
+/* Pull the website's products into the catalog. Items are keyed w-<product id>, so syncing again
+   updates name, rate and warranty in place and never creates duplicates or touches your own items. */
+async function syncWebProducts(btn){
+  var br=null;try{br=window.parent.__rspBilling}catch(e){}
+  if(!br||!br.supabase){toast('Open Billing from the admin panel to sync.',true);return}
+  if(btn){btn.disabled=true;btn.textContent='Syncing…'}
+  try{
+    var r=await br.supabase.from('products').select('id,name,sku,price,sale_price,unit,warranty_months,short_description,status,category:categories(name),brand:brands(name)').limit(2000);
+    if(r.error)throw r.error;
+    var rows=(r.data||[]).filter(function(p){return p.status!=='archived'});
+    var add=0,upd=0,jobs=[];
+    rows.forEach(function(p){
+      var id='w-'+p.id,old=S.products.find(function(x){return x.id===id});
+      var m=Number(p.warranty_months)||0;
+      var war=!m?'':(m%12===0?String(m/12).padStart(2,'0'):m+' months');
+      var det=[p.brand&&p.brand.name?'Brand: '+p.brand.name:'',p.sku?'Model/SKU: '+p.sku:''].filter(Boolean).join(' • ');
+      var o=Object.assign({},old||{},{id:id,name:p.name,cat:(p.category&&p.category.name)||'Uncategorised',unit:p.unit||'pcs',
+        rate:Number(p.sale_price)>0?Number(p.sale_price):Number(p.price)||0,details:det||(old&&old.details)||'',warranty:war||(old&&old.warranty)||'',
+        service:(old&&old.service)||'',replacement:(old&&old.replacement)||'',guarantee:(old&&old.guarantee)||'',webId:p.id,createdAt:(old&&old.createdAt)||Date.now()});
+      if(old)upd++;else add++;
+      jobs.push(put('products',o));
+    });
+    await Promise.all(jobs);
+    toast('Synced '+rows.length+' website products ('+add+' new, '+upd+' updated).');
+  }catch(e){toast('Could not sync: '+((e&&e.message)||'error'),true)}
+  render();
+}
 function catalogHTML(){
   var all=S.products.slice().sort(function(a,b){return (a.cat||'').localeCompare(b.cat||'')||a.name.localeCompare(b.name)});
   var q=(flt.q||'').trim().toLowerCase(),fc=flt.pcat||'all',counts={},order=[];
@@ -1143,7 +1170,7 @@ function catalogHTML(){
   var reset=isAdmin()?'<div class="actions" style="margin:12px"><button class="btn sm danger" data-act="reset-catalog">Replace catalog with the Rising Sun price list ('+SEED.length+' items)</button></div>':'';
   return formPanel()+bar+'<div class="panel">'+(list.length?'<div class="scroll"><table class="tbl"><thead><tr><th>Item</th><th>Category</th><th>Unit</th><th class="r">Rate</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+reset
    :all.length?'<div class="empty"><h3>No items match</h3><p>Try a different word, or choose "All" above.</p></div>'+reset
-   :'<div class="empty"><h3>Your catalog is empty</h3><p>Save the panels, inverters, batteries and services you sell, with your standard rates, then add them to any invoice in one tap.</p><div class="actions"><button class="btn primary" data-act="starter">Add starter list (set rates after)</button><button class="btn" data-act="import-prod">Import price list</button><button class="btn" data-act="new-prod">Add one item</button></div></div>')+'</div>';
+   :'<div class="empty"><h3>Your catalog is empty</h3><p>Save the panels, inverters, batteries and services you sell, with your standard rates, then add them to any invoice in one tap.</p><div class="actions"><button class="btn primary" data-act="starter">Add starter list (set rates after)</button><button class="btn" data-act="sync-web">Sync website products</button><button class="btn" data-act="import-prod">Import price list</button><button class="btn" data-act="new-prod">Add one item</button></div></div>')+'</div>';
 }
 
 /* ----- settings ----- */
@@ -1176,7 +1203,7 @@ function render(){
   else if(v==='customers')h=topbar('Customers',S.customers.length+' saved','<button class="btn" data-act="export-xlsx" data-w="all">Download Excel</button><button class="btn" data-act="export-cust">Download CSV</button><button class="btn primary" data-act="new-cust">+ New customer</button>')+recBanner()+customersHTML();
   else if(v==='customer'){var cc=S.customers.find(function(x){return x.id===view.id});if(!cc){view={name:'customers'};return render()}h=topbar(esc(cc.name),'Customer profile','<button class="btn" data-go="customers">← All customers</button>')+customerHTML(cc)}
   else if(v==='finance'){if(!isAdmin()){view={name:'dashboard'};return render()}h=topbar('Finance','Cash flow, receivables and project profit','<button class="btn primary" data-act="new-exp">+ Add expense</button>')+finHTML()}
-  else if(v==='catalog')h=topbar('Catalog',S.products.length+' items','<button class="btn" data-act="export-xlsx" data-w="products">Download Excel</button><button class="btn" data-act="import-prod">Import price list</button><button class="btn primary" data-act="new-prod">+ New item</button>')+catalogHTML();
+  else if(v==='catalog')h=topbar('Catalog',S.products.length+' items','<button class="btn" data-act="export-xlsx" data-w="products">Download Excel</button><button class="btn" data-act="sync-web">Sync website products</button><button class="btn" data-act="import-prod">Import price list</button><button class="btn primary" data-act="new-prod">+ New item</button>')+catalogHTML();
   else if(v==='settings'){if(!sdraft)sdraft=cfg();h=topbar('Settings','Printed on every invoice and quotation')+recBanner()+(isAdmin()?settingsHTML():'<div class="panel"><p class="hint" style="margin:0">Only an Admin can change these settings.</p></div>')}
   m.innerHTML=h;
   if(v==='edit')updateEdit();
@@ -1327,6 +1354,7 @@ async function act(a,t){
   if(a==='edit-prod'){panel={kind:'product',isNew:false,data:Object.assign({},S.products.find(function(x){return x.id===t.dataset.id}))};render();return}
   if(a==='starter'){STARTER.forEach(function(s){put('products',{id:uid(),name:s[0],unit:s[1],cat:s[2],rate:0,createdAt:Date.now()})});toast('Starter list added. Set your rates.');render();return}
   if(a==='panel-close'){panel=null;render();return}
+  if(a==='sync-web'){syncWebProducts(t);return}
   if(a==='import-prod'){panel={kind:'import',isNew:true,data:{text:''}};if(view.name!=='catalog')view={name:'catalog'};render();return}
   if(a==='panel-save'&&panel.kind==='import'){
     var added=0,lines=(panel.data.text||'').split(/\r?\n/);
@@ -1767,7 +1795,7 @@ var AK='rsp_auth_v1',SKY='rsp_sess_v1',FK='rsp_fail_v1',IDLE=30*60*1000,KEEP=7*2
 var ownerTries=0;
 function inCl(){return !!(window.claude&&window.claude.use)}   /* true inside Claude, where a one-time reset code can be checked */
 var memAuth=null,user=null,gateMode='login',gateMsg='',gateCode='',gateUser=null,lastAct=Date.now(),lastSave=0,signArm=false,amsg='';
-var ADMIN_ONLY=['save-settings','import-json','recover','recover-hide','export-json','import-prod','delete','del-cust','del-prod','new-prod','edit-prod','new-exp','edit-exp','del-exp','export-exp','fin-per','export-products','reset-catalog'];
+var ADMIN_ONLY=['sync-web','save-settings','import-json','recover','recover-hide','export-json','import-prod','delete','del-cust','del-prod','new-prod','edit-prod','new-exp','edit-exp','del-exp','export-exp','fin-per','export-products','reset-catalog'];
 function isAdmin(){return !!user&&user.role==='admin'}
 function aget(){try{var j=JSON.parse(localStorage.getItem(AK)||'null');if(j&&j.users)return j}catch(e){}return memAuth}
 function aput(a){memAuth=a;try{localStorage.setItem(AK,JSON.stringify(a))}catch(e){}}
