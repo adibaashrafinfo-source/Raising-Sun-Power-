@@ -20,6 +20,7 @@ import {
   Package,
   PieChart,
   Receipt,
+  ReceiptText,
   RotateCcw,
   Settings,
   ShieldCheck,
@@ -41,6 +42,7 @@ import { cn } from "@/lib/utils"
 const links = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
+  { to: "/admin/billing", label: "Billing", icon: ReceiptText },
   { to: "/admin/invoices", label: "Invoices", icon: FileText },
   { to: "/admin/quotations", label: "Quotations", icon: FilePlus2 },
   { to: "/admin/products", label: "Products", icon: Package },

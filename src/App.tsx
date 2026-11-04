@@ -41,10 +41,6 @@ const AdminLayout = lazy(() =>
 )
 const AdminDashboardPage = lazy(() => import("@/pages/admin/AdminDashboardPage"))
 const AdminOrdersPage = lazy(() => import("@/pages/admin/AdminOrdersPage"))
-const AdminQuotationPage = lazy(() => import("@/pages/admin/AdminQuotationPage"))
-const AdminQuotationsPage = lazy(() => import("@/pages/admin/AdminQuotationsPage"))
-const AdminInvoicesPage = lazy(() => import("@/pages/admin/AdminInvoicesPage"))
-const AdminInvoiceNewPage = lazy(() => import("@/pages/admin/AdminInvoiceNewPage"))
 const AdminProductsPage = lazy(() => import("@/pages/admin/AdminProductsPage"))
 const AdminPackagesPage = lazy(() => import("@/pages/admin/AdminPackagesPage"))
 const AdminStockPage = lazy(() => import("@/pages/admin/AdminStockPage"))
@@ -66,6 +62,7 @@ const AdminSettingsPage = lazy(() => import("@/pages/admin/AdminSettingsPage"))
 const AdminCmsPage = lazy(() => import("@/pages/admin/AdminCmsPage"))
 const AdminHeroSlidesPage = lazy(() => import("@/pages/admin/AdminHeroSlidesPage"))
 const AdminRoiSettingsPage = lazy(() => import("@/pages/admin/AdminRoiSettingsPage"))
+const AdminBillingPage = lazy(() => import("@/pages/admin/AdminBillingPage"))
 const AdminCalculatorPage = lazy(() => import("@/pages/admin/AdminCalculatorPage"))
 const AdminCourierPage = lazy(() => import("@/pages/admin/AdminCourierPage"))
 const AdminStaffPage = lazy(() => import("@/pages/admin/AdminStaffPage"))
@@ -175,54 +172,9 @@ export default function App() {
                   </Suspense>
                 }
               />
-              <Route
-                path="invoices"
-                element={
-                  <Suspense fallback={<PageFallback />}>
-                    <AdminInvoicesPage />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="invoices/new"
-                element={
-                  <Suspense fallback={<PageFallback />}>
-                    <AdminInvoiceNewPage />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="invoices/:id/edit"
-                element={
-                  <Suspense fallback={<PageFallback />}>
-                    <AdminInvoiceNewPage />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="quotations"
-                element={
-                  <Suspense fallback={<PageFallback />}>
-                    <AdminQuotationsPage />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="quotations/new"
-                element={
-                  <Suspense fallback={<PageFallback />}>
-                    <AdminQuotationPage />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="quotations/:id"
-                element={
-                  <Suspense fallback={<PageFallback />}>
-                    <AdminQuotationPage />
-                  </Suspense>
-                }
-              />
+              <Route path="billing" element={<Suspense fallback={<PageFallback />}><AdminBillingPage view="dashboard" /></Suspense>} />
+              <Route path="invoices" element={<Suspense fallback={<PageFallback />}><AdminBillingPage view="invoices" /></Suspense>} />
+              <Route path="quotations" element={<Suspense fallback={<PageFallback />}><AdminBillingPage view="quotes" /></Suspense>} />
               <Route
                 path="couriers"
                 element={
