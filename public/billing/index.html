@@ -389,6 +389,7 @@ function enqueue(path,fn){
 }
 function upsert(col,obj){var a=S[col],i=a.findIndex(function(x){return x.id===obj.id});if(i<0)a.push(obj);else a[i]=obj}
 function put(col,obj,keep){
+  delete obj.virt;
   if(!keep||!obj.updatedAt)obj.updatedAt=Date.now();upsert(col,obj);
   if(cloud.db){var o=JSON.parse(JSON.stringify(obj));return enqueue(col+'/'+obj.id,function(){return cloud.db.doc(col+'/'+obj.id).set(o)})}
   lsSave();return Promise.resolve();
@@ -419,6 +420,7 @@ async function initStore(){
         ];
         var onSnap=function(snap){
           S[c]=snap.docs.map(function(d){var o=d.data();o.id=d.id;return o});
+          if(c==='products')mergeWeb();
           cloud.def[c]=!(snap.metadata&&snap.metadata.fromCache);
           softRender();
         };
@@ -449,6 +451,7 @@ async function initStore(){
     S.seeded=true;lsSave();
   }
   cloud.ready=true;render();
+  loadWebProducts();setInterval(function(){if(!document.hidden)loadWebProducts()},60000);
 }
 
 /* ---------- recover records saved only on this device (cloud mode) ---------- */
@@ -1128,28 +1131,49 @@ function formPanel(){
 }
 /* Pull the website's products into the catalog. Items are keyed w-<product id>, so syncing again
    updates name, rate and warranty in place and never creates duplicates or touches your own items. */
-async function syncWebProducts(btn){
+var webRows=[];
+function webMap(p,old){
+  var m=Number(p.warranty_months)||0;
+  var war=!m?'':(m%12===0?String(m/12).padStart(2,'0'):m+' months');
+  var det=[p.brand&&p.brand.name?'Brand: '+p.brand.name:'',p.sku?'Model/SKU: '+p.sku:''].filter(Boolean).join(' • ');
+  return Object.assign({},old||{},{id:'w-'+p.id,name:p.name,cat:(p.category&&p.category.name)||'Uncategorised',unit:p.unit||'pcs',
+    rate:Number(p.sale_price)>0?Number(p.sale_price):Number(p.price)||0,details:det||(old&&old.details)||'',warranty:war||(old&&old.warranty)||'',
+    service:(old&&old.service)||'',replacement:(old&&old.replacement)||'',guarantee:(old&&old.guarantee)||'',webId:p.id,createdAt:(old&&old.createdAt)||Date.now()});
+}
+/* Every product uploaded on the website is always in the catalog, so it can be picked on any invoice or
+   quotation without syncing first. They are held in memory until saved; a saved copy keeps its edits but
+   follows the website's name, category and price. */
+function mergeWeb(){
+  webRows.forEach(function(p){
+    var id='w-'+p.id,old=S.products.find(function(x){return x.id===id});
+    var o=webMap(p,old);
+    if(old){Object.assign(old,o)}else{o.virt=true;S.products.push(o)}
+  });
+}
+async function loadWebProducts(){
   var br=null;try{br=window.parent.__rspBilling}catch(e){}
-  if(!br||!br.supabase){toast('Open Billing from the admin panel to sync.',true);return}
+  if(!br||!br.supabase)return;
+  try{
+    var r=await br.supabase.from('products').select('id,name,sku,price,sale_price,unit,warranty_months,status,category:categories(name),brand:brands(name)').limit(2000);
+    if(r.error)throw r.error;
+    webRows=(r.data||[]).filter(function(p){return p.status!=='archived'});
+    var before=S.products.length;mergeWeb();
+    if(S.products.length!==before||view.name==='catalog')softRender();
+  }catch(e){}
+}
+/* Save every website product into the catalog (so its service / replacement / guarantee can be filled in). */
+async function syncWebProducts(btn){
   if(btn){btn.disabled=true;btn.textContent='Syncing…'}
   try{
-    var r=await br.supabase.from('products').select('id,name,sku,price,sale_price,unit,warranty_months,short_description,status,category:categories(name),brand:brands(name)').limit(2000);
-    if(r.error)throw r.error;
-    var rows=(r.data||[]).filter(function(p){return p.status!=='archived'});
+    await loadWebProducts();
     var add=0,upd=0,jobs=[];
-    rows.forEach(function(p){
-      var id='w-'+p.id,old=S.products.find(function(x){return x.id===id});
-      var m=Number(p.warranty_months)||0;
-      var war=!m?'':(m%12===0?String(m/12).padStart(2,'0'):m+' months');
-      var det=[p.brand&&p.brand.name?'Brand: '+p.brand.name:'',p.sku?'Model/SKU: '+p.sku:''].filter(Boolean).join(' • ');
-      var o=Object.assign({},old||{},{id:id,name:p.name,cat:(p.category&&p.category.name)||'Uncategorised',unit:p.unit||'pcs',
-        rate:Number(p.sale_price)>0?Number(p.sale_price):Number(p.price)||0,details:det||(old&&old.details)||'',warranty:war||(old&&old.warranty)||'',
-        service:(old&&old.service)||'',replacement:(old&&old.replacement)||'',guarantee:(old&&old.guarantee)||'',webId:p.id,createdAt:(old&&old.createdAt)||Date.now()});
-      if(old)upd++;else add++;
-      jobs.push(put('products',o));
+    webRows.forEach(function(p){
+      var old=S.products.find(function(x){return x.id==='w-'+p.id});
+      if(old&&!old.virt)upd++;else add++;
+      jobs.push(put('products',webMap(p,old)));
     });
     await Promise.all(jobs);
-    toast('Synced '+rows.length+' website products ('+add+' new, '+upd+' updated).');
+    toast('Saved '+webRows.length+' website products to the catalog ('+add+' new, '+upd+' updated).');
   }catch(e){toast('Could not sync: '+((e&&e.message)||'error'),true)}
   render();
 }
