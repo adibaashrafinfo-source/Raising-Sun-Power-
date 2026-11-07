@@ -21,7 +21,7 @@ import { useCartStore } from "@/store/cart-store"
 import type { OrderInsert, OrderItemInsert, PaymentMethod } from "@/types/database"
 
 const PAYMENT_OPTIONS: { value: PaymentMethod; label: string; note: string; badgeBg: string }[] = [
-  { value: "cod", label: "Cash on Delivery", note: "Pay when you receive your order", badgeBg: "#67A70E" },
+  { value: "cod", label: "Cash on Delivery", note: "Pay when you receive your order", badgeBg: "#3F8F0C" },
   { value: "bkash", label: "bKash", note: "Send payment, then enter the transaction ID", badgeBg: "#E2136E" },
   { value: "nagad", label: "Nagad", note: "Send payment, then enter the transaction ID", badgeBg: "#EE6123" },
 ]

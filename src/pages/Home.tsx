@@ -40,7 +40,7 @@ export default function Home() {
       <Reveal>
         <ProductGridSection
           kicker="Loved by installers"
-          kickerColor="#F49E09"
+          kickerColor="#FA9104"
           title="Best of Rising Sun"
           linkLabel="See more"
           products={bestSellerProducts}

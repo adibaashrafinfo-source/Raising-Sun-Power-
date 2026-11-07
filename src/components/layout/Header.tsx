@@ -214,6 +214,7 @@ export function Header() {
           : undefined,
       },
     ]
+    items.unshift({ key: "home", label: "Home", to: "/" })
     if (menuGroups.length === 0) {
       items.push({ key: "products", label: "Products", to: "/products" })
     }
@@ -290,15 +291,16 @@ export function Header() {
             to="/solar-calculator"
             aria-label="Solar Calculator"
             title="Solar Calculator"
-            className={`${iconButton} no-underline`}
+            className={`${iconButton} no-underline xl:w-auto xl:gap-1.5 xl:px-3`}
           >
             <Calculator className="size-[20px] text-orange-500" />
+            <span className="hidden whitespace-nowrap text-[13px] font-bold text-text xl:inline">Solar Calculator</span>
           </Link>
           <button onClick={toggleTheme} aria-label="Toggle theme" className={iconButton}>
             {theme === "dark" ? (
               <Sun className="size-[20px]" stroke="#D9A400" />
             ) : (
-              <Moon className="size-[20px]" stroke="#0B3F94" />
+              <Moon className="size-[20px]" stroke="#02296F" />
             )}
           </button>
           <button onClick={openCart} aria-label="Cart" className={iconButton}>

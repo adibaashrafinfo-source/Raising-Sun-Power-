@@ -10,7 +10,7 @@ export function WhyChooseUs() {
     <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-12">
       <SectionHeader
         kicker="Why choose RSP"
-        kickerColor="#F49E09"
+        kickerColor="#FA9104"
         title="Bought right, backed properly"
       />
       <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2 lg:grid-cols-4">

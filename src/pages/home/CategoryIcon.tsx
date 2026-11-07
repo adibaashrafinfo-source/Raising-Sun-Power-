@@ -33,24 +33,24 @@ const ICONS: Record<string, React.ComponentType<{ className?: string; style?: Re
 }
 
 const COLORS: Record<string, string> = {
-  "solar-panels": "#217CCA",
-  inverters: "#F49E09",
-  batteries: "#67A70E",
-  "mcb-mccb": "#217CCA",
-  switchgear: "#F49E09",
-  "cables-wires": "#67A70E",
-  "complete-solutions": "#F49E09",
-  accessories: "#217CCA",
-  "dc-fan": "#F49E09",
-  "dc-light": "#67A70E",
-  "ac-fan": "#217CCA",
-  "switch-socket": "#052C6E",
-  gadgets: "#F49E09",
-  ips: "#67A70E",
-  "portable-power-station": "#217CCA",
+  "solar-panels": "#0352AF",
+  inverters: "#FA9104",
+  batteries: "#3F8F0C",
+  "mcb-mccb": "#0352AF",
+  switchgear: "#FA9104",
+  "cables-wires": "#3F8F0C",
+  "complete-solutions": "#FA9104",
+  accessories: "#0352AF",
+  "dc-fan": "#FA9104",
+  "dc-light": "#3F8F0C",
+  "ac-fan": "#0352AF",
+  "switch-socket": "#011653",
+  gadgets: "#FA9104",
+  ips: "#3F8F0C",
+  "portable-power-station": "#0352AF",
 }
 
 export function CategoryIcon({ slug, className = "size-[26px]" }: { slug: string; className?: string }) {
   const Icon = ICONS[slug] ?? Boxes
-  return <Icon className={className} style={{ color: COLORS[slug] ?? "#F49E09" }} />
+  return <Icon className={className} style={{ color: COLORS[slug] ?? "#FA9104" }} />
 }

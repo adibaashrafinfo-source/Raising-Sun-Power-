@@ -162,7 +162,7 @@ function ExpenseBreakdownReport() {
                 }}
                 formatter={(value) => [formatBDT(Number(value)), "Total"]}
               />
-              <Bar dataKey="total" fill="#F49E09" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="total" fill="#FA9104" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

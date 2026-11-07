@@ -144,14 +144,14 @@ function invoiceHtml(
   * { box-sizing: border-box; }
   body { margin: 0; padding: 28px; font: 13px/1.55 "Helvetica Neue", Arial, sans-serif; color: #14213a; }
   .head { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start;
-          border-bottom: 3px solid #217CCA; padding-bottom: 16px; }
+          border-bottom: 3px solid #0352AF; padding-bottom: 16px; }
   .brand { font-size: 21px; font-weight: 800; letter-spacing: .2px; }
-  .brand small { display: block; font-size: 11px; font-weight: 600; color: #F49E09;
+  .brand small { display: block; font-size: 11px; font-weight: 600; color: #FA9104;
                  letter-spacing: 1.6px; text-transform: uppercase; }
   .logo { height: 54px; width: auto; margin-bottom: 6px; }
   .muted { color: #5a6b85; }
   .title { text-align: right; }
-  .title h1 { margin: 0; font-size: 25px; letter-spacing: 3px; text-transform: uppercase; color: #217CCA; }
+  .title h1 { margin: 0; font-size: 25px; letter-spacing: 3px; text-transform: uppercase; color: #0352AF; }
   .grid { display: flex; gap: 24px; margin-top: 20px; }
   .grid > div { flex: 1; }
   .label { font-size: 10.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
@@ -166,7 +166,7 @@ function invoiceHtml(
   tfoot tr:first-child td { padding-top: 12px; }
   .sum-label { text-align: right; color: #5a6b85; white-space: nowrap; }
   tfoot .grand td { border-top: 2px solid #14213a; padding-top: 9px; font-size: 17px;
-                    font-weight: 800; color: #F49E09; }
+                    font-weight: 800; color: #FA9104; }
   .note { margin-top: 20px; background: #fff7e8; border: 1px solid #f6dfae; border-radius: 8px;
           padding: 10px 12px; font-size: 12px; }
   footer { margin-top: 26px; border-top: 1px solid #e8edf5; padding-top: 12px; font-size: 11.5px; }
@@ -175,7 +175,7 @@ function invoiceHtml(
   .words b { display: block; color: #14213a; font-size: 12.5px; margin-top: 2px; }
   .status { display: inline-block; margin-top: 12px; padding: 4px 12px; border-radius: 6px; font-weight: 800;
             letter-spacing: 1.4px; font-size: 12px; border: 2px solid; }
-  .status.paid { color: #2a6b08; border-color: #2a6b08; }
+  .status.paid { color: #287207; border-color: #287207; }
   .status.partial { color: #a8620a; border-color: #a8620a; }
   .status.unpaid { color: #b42318; border-color: #b42318; }
   table.pay { margin-top: 16px; }
@@ -434,14 +434,14 @@ export async function printReceipt(
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; padding: 28px; font: 14px/1.6 "Helvetica Neue", Arial, sans-serif; color: #14213a; }
-  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #217CCA; padding-bottom: 14px; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #0352AF; padding-bottom: 14px; }
   .logo { height: 50px; margin-bottom: 4px; }
-  h1 { margin: 0; font-size: 24px; letter-spacing: 3px; text-transform: uppercase; color: #217CCA; text-align: right; }
+  h1 { margin: 0; font-size: 24px; letter-spacing: 3px; text-transform: uppercase; color: #0352AF; text-align: right; }
   .muted { color: #5a6b85; }
   table { width: 100%; border-collapse: collapse; margin-top: 22px; }
   td { padding: 9px 4px; border-bottom: 1px solid #e8edf5; }
   td:first-child { color: #5a6b85; width: 40%; }
-  .amount td { font-size: 20px; font-weight: 800; color: #2a6b08; border-top: 2px solid #14213a; }
+  .amount td { font-size: 20px; font-weight: 800; color: #287207; border-top: 2px solid #14213a; }
   .sign { margin-top: 60px; display: flex; justify-content: space-between; font-size: 12px; color: #5a6b85; }
   .sign div { width: 200px; border-top: 1px solid #14213a; padding-top: 5px; text-align: center; }
   @page { size: A4; margin: 14mm; }

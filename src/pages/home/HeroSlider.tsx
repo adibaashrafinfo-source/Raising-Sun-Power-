@@ -12,9 +12,9 @@ const AUTO_ADVANCE_MS = 3000
 
 /** Kept in step with the built-in slides so uploaded banners are lit the same. */
 const GLOWS = [
-  "radial-gradient(circle,#217CCA 0%,transparent 70%)",
-  "radial-gradient(circle,#67A70E 0%,transparent 70%)",
-  "radial-gradient(circle,#F49E09 0%,transparent 70%)",
+  "radial-gradient(circle,#0352AF 0%,transparent 70%)",
+  "radial-gradient(circle,#3F8F0C 0%,transparent 70%)",
+  "radial-gradient(circle,#FA9104 0%,transparent 70%)",
 ]
 
 /** The banner frame's shape. Upload at this ratio and nothing is letterboxed. */

@@ -301,9 +301,9 @@ function quotationHtml(input: QuotationInput, qrDataUrl: string): string {
   * { box-sizing: border-box; }
   body { margin: 0; padding: 28px; font: 13px/1.55 "Helvetica Neue", Arial, sans-serif; color: #14213a; }
   .head { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start;
-          border-bottom: 3px solid #217CCA; padding-bottom: 16px; }
+          border-bottom: 3px solid #0352AF; padding-bottom: 16px; }
   .brand { font-size: 21px; font-weight: 800; letter-spacing: .2px; }
-  .brand small { display: block; font-size: 11px; font-weight: 600; color: #F49E09;
+  .brand small { display: block; font-size: 11px; font-weight: 600; color: #FA9104;
                  letter-spacing: 1.1px; text-transform: uppercase; }
   .title h1 { margin: 0; font-size: 26px; letter-spacing: .3px; }
   .title { text-align: right; }
@@ -320,7 +320,7 @@ function quotationHtml(input: QuotationInput, qrDataUrl: string): string {
   .wr { margin-top: 4px; font-size: 11px; font-weight: 600; color: #2f8f1f; }
   .wr span { display: inline-block; margin-right: 12px; }
   .sn { margin-top: 4px; font-size: 11px; color: #14213a; word-break: break-word; }
-  .sn b { color: #217CCA; }
+  .sn b { color: #0352AF; }
   tfoot td { border-top: 1px solid #d7e0ec; font-weight: 700; }
   tfoot .sum-label { text-align: right; color: #566379; }
   tfoot .grand td { font-size: 15px; }
@@ -331,7 +331,7 @@ function quotationHtml(input: QuotationInput, qrDataUrl: string): string {
   .words b { display: block; color: #14213a; font-size: 12.5px; margin-top: 2px; }
   .energy { margin-top: 20px; font-size: 12px; }
   .energy h4 { margin: 0 0 6px; font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase;
-               color: #F49E09; font-weight: 700; }
+               color: #FA9104; font-weight: 700; }
   .energy table { margin-top: 0; }
   .energy th { background: #eef3fa; font-size: 10.5px; }
   .energy .note { margin-top: 8px; padding: 8px 10px; }

@@ -7,10 +7,10 @@ import { SectionHeader } from "@/pages/home/SectionHeader"
 
 // One brand wash per card, cycled so a new menu group still gets a look.
 const WASHES = [
-  "linear-gradient(160deg,#217CCA,#052C6E)",
-  "linear-gradient(160deg,#F49E09,#a8620a)",
-  "linear-gradient(160deg,#4C9412,#1f4d06)",
-  "linear-gradient(160deg,#0B3F94,#03163a)",
+  "linear-gradient(160deg,#0352AF,#011653)",
+  "linear-gradient(160deg,#FA9104,#a8620a)",
+  "linear-gradient(160deg,#35800A,#1f4d06)",
+  "linear-gradient(160deg,#02296F,#03163a)",
 ]
 
 /** The big entry cards: one per menu group, listing what is filed under it. */
@@ -22,7 +22,7 @@ export function OurCategory() {
     <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-12">
       <SectionHeader
         kicker="Shop the range"
-        kickerColor="#67A70E"
+        kickerColor="#3F8F0C"
         title="Our categories"
         linkTo="/products"
         linkLabel="See the full catalogue"

@@ -6,14 +6,14 @@ import { telLink, whatsappLink } from "@/data/company"
 export function CtaBand() {
   return (
     <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-12">
-      <div className="relative overflow-hidden rounded-3xl bg-[linear-gradient(160deg,#217CCA,#052C6E)] p-7 shadow-[0_24px_60px_rgba(5,44,110,.4)] sm:p-12">
+      <div className="relative overflow-hidden rounded-3xl bg-[linear-gradient(160deg,#0352AF,#011653)] p-7 shadow-[0_24px_60px_rgba(5,44,110,.4)] sm:p-12">
         <div
           className="pointer-events-none absolute -right-8 -top-16 size-[280px] rounded-full opacity-35 blur-[10px]"
-          style={{ background: "radial-gradient(circle,#F49E09,transparent 68%)" }}
+          style={{ background: "radial-gradient(circle,#FA9104,transparent 68%)" }}
         />
         <div
           className="pointer-events-none absolute -bottom-20 -left-10 size-[260px] rounded-full opacity-30 blur-[30px]"
-          style={{ background: "radial-gradient(circle,#67A70E,transparent 70%)" }}
+          style={{ background: "radial-gradient(circle,#3F8F0C,transparent 70%)" }}
         />
         {/* Same faint grid as the hero, so the two brand blocks match. */}
         <div
@@ -37,7 +37,7 @@ export function CtaBand() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/solar-assessment"
-              className="flex h-[52px] items-center gap-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-400 px-6 text-[15px] font-bold text-white no-underline shadow-[0_10px_26px_rgba(244,158,9,.35)] transition-transform duration-200 hover:-translate-y-0.5 active:scale-95"
+              className="flex h-[52px] items-center gap-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-400 px-6 text-[15px] font-bold text-white no-underline shadow-[0_10px_26px_rgba(250,145,4,.35)] transition-transform duration-200 hover:-translate-y-0.5 active:scale-95"
             >
               Get Free Solar Assessment
             </Link>

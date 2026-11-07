@@ -77,8 +77,8 @@ export default function ContactPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <ContactCard
           icon={Phone}
-          color="#217CCA"
-          tint="rgba(33,124,202,.14)"
+          color="#0352AF"
+          tint="rgba(3,82,175,.14)"
           label="Call us"
           value={phone}
           href={`tel:${phone.replace(/\s|-/g, "")}`}
@@ -91,8 +91,8 @@ export default function ContactPage() {
           value="Chat with us"
           href={`https://wa.me/${whatsappNumber}`}
         />
-        <ContactCard icon={Mail} color="#F49E09" tint="rgba(244,158,9,.16)" label="Email" value={email} href={`mailto:${email}`} />
-        <ContactCard icon={Clock} color="#67A70E" tint="rgba(103,167,14,.14)" label="Business hours" value={businessHours} />
+        <ContactCard icon={Mail} color="#FA9104" tint="rgba(250,145,4,.16)" label="Email" value={email} href={`mailto:${email}`} />
+        <ContactCard icon={Clock} color="#3F8F0C" tint="rgba(63,143,12,.14)" label="Business hours" value={businessHours} />
       </div>
 
       <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">

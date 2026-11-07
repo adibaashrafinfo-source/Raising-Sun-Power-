@@ -22,7 +22,7 @@ export const heroSlides: HeroSlide[] = [
     ctaTo: "/products",
     secondaryLabel: "Explore Products",
     secondaryTo: "/products",
-    glow: "radial-gradient(circle,#217CCA 0%,transparent 70%)",
+    glow: "radial-gradient(circle,#0352AF 0%,transparent 70%)",
   },
   {
     badge: "Free system sizing",
@@ -33,7 +33,7 @@ export const heroSlides: HeroSlide[] = [
     ctaTo: "/solar-assessment",
     secondaryLabel: "Try the calculator",
     secondaryTo: "/solar-calculator",
-    glow: "radial-gradient(circle,#67A70E 0%,transparent 70%)",
+    glow: "radial-gradient(circle,#3F8F0C 0%,transparent 70%)",
   },
   {
     badge: "Dealer & wholesale pricing",
@@ -44,7 +44,7 @@ export const heroSlides: HeroSlide[] = [
     ctaTo: "/wholesale",
     secondaryLabel: "Get a quotation",
     secondaryTo: "/get-quotation",
-    glow: "radial-gradient(circle,#F49E09 0%,transparent 70%)",
+    glow: "radial-gradient(circle,#FA9104 0%,transparent 70%)",
   },
 ]
 
@@ -54,10 +54,10 @@ const tG = "linear-gradient(135deg,#EAF6DD,#CDE9B7)"
 const tGold = "linear-gradient(135deg,#FDF4D2,#F3DE94)"
 
 export const trustChips = [
-  { title: "100% Authentic", sub: "Genuine brands only", tint: "rgba(33,124,202,.14)", color: "#217CCA" },
-  { title: "Warranty", sub: "Brand-backed cover", tint: "rgba(103,167,14,.14)", color: "#67A70E" },
-  { title: "Fast Delivery", sub: "Nationwide · 2–4 days", tint: "rgba(244,158,9,.16)", color: "#F49E09" },
-  { title: "COD Available", sub: "Pay on delivery", tint: "rgba(33,124,202,.14)", color: "#217CCA" },
+  { title: "100% Authentic", sub: "Genuine brands only", tint: "rgba(3,82,175,.14)", color: "#0352AF" },
+  { title: "Warranty", sub: "Brand-backed cover", tint: "rgba(63,143,12,.14)", color: "#3F8F0C" },
+  { title: "Fast Delivery", sub: "Nationwide · 2–4 days", tint: "rgba(250,145,4,.16)", color: "#FA9104" },
+  { title: "COD Available", sub: "Pay on delivery", tint: "rgba(3,82,175,.14)", color: "#0352AF" },
 ]
 
 export const categories = [
@@ -82,17 +82,17 @@ export const solutions = [
   {
     title: "Home Solar",
     body: "Rooftop kits sized for load-shedding backup and monthly savings.",
-    grad: "linear-gradient(160deg,#217CCA,#052C6E)",
+    grad: "linear-gradient(160deg,#0352AF,#011653)",
   },
   {
     title: "Commercial Power",
     body: "Reliable three-phase supply, UPS and switchgear for shops & offices.",
-    grad: "linear-gradient(160deg,#F49E09,#c46f00)",
+    grad: "linear-gradient(160deg,#FA9104,#c46f00)",
   },
   {
     title: "Industrial Switchgear",
     body: "MCCB, distribution boards and protection engineered for factories.",
-    grad: "linear-gradient(160deg,#67A70E,#2A6B08)",
+    grad: "linear-gradient(160deg,#3F8F0C,#287207)",
   },
 ]
 
@@ -135,26 +135,26 @@ export const whyRsp = [
   {
     title: "100% Genuine",
     body: "Every unit sourced from authorized channels with verifiable serials.",
-    tint: "rgba(33,124,202,.14)",
-    color: "#217CCA",
+    tint: "rgba(3,82,175,.14)",
+    color: "#0352AF",
   },
   {
     title: "Warranty Support",
     body: "On-brand warranty handled locally — no shipping units abroad.",
-    tint: "rgba(103,167,14,.14)",
-    color: "#67A70E",
+    tint: "rgba(63,143,12,.14)",
+    color: "#3F8F0C",
   },
   {
     title: "Fast Nationwide Delivery",
     body: "Courier delivery to all 64 districts, 2–4 days with COD.",
-    tint: "rgba(244,158,9,.16)",
-    color: "#F49E09",
+    tint: "rgba(250,145,4,.16)",
+    color: "#FA9104",
   },
   {
     title: "Expert Guidance",
     body: "Engineers help you size the right system — call or WhatsApp anytime.",
-    tint: "rgba(33,124,202,.14)",
-    color: "#217CCA",
+    tint: "rgba(3,82,175,.14)",
+    color: "#0352AF",
   },
 ]
 
@@ -165,7 +165,7 @@ export const testimonials = [
     name: "Rakibul Hasan",
     role: "Homeowner · Rangpur",
     initials: "RH",
-    avatar: "linear-gradient(135deg,#217CCA,#0B3F94)",
+    avatar: "linear-gradient(135deg,#0352AF,#02296F)",
   },
   {
     quote:
@@ -173,7 +173,7 @@ export const testimonials = [
     name: "Md. Salauddin",
     role: "Electrician · Dhaka",
     initials: "MS",
-    avatar: "linear-gradient(135deg,#F49E09,#c46f00)",
+    avatar: "linear-gradient(135deg,#FA9104,#c46f00)",
   },
   {
     quote:
@@ -181,7 +181,7 @@ export const testimonials = [
     name: "Nusrat Jahan",
     role: "Shop owner · Chattogram",
     initials: "NJ",
-    avatar: "linear-gradient(135deg,#67A70E,#2A6B08)",
+    avatar: "linear-gradient(135deg,#3F8F0C,#287207)",
   },
   {
     quote:
@@ -189,7 +189,7 @@ export const testimonials = [
     name: "Tanvir Ahmed",
     role: "Contractor · Sylhet",
     initials: "TA",
-    avatar: "linear-gradient(135deg,#217CCA,#217CCA)",
+    avatar: "linear-gradient(135deg,#0352AF,#0352AF)",
   },
 ]
 

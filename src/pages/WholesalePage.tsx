@@ -130,14 +130,14 @@ export default function WholesalePage() {
 
       {/* Hero */}
       <section className="mx-auto max-w-[1280px] px-4 pb-6 sm:px-6">
-        <div className="relative overflow-hidden rounded-[26px] bg-[linear-gradient(160deg,#052C6E,#04214f_55%,#03163a)] p-7 shadow-[0_24px_60px_rgba(5,44,110,.35)] sm:p-12">
+        <div className="relative overflow-hidden rounded-[26px] bg-[linear-gradient(160deg,#011653,#04214f_55%,#03163a)] p-7 shadow-[0_24px_60px_rgba(5,44,110,.35)] sm:p-12">
           <div
             className="pointer-events-none absolute -right-10 -top-16 size-[320px] rounded-full opacity-30 blur-[12px]"
-            style={{ background: "radial-gradient(circle,#F49E09 0%,transparent 68%)" }}
+            style={{ background: "radial-gradient(circle,#FA9104 0%,transparent 68%)" }}
           />
           <div className="relative max-w-[720px]">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-sm">
-              <span className="size-[7px] rounded-full bg-green-400 shadow-[0_0_0_4px_rgba(103,167,14,.25)]" />
+              <span className="size-[7px] rounded-full bg-green-400 shadow-[0_0_0_4px_rgba(63,143,12,.25)]" />
               B2B &amp; Dealer Supply
             </span>
             <h1 className="mt-5 text-balance font-heading text-[clamp(28px,4.4vw,44px)] font-extrabold leading-[1.1] tracking-tight text-white">

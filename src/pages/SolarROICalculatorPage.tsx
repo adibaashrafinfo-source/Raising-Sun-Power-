@@ -224,7 +224,7 @@ function RoiResults({ result, customerType }: { result: RoiCalculatorResult; cus
           </span>
         </div>
 
-        <div className="mx-auto max-w-[420px] rounded-[18px] bg-[linear-gradient(160deg,#217CCA,#052C6E)] p-7 text-center text-white shadow-[0_14px_34px_rgba(5,44,110,.3)]">
+        <div className="mx-auto max-w-[420px] rounded-[18px] bg-[linear-gradient(160deg,#0352AF,#011653)] p-7 text-center text-white shadow-[0_14px_34px_rgba(5,44,110,.3)]">
           <span className="text-[13px] font-semibold text-[#B7D2F2]">Payback Period</span>
           <div className="mt-1.5 font-heading text-[44px] font-extrabold leading-none">
             {Number.isFinite(result.paybackPeriodYears)
@@ -306,13 +306,13 @@ function RoiResults({ result, customerType }: { result: RoiCalculatorResult; cus
                 {crossoverYear && (
                   <ReferenceLine
                     x={crossoverYear}
-                    stroke="#67A70E"
+                    stroke="#3F8F0C"
                     strokeDasharray="4 4"
-                    label={{ value: "Payback", position: "top", fontSize: 11, fill: "#67A70E", fontWeight: 700 }}
+                    label={{ value: "Payback", position: "top", fontSize: 11, fill: "#3F8F0C", fontWeight: 700 }}
                   />
                 )}
-                <Line type="monotone" dataKey="cumulative" stroke="#217CCA" strokeWidth={2.5} dot={false} />
-                <Line type="monotone" dataKey="investment" stroke="#F49E09" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                <Line type="monotone" dataKey="cumulative" stroke="#0352AF" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey="investment" stroke="#FA9104" strokeWidth={2} strokeDasharray="5 5" dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>

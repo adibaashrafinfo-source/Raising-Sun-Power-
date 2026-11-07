@@ -8,10 +8,10 @@ import { useSeo } from "@/hooks/use-seo"
 import { cn } from "@/lib/utils"
 
 const CATEGORY_TINT: Record<string, string> = {
-  "Solar Basics": "#67A70E",
-  "System Design": "#217CCA",
-  "Net Metering": "#F49E09",
-  Maintenance: "#0B3F94",
+  "Solar Basics": "#3F8F0C",
+  "System Design": "#0352AF",
+  "Net Metering": "#FA9104",
+  Maintenance: "#02296F",
   "Electrical Safety": "#E23B3B",
 }
 
@@ -47,7 +47,7 @@ export default function BlogPage() {
         </span>
         <h1 className="mt-4 text-balance font-heading text-[clamp(28px,4vw,42px)] font-extrabold leading-tight tracking-tight text-text">
           Solar guides for{" "}
-          <span className="bg-[linear-gradient(120deg,#217CCA,#F49E09_52%,#67A70E)] bg-clip-text text-transparent">
+          <span className="bg-[linear-gradient(120deg,#0352AF,#FA9104_52%,#3F8F0C)] bg-clip-text text-transparent">
             Bangladesh
           </span>
         </h1>
@@ -89,11 +89,11 @@ export default function BlogPage() {
       {featured && (
         <Link
           to={`/blog/${featured.slug}`}
-          className="group mb-5 block overflow-hidden rounded-[24px] border border-border bg-[linear-gradient(160deg,#052C6E,#04214f_55%,#03163a)] p-7 no-underline shadow-[0_20px_50px_rgba(5,44,110,.3)] sm:p-10"
+          className="group mb-5 block overflow-hidden rounded-[24px] border border-border bg-[linear-gradient(160deg,#011653,#04214f_55%,#03163a)] p-7 no-underline shadow-[0_20px_50px_rgba(5,44,110,.3)] sm:p-10"
         >
           <span
             className="inline-block rounded-full px-3 py-1 text-[11.5px] font-extrabold text-white"
-            style={{ background: CATEGORY_TINT[featured.category] ?? "#217CCA" }}
+            style={{ background: CATEGORY_TINT[featured.category] ?? "#0352AF" }}
           >
             {featured.category}
           </span>
@@ -123,7 +123,7 @@ export default function BlogPage() {
           >
             <span
               className="w-fit rounded-full px-2.5 py-1 text-[11px] font-extrabold text-white"
-              style={{ background: CATEGORY_TINT[post.category] ?? "#217CCA" }}
+              style={{ background: CATEGORY_TINT[post.category] ?? "#0352AF" }}
             >
               {post.category}
             </span>

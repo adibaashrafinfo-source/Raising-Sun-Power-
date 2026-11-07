@@ -33,7 +33,7 @@ export function FeaturedTabs() {
     <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-12">
       <SectionHeader
         kicker="Top rated & stocked"
-        kickerColor="#217CCA"
+        kickerColor="#0352AF"
         title="Featured products"
         linkTo="/products"
         linkLabel="View all products"
