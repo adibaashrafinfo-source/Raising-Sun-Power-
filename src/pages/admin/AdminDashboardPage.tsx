@@ -27,10 +27,10 @@ import { cn, formatBDT } from "@/lib/utils"
 import type { OrderStatus } from "@/types/database"
 
 const STATUS_META: Record<OrderStatus, { label: string; color: string }> = {
-  pending: { label: "Pending", color: "#F49E09" },
-  confirmed: { label: "Confirmed", color: "#217CCA" },
-  shipped: { label: "Shipped", color: "#0B3F94" },
-  delivered: { label: "Delivered", color: "#67A70E" },
+  pending: { label: "Pending", color: "#FA9104" },
+  confirmed: { label: "Confirmed", color: "#0352AF" },
+  shipped: { label: "Shipped", color: "#02296F" },
+  delivered: { label: "Delivered", color: "#3F8F0C" },
   cancelled: { label: "Cancelled", color: "#E23B3B" },
 }
 
@@ -141,8 +141,8 @@ export default function AdminDashboardPage() {
               <AreaChart data={trendChartData} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
                 <defs>
                   <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#F49E09" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#F49E09" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#FA9104" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#FA9104" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis
@@ -165,7 +165,7 @@ export default function AdminDashboardPage() {
                 <Area
                   type="monotone"
                   dataKey="sales"
-                  stroke="#F49E09"
+                  stroke="#FA9104"
                   strokeWidth={2.5}
                   fill="url(#revenueFill)"
                 />

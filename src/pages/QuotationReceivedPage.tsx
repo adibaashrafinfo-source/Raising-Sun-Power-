@@ -29,7 +29,7 @@ export default function QuotationReceivedPage() {
   return (
     <main className="mx-auto max-w-[640px] px-4 pb-16 pt-8 sm:px-6">
       <div className="text-center">
-        <span className="inline-flex size-[88px] items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-green-500 shadow-[0_14px_34px_rgba(103,167,14,.4)]">
+        <span className="inline-flex size-[88px] items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-green-500 shadow-[0_14px_34px_rgba(63,143,12,.4)]">
           <Check className="size-11 text-white" strokeWidth={2.5} />
         </span>
         <h1 className="mt-5 font-heading text-[clamp(24px,4vw,32px)] font-extrabold tracking-tight text-text">

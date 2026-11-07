@@ -42,10 +42,10 @@ export function NewsletterStrip() {
 
   return (
     <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-12">
-      <div className="relative overflow-hidden rounded-[24px] bg-[linear-gradient(160deg,#217CCA,#052C6E)] p-6 shadow-[0_18px_44px_rgba(5,44,110,.32)] sm:p-9">
+      <div className="relative overflow-hidden rounded-[24px] bg-[linear-gradient(160deg,#0352AF,#011653)] p-6 shadow-[0_18px_44px_rgba(5,44,110,.32)] sm:p-9">
         <div
           className="pointer-events-none absolute -right-10 -top-16 size-[260px] rounded-full opacity-30 blur-[40px]"
-          style={{ background: "radial-gradient(circle,#F49E09,transparent 70%)" }}
+          style={{ background: "radial-gradient(circle,#FA9104,transparent 70%)" }}
         />
         <div className="relative flex flex-col items-start justify-between gap-5 lg:flex-row lg:items-center">
           <div className="max-w-[520px]">

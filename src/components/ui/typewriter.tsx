@@ -48,7 +48,7 @@ export function Typewriter({
         aria-hidden="true"
         className="ml-0.5 inline-block border-r-2 align-baseline"
         style={{
-          borderColor: "var(--orange-500,#f49e09)",
+          borderColor: "var(--orange-500,#FA9104)",
           animation: done ? "rsp-caret 1s step-end infinite" : "none",
         }}
       >

@@ -74,7 +74,7 @@ export default function BlogPostPage() {
           </div>
 
           {/* Inline CTA */}
-          <div className="mt-10 rounded-[22px] bg-[linear-gradient(160deg,#052C6E,#04214f_55%,#03163a)] p-6 sm:p-8">
+          <div className="mt-10 rounded-[22px] bg-[linear-gradient(160deg,#011653,#04214f_55%,#03163a)] p-6 sm:p-8">
             <h2 className="font-heading text-[clamp(20px,2.6vw,26px)] font-extrabold tracking-tight text-white">
               আপনার জন্য সঠিক সিস্টেম কোনটি?
             </h2>

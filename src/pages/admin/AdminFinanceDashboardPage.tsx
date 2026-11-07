@@ -39,14 +39,14 @@ export default function AdminFinanceDashboardPage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <KpiCard icon={Boxes} label="Total Stock Value" value={formatBDT(totalStockValue)} color="#217CCA" />
-          <KpiCard icon={Truck} label="Total Supplier Due" value={formatBDT(totalSupplierDue)} color="#F49E09" />
+          <KpiCard icon={Boxes} label="Total Stock Value" value={formatBDT(totalStockValue)} color="#0352AF" />
+          <KpiCard icon={Truck} label="Total Supplier Due" value={formatBDT(totalSupplierDue)} color="#FA9104" />
           <KpiCard icon={Users} label="Total Customer Due" value={formatBDT(customerDueTotal ?? 0)} color="#E23B3B" />
           <KpiCard
             icon={thisMonth && thisMonth.net_cash_flow >= 0 ? TrendingUp : TrendingDown}
             label="This Month Net Cash Flow"
             value={formatBDT(thisMonth?.net_cash_flow ?? 0)}
-            color={thisMonth && thisMonth.net_cash_flow >= 0 ? "#67A70E" : "#E23B3B"}
+            color={thisMonth && thisMonth.net_cash_flow >= 0 ? "#3F8F0C" : "#E23B3B"}
           />
         </div>
       )}

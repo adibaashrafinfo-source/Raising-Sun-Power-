@@ -44,29 +44,29 @@ const FOCUS = [
 const WHY_CHOOSE = [
   {
     icon: BadgeCheck,
-    tint: "rgba(33,124,202,.14)",
-    color: "#217CCA",
+    tint: "rgba(3,82,175,.14)",
+    color: "#0352AF",
     title: "Genuine Products",
     body: "Verified sourcing and brand-focused product supply.",
   },
   {
     icon: Headphones,
-    tint: "rgba(103,167,14,.14)",
-    color: "#67A70E",
+    tint: "rgba(63,143,12,.14)",
+    color: "#3F8F0C",
     title: "Technical Support",
     body: "Product selection and solar system guidance.",
   },
   {
     icon: Wrench,
-    tint: "rgba(244,158,9,.16)",
-    color: "#F49E09",
+    tint: "rgba(250,145,4,.16)",
+    color: "#FA9104",
     title: "Professional Installation",
     body: "Site survey, installation and commissioning support.",
   },
   {
     icon: FileText,
     tint: "rgba(11,63,148,.14)",
-    color: "#0B3F94",
+    color: "#02296F",
     title: "Transparent Pricing",
     body: "Clear quotation and scope.",
   },
@@ -114,20 +114,20 @@ export default function AboutPage() {
       <section className="relative mx-auto max-w-[1280px] overflow-hidden px-4 pb-10 pt-4 sm:px-6">
         <div
           className="pointer-events-none absolute -top-10 left-[6%] size-[340px] rounded-full opacity-15 blur-[18px]"
-          style={{ background: "radial-gradient(circle,#217CCA 0%,transparent 68%)" }}
+          style={{ background: "radial-gradient(circle,#0352AF 0%,transparent 68%)" }}
         />
         <div
           className="pointer-events-none absolute right-[2%] top-[80px] size-[320px] rounded-full opacity-15 blur-[20px]"
-          style={{ background: "radial-gradient(circle,#F49E09 0%,transparent 66%)" }}
+          style={{ background: "radial-gradient(circle,#FA9104 0%,transparent 66%)" }}
         />
         <div className="relative mx-auto max-w-[820px] text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-muted shadow-[var(--shadow-sm)]">
-            <span className="size-[7px] rounded-full bg-green-400 shadow-[0_0_0_4px_rgba(103,167,14,.2)]" />
+            <span className="size-[7px] rounded-full bg-green-400 shadow-[0_0_0_4px_rgba(63,143,12,.2)]" />
             {badge}
           </span>
           <h1 className="mt-5 text-balance font-heading text-[clamp(30px,4.6vw,48px)] font-extrabold leading-[1.1] tracking-tight text-text">
             {title}{" "}
-            <span className="bg-[linear-gradient(120deg,#217CCA,#F49E09_52%,#67A70E)] bg-clip-text text-transparent">
+            <span className="bg-[linear-gradient(120deg,#0352AF,#FA9104_52%,#3F8F0C)] bg-clip-text text-transparent">
               {highlight}
             </span>
           </h1>
@@ -151,10 +151,10 @@ export default function AboutPage() {
 
       {/* Our Mission */}
       <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-6 sm:px-6">
-        <div className="relative overflow-hidden rounded-[26px] bg-[linear-gradient(160deg,#052C6E,#04214f_55%,#03163a)] p-7 shadow-[0_24px_60px_rgba(5,44,110,.35)] sm:p-11">
+        <div className="relative overflow-hidden rounded-[26px] bg-[linear-gradient(160deg,#011653,#04214f_55%,#03163a)] p-7 shadow-[0_24px_60px_rgba(5,44,110,.35)] sm:p-11">
           <div
             className="pointer-events-none absolute -right-10 -top-16 size-[300px] rounded-full opacity-30 blur-[12px]"
-            style={{ background: "radial-gradient(circle,#67A70E 0%,transparent 68%)" }}
+            style={{ background: "radial-gradient(circle,#3F8F0C 0%,transparent 68%)" }}
           />
           <div className="relative text-center">
             <span className="text-xs font-bold uppercase tracking-[0.16em] text-gold-400">Our Mission</span>

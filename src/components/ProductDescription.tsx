@@ -23,7 +23,7 @@ function Block({ block }: { block: DescriptionBlock }) {
     case "heading":
       return (
         <h3 className="mt-7 flex items-center gap-2.5 font-heading text-lg font-extrabold tracking-tight text-text first:mt-0">
-          <span className="h-5 w-1 rounded-full bg-[linear-gradient(180deg,#217CCA,#67A70E)]" />
+          <span className="h-5 w-1 rounded-full bg-[linear-gradient(180deg,#0352AF,#3F8F0C)]" />
           {block.text}
         </h3>
       )

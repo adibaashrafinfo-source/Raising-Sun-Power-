@@ -109,12 +109,12 @@ export default function SolarAssessmentPage() {
 
       <div className="mx-auto mb-9 max-w-[720px] text-center">
         <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-muted shadow-[var(--shadow-sm)]">
-          <span className="size-[7px] rounded-full bg-green-400 shadow-[0_0_0_4px_rgba(103,167,14,.2)]" />
+          <span className="size-[7px] rounded-full bg-green-400 shadow-[0_0_0_4px_rgba(63,143,12,.2)]" />
           Free · No obligation
         </span>
         <h1 className="mt-4 text-balance font-heading text-[clamp(28px,4vw,42px)] font-extrabold leading-tight tracking-tight text-text">
           Get Free Solar{" "}
-          <span className="bg-[linear-gradient(120deg,#217CCA,#F49E09_52%,#67A70E)] bg-clip-text text-transparent">
+          <span className="bg-[linear-gradient(120deg,#0352AF,#FA9104_52%,#3F8F0C)] bg-clip-text text-transparent">
             Assessment
           </span>
         </h1>
@@ -158,7 +158,7 @@ export default function SolarAssessmentPage() {
                     className={cn(
                       "flex flex-col items-center gap-2 rounded-2xl border p-3.5 text-center transition-all",
                       active
-                        ? "border-blue bg-blue/10 text-blue shadow-[0_0_0_3px_rgba(33,124,202,.12)]"
+                        ? "border-blue bg-blue/10 text-blue shadow-[0_0_0_3px_rgba(3,82,175,.12)]"
                         : "border-border bg-surface-2 text-muted hover:border-blue/40",
                     )}
                   >

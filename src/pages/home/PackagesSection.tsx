@@ -23,7 +23,7 @@ export function PackagesSection() {
     <section className="mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-12">
       <SectionHeader
         kicker="Sized & priced together"
-        kickerColor="#F49E09"
+        kickerColor="#FA9104"
         title="Solar packages"
         linkTo="/packages"
         linkLabel="Browse all packages"

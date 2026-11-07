@@ -222,7 +222,7 @@ export default function SolarCalculatorPage() {
               </span>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-[18px] bg-[linear-gradient(160deg,#217CCA,#052C6E)] p-6 text-center text-white shadow-[0_14px_34px_rgba(5,44,110,.3)]">
+              <div className="rounded-[18px] bg-[linear-gradient(160deg,#0352AF,#011653)] p-6 text-center text-white shadow-[0_14px_34px_rgba(5,44,110,.3)]">
                 <span className="mb-3 inline-flex size-12 items-center justify-center rounded-2xl bg-white/15">
                   <PanelTop className="size-6 text-gold-400" />
                 </span>
@@ -290,7 +290,7 @@ export default function SolarCalculatorPage() {
               )}
             </div>
 
-            <div className="mt-[22px] rounded-2xl bg-[linear-gradient(120deg,#0B3F94,#052C6E)] p-6 shadow-[0_16px_40px_rgba(5,44,110,.32)] sm:p-7">
+            <div className="mt-[22px] rounded-2xl bg-[linear-gradient(120deg,#02296F,#011653)] p-6 shadow-[0_16px_40px_rgba(5,44,110,.32)] sm:p-7">
               <div className="flex flex-wrap gap-3">
                 <Button size="lg" className="min-w-[220px] flex-1" onClick={goToQuote}>
                   Get a Formal Quotation →

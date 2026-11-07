@@ -69,15 +69,15 @@ export function Footer() {
   return (
     <footer className="relative overflow-hidden bg-[image:var(--footer-bg)] text-[var(--footer-text)] transition-colors">
       {/* top brand-gradient accent line */}
-      <div className="h-1 w-full bg-[linear-gradient(90deg,#217CCA,#F49E09_50%,#67A70E)]" />
+      <div className="h-1 w-full bg-[linear-gradient(90deg,#0352AF,#FA9104_50%,#3F8F0C)]" />
       {/* ambient glows */}
       <div
         className="pointer-events-none absolute -left-[8%] top-[6%] size-[420px] rounded-full opacity-20 blur-[60px]"
-        style={{ background: "radial-gradient(circle,#217CCA 0%,transparent 70%)" }}
+        style={{ background: "radial-gradient(circle,#0352AF 0%,transparent 70%)" }}
       />
       <div
         className="pointer-events-none absolute -right-[6%] bottom-[4%] size-[380px] rounded-full opacity-[0.18] blur-[60px]"
-        style={{ background: "radial-gradient(circle,#67A70E 0%,transparent 70%)" }}
+        style={{ background: "radial-gradient(circle,#3F8F0C 0%,transparent 70%)" }}
       />
 
       <div className="relative mx-auto max-w-[1280px] px-4 pb-6 pt-10 sm:px-6">
