@@ -5,8 +5,10 @@ import { Footer } from "@/components/layout/Footer"
 import { Header } from "@/components/layout/Header"
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav"
 import { MobileMenu } from "@/components/layout/MobileMenu"
+import { useSiteContentLive } from "@/hooks/use-site-content"
 
 export function AppLayout() {
+  useSiteContentLive()
   return (
     <div className="min-h-screen bg-bg text-text">
       <Header />

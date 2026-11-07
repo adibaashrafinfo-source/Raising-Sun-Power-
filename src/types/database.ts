@@ -130,6 +130,9 @@ export type SiteContent = {
   /** Optional: present once the header_logo_height column exists on the row. */
   header_logo_height?: number | null
   footer_logo_url: string | null
+  /** Optional: present once rsp_footer_branding.sql has been run. */
+  footer_logo_height?: number | null
+  footer_badges?: { url: string; alt: string; height: number; zoom?: number }[] | null
   hero_image_url: string | null
   hero_badge: string | null
   hero_headline_prefix: string | null

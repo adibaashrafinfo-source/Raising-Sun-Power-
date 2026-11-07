@@ -5,6 +5,7 @@ import { FacebookIcon, InstagramIcon, LinkedinIcon, TiktokIcon, YoutubeIcon } fr
 import { COMPANY } from "@/data/company"
 import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent } from "@/hooks/use-site-content"
+import { clampFooterLogoHeight, DEFAULT_FOOTER_BADGES, DEFAULT_FOOTER_LOGO_HEIGHT } from "@/lib/logo-size"
 import { officesFrom } from "@/lib/offices"
 
 /** Each network in its own colour — a grey icon row reads as decoration. */
@@ -15,12 +16,6 @@ const SOCIAL_BRAND: Record<string, string> = {
   LinkedIn: "#0A66C2",
   TikTok: "#111827",
 }
-
-const TRUST_BADGES = [
-  { src: "/badges/dncc.jpg", alt: "Dhaka North City Corporation", className: "h-20 w-20 scale-[1.65] object-contain" },
-  { src: "/badges/sreda-stakeholder-000.png", alt: "SREDA Stakeholder 000", className: "h-[68px] w-auto object-contain" },
-  { src: "/badges/trustpilot.png", alt: "Review us on Trustpilot", className: "h-20 w-auto object-contain" },
-]
 
 const shopLinks = [
   { label: "Solar Packages", to: "/packages" },
@@ -54,6 +49,9 @@ export function Footer() {
   const phone = settings?.support_phone || COMPANY.phone
   const email = settings?.contact_email || COMPANY.email
   const logo = cms?.footer_logo_url || "/logo.png"
+  const logoHeight = clampFooterLogoHeight(cms?.footer_logo_height || DEFAULT_FOOTER_LOGO_HEIGHT)
+  // The admin's list wins once they have saved one; until then the original three show.
+  const badges = cms?.footer_badges && cms.footer_badges.length > 0 ? cms.footer_badges : DEFAULT_FOOTER_BADGES
   const description =
     cms?.footer_description ||
     "Genuine solar & electrical products with engineered reliability — powering homes and businesses across Bangladesh with clean, renewable energy."
@@ -87,7 +85,12 @@ export function Footer() {
           {/* Brand + contact + social */}
           <div className="lg:col-span-4">
             {/* The lockup already carries the name, so no typed wordmark beside it. */}
-            <img src={logo} alt="Rising Sun Power BD" className="h-[52px] w-auto max-w-[220px] object-contain" />
+            <img
+              src={logo}
+              alt="Rising Sun Power BD"
+              style={{ height: logoHeight }}
+              className="w-auto max-w-full object-contain"
+            />
             <p className="mt-3 max-w-[320px] text-[13px] leading-relaxed text-[var(--footer-muted)]">{description}</p>
 
             <div className="mt-4 flex flex-col gap-1.5">
@@ -142,13 +145,20 @@ export function Footer() {
         <div className="mt-7 flex flex-col items-center gap-4 rounded-2xl border border-[var(--footer-border)] bg-[var(--footer-card)] px-5 py-5">
           <span className="text-[13px] font-semibold text-[var(--footer-text)]">Registered &amp; trusted</span>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            {TRUST_BADGES.map((badge) => (
+            {badges.map((badge, i) => (
               <span
-                key={badge.src}
+                key={`${badge.url}-${i}`}
                 title={badge.alt}
-                className="flex h-24 items-center justify-center overflow-hidden rounded-xl bg-white px-3 shadow-[0_6px_16px_rgba(0,0,0,.18)]"
+                style={{ height: Math.max(badge.height, 32) + 16 }}
+                className="flex items-center justify-center overflow-hidden rounded-xl bg-white px-3 shadow-[0_6px_16px_rgba(0,0,0,.18)]"
               >
-                <img src={badge.src} alt={badge.alt} loading="lazy" className={badge.className} />
+                <img
+                  src={badge.url}
+                  alt={badge.alt}
+                  loading="lazy"
+                  style={{ height: badge.height, transform: badge.zoom ? `scale(${badge.zoom})` : undefined }}
+                  className="w-auto object-contain"
+                />
               </span>
             ))}
           </div>
