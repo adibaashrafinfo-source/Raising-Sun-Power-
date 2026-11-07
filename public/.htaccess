@@ -1,0 +1,22 @@
+# Single-page app: any URL that is not a real file or folder loads index.html,
+# so refreshing /admin/orders or opening a shared link does not give a 404.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# Always re-check the page shell; hashed assets under /assets can be cached for a year.
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <IfModule mod_rewrite.c>
+    <FilesMatch "\.(js|css|woff2?|png|jpe?g|webp|svg)$">
+      Header set Cache-Control "public, max-age=31536000"
+    </FilesMatch>
+  </IfModule>
+</IfModule>

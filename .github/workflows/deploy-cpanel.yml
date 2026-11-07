@@ -1,0 +1,59 @@
+# Builds the site on every push to main and publishes the finished files to the
+# `deploy` branch. cPanel's Git Version Control tracks that branch; its
+# .cpanel.yml (written below) copies the files into public_html on each deploy.
+#
+# One-time setup in GitHub: Settings > Secrets and variables > Actions, add
+#   VITE_SUPABASE_URL      (your Supabase project URL)
+#   VITE_SUPABASE_ANON_KEY (the anon / publishable key)
+name: Build and publish to deploy branch
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-cpanel
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          test -n "$VITE_SUPABASE_URL" || { echo "Add the VITE_SUPABASE_URL secret first"; exit 1; }
+          test -n "$VITE_SUPABASE_ANON_KEY" || { echo "Add the VITE_SUPABASE_ANON_KEY secret first"; exit 1; }
+          npm run build
+
+      - name: Publish dist to the deploy branch
+        run: |
+          cd dist
+          cat > .cpanel.yml <<'YML'
+          ---
+          deployment:
+            tasks:
+              - export DEPLOYPATH=$HOME/public_html/
+              - /bin/cp -R -f . $DEPLOYPATH
+          YML
+          git init -q -b deploy
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Deploy ${GITHUB_SHA}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" deploy
