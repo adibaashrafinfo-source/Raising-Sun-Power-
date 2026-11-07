@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { ImageIcon, Upload, X } from "lucide-react"
+import { ImageIcon, Plus, Trash2, Upload, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -10,15 +10,35 @@ import { useUpdateSettings } from "@/hooks/use-admin"
 import { useSettings } from "@/hooks/use-checkout"
 import { useSiteContent, useUpdateSiteContent } from "@/hooks/use-site-content"
 import { formatBytes } from "@/lib/compress-image"
-import { DEFAULT_LOGO_HEIGHT, LOGO_HEIGHT_MAX, LOGO_HEIGHT_MIN } from "@/lib/logo-size"
+import {
+  BADGE_HEIGHT_MAX,
+  BADGE_HEIGHT_MIN,
+  DEFAULT_BADGE_HEIGHT,
+  DEFAULT_FOOTER_BADGES,
+  DEFAULT_FOOTER_LOGO_HEIGHT,
+  DEFAULT_LOGO_HEIGHT,
+  FOOTER_LOGO_HEIGHT_MAX,
+  FOOTER_LOGO_HEIGHT_MIN,
+  type FooterBadge,
+  LOGO_HEIGHT_MAX,
+  LOGO_HEIGHT_MIN,
+} from "@/lib/logo-size"
 import { uploadSiteAsset } from "@/lib/queries/site-content"
 import { getErrorMessage } from "@/lib/utils"
 import type { SiteContent } from "@/types/database"
 
 type FormState = Omit<
   SiteContent,
-  "id" | "updated_at" | "showroom_3_name" | "showroom_3_address" | "header_logo_height"
+  | "id"
+  | "updated_at"
+  | "showroom_3_name"
+  | "showroom_3_address"
+  | "header_logo_height"
+  | "footer_logo_height"
+  | "footer_badges"
 > & {
+  footer_logo_height: number
+  footer_badges: FooterBadge[]
   showroom_3_name: string | null
   showroom_3_address: string | null
   header_logo_height: number
@@ -28,6 +48,8 @@ const EMPTY: FormState = {
   header_logo_url: "",
   header_logo_height: DEFAULT_LOGO_HEIGHT,
   footer_logo_url: "",
+  footer_logo_height: DEFAULT_FOOTER_LOGO_HEIGHT,
+  footer_badges: [],
   hero_image_url: "",
   hero_badge: "",
   hero_headline_prefix: "",
@@ -67,6 +89,9 @@ export default function AdminCmsPage() {
       header_logo_url: content.header_logo_url ?? "",
       header_logo_height: content.header_logo_height ?? DEFAULT_LOGO_HEIGHT,
       footer_logo_url: content.footer_logo_url ?? "",
+      footer_logo_height: content.footer_logo_height ?? DEFAULT_FOOTER_LOGO_HEIGHT,
+      // Until the admin saves a list, show the three that are on the site so they can be edited.
+      footer_badges: content.footer_badges?.length ? content.footer_badges : DEFAULT_FOOTER_BADGES,
       hero_image_url: content.hero_image_url ?? "",
       hero_badge: content.hero_badge ?? "",
       hero_headline_prefix: content.hero_headline_prefix ?? "",
@@ -105,17 +130,34 @@ export default function AdminCmsPage() {
   // Same story for the logo size: the slider only appears once the column is
   // there, and it is left out of the save until then.
   const hasLogoSize = !!content && "header_logo_height" in content
+  // Footer logo size and the badge list need rsp_footer_branding.sql.
+  const hasFooterBranding = !!content && "footer_badges" in content
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
+  const setBadge = (index: number, patch: Partial<FooterBadge>) =>
+    setForm((f) => ({
+      ...f,
+      footer_badges: f.footer_badges.map((b, j) => (j === index ? { ...b, ...patch } : b)),
+    }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
       // Both rows are saved together so one Save button covers the page.
-      const { showroom_3_name, showroom_3_address, header_logo_height, ...rest } = form
+      const {
+        showroom_3_name,
+        showroom_3_address,
+        header_logo_height,
+        footer_logo_height,
+        footer_badges,
+        ...rest
+      } = form
       await updateContent.mutateAsync({
         ...rest,
+        ...(hasFooterBranding
+          ? { footer_logo_height, footer_badges: footer_badges.filter((b) => b.url) }
+          : {}),
         ...(hasOffice3 ? { showroom_3_name, showroom_3_address } : {}),
         ...(hasLogoSize ? { header_logo_height } : {}),
       })
@@ -155,7 +197,66 @@ export default function AdminCmsPage() {
               onChange={(v) => set("header_logo_height", v)}
             />
           )}
+          {hasFooterBranding && (
+            <SizeField
+              label="Footer logo size"
+              hint="How tall the logo is in the footer, in pixels."
+              value={form.footer_logo_height}
+              min={FOOTER_LOGO_HEIGHT_MIN}
+              max={FOOTER_LOGO_HEIGHT_MAX}
+              onChange={(v) => set("footer_logo_height", v)}
+            />
+          )}
         </Section>
+
+        {hasFooterBranding ? (
+          <Section
+            title='Footer — "Registered & trusted" logos'
+            subtitle="Add, remove or resize the registration and review logos in the footer. Saved changes show on the site within seconds."
+          >
+            {form.footer_badges.map((badge, i) => (
+              <div key={i} className="flex flex-col gap-3 rounded-xl border border-border bg-surface-2 p-3.5">
+                <ImageField
+                  label={`Logo ${i + 1}`}
+                  value={badge.url}
+                  onChange={(v) => setBadge(i, { url: v })}
+                />
+                <TextField label="Name (shown on hover)" value={badge.alt} onChange={(v) => setBadge(i, { alt: v })} />
+                <SizeField
+                  label="Size"
+                  value={badge.height}
+                  min={BADGE_HEIGHT_MIN}
+                  max={BADGE_HEIGHT_MAX}
+                  onChange={(v) => setBadge(i, { height: v })}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="self-start text-red-500"
+                  onClick={() => set("footer_badges", form.footer_badges.filter((_, j) => j !== i))}
+                >
+                  <Trash2 className="size-3.5" /> Remove
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              className="self-start"
+              onClick={() =>
+                set("footer_badges", [...form.footer_badges, { url: "", alt: "", height: DEFAULT_BADGE_HEIGHT }])
+              }
+            >
+              <Plus className="size-4" /> Add a logo
+            </Button>
+          </Section>
+        ) : (
+          <p className="rounded-xl border border-dashed border-border p-3 text-xs text-muted">
+            Footer logo size and the editable footer logos need <b>rsp_footer_branding.sql</b> to be run once in
+            Supabase.
+          </p>
+        )}
 
         {/* Hero */}
         <Section title="Homepage Hero" subtitle="The headline and subheading at the top of the homepage. The hero uses a brand gradient background — no image needed.">

@@ -374,6 +374,8 @@ export function Header() {
       {open && openItem?.panel && (
         <MegaMenu
           items={openItem.panel}
+          title={openItem.label}
+          viewAllTo={openItem.to}
           left={open.left}
           onClose={() => setOpen(null)}
           onMouseEnter={() => closeTimer.current && clearTimeout(closeTimer.current)}
@@ -411,7 +413,7 @@ function BrandLogo({ src, height }: { src: string; height: number }) {
           alt="Rising Sun Power BD"
           // The artwork ships on a white background; multiply against the white
           // bar drops it, so the logo reads as if it were transparent.
-          style={{ mixBlendMode: "multiply", maxHeight: size }}
+          style={{ mixBlendMode: "multiply", ...(isWide ? { height: size } : {}) }}
           onLoad={(e) => {
             const img = e.currentTarget
             setIsWide(img.naturalHeight > 0 && img.naturalWidth / img.naturalHeight >= 1.8)

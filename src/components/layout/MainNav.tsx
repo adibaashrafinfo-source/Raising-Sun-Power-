@@ -25,7 +25,7 @@ export type NavItem = {
 const MORE_RESERVE = 40
 
 const ITEM_CLASS =
-  "relative inline-flex items-center gap-0.5 whitespace-nowrap rounded-lg px-1.5 py-2 text-[11.5px] font-bold uppercase tracking-[0.01em] text-text no-underline transition-colors hover:text-orange-500 xl:gap-1 xl:px-2 xl:text-[12.5px]"
+  "relative inline-flex items-center gap-0.5 whitespace-nowrap rounded-lg px-1.5 py-2 text-[12px] font-bold uppercase tracking-[0.02em] text-text no-underline transition-colors hover:text-orange-500 xl:gap-1 xl:px-2.5 xl:text-[13.5px]"
 
 /** The "More" overflow panel sits in the portal root, outside the header's
  *  forced-light scope, so it needs its own light styling to match the bar
@@ -94,7 +94,7 @@ export function MainNav({
   const overflow = items.slice(limit)
 
   return (
-    <div ref={rowRef} className="flex items-center gap-0 overflow-hidden py-2">
+    <div ref={rowRef} className="flex items-center justify-between gap-0 overflow-hidden py-2">
       {visible.map((item) => {
         const isOpen = openKey === item.key
         return (
