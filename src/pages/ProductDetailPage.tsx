@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import {
+  ChevronLeft,
   ChevronRight,
   Download,
   FileText,
@@ -44,6 +45,23 @@ export default function ProductDetailPage() {
 
   const [qty, setQty] = useState(1)
   const [activeImage, setActiveImage] = useState(0)
+  const imageCount = product?.images.length ?? 0
+  const stepImage = (delta: number) =>
+    setActiveImage((i) => (imageCount > 0 ? (i + delta + imageCount) % imageCount : 0))
+
+  // Left / right arrow keys flip through the photos (unless someone is typing).
+  useEffect(() => {
+    if (imageCount < 2) return
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable)) return
+      if (e.key === "ArrowLeft") stepImage(-1)
+      else if (e.key === "ArrowRight") stepImage(1)
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageCount])
   const [barVisible, setBarVisible] = useState(false)
   const actionsRef = useRef<HTMLDivElement>(null)
 
@@ -213,6 +231,29 @@ export default function ProductDetailPage() {
               <img src={images[activeImage]} alt={product.name} className="size-full object-contain" />
             ) : (
               <ProductArt art={art} className="h-[184px] w-[230px]" />
+            )}
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Previous image"
+                  onClick={() => stepImage(-1)}
+                  className="absolute left-3 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black shadow-[0_4px_14px_rgba(0,0,0,.2)] transition hover:scale-105 hover:bg-white"
+                >
+                  <ChevronLeft className="size-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next image"
+                  onClick={() => stepImage(1)}
+                  className="absolute right-3 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black shadow-[0_4px_14px_rgba(0,0,0,.2)] transition hover:scale-105 hover:bg-white"
+                >
+                  <ChevronRight className="size-5" />
+                </button>
+                <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-white">
+                  {activeImage + 1} / {images.length}
+                </span>
+              </>
             )}
           </div>
           {images.length > 1 && (

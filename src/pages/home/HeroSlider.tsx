@@ -8,7 +8,7 @@ import { useHeroSlides } from "@/hooks/use-hero-slides"
 import { useSiteContent } from "@/hooks/use-site-content"
 import { cn } from "@/lib/utils"
 
-const AUTO_ADVANCE_MS = 5500
+const AUTO_ADVANCE_MS = 3000
 
 /** Kept in step with the built-in slides so uploaded banners are lit the same. */
 const GLOWS = [
