@@ -48,7 +48,7 @@ export function Footer() {
   const whatsappNumber = settings?.whatsapp_number || COMPANY.whatsappIntl
   const phone = settings?.support_phone || COMPANY.phone
   const email = settings?.contact_email || COMPANY.email
-  const logo = cms?.footer_logo_url || "/logo.png"
+  const logo = cms ? cms.footer_logo_url || "/logo.png" : null
   const logoHeight = clampFooterLogoHeight(cms?.footer_logo_height || DEFAULT_FOOTER_LOGO_HEIGHT)
   // The admin's list wins once they have saved one; until then the original three show.
   const badges = cms?.footer_badges && cms.footer_badges.length > 0 ? cms.footer_badges : DEFAULT_FOOTER_BADGES
@@ -85,12 +85,16 @@ export function Footer() {
           {/* Brand + contact + social */}
           <div className="lg:col-span-4">
             {/* The lockup already carries the name, so no typed wordmark beside it. */}
-            <img
-              src={logo}
-              alt="Rising Sun Power BD"
-              style={{ height: logoHeight }}
-              className="w-auto max-w-full object-contain"
-            />
+            {logo ? (
+              <img
+                src={logo}
+                alt="Rising Sun Power BD"
+                style={{ height: logoHeight }}
+                className="w-auto max-w-full object-contain"
+              />
+            ) : (
+              <div style={{ height: logoHeight }} aria-hidden />
+            )}
             <p className="mt-3 max-w-[320px] text-[13px] leading-relaxed text-[var(--footer-muted)]">{description}</p>
 
             <div className="mt-4 flex flex-col gap-1.5">

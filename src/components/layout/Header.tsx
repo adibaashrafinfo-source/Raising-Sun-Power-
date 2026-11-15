@@ -190,7 +190,8 @@ export function Header() {
   const openMobileMenu = useCartStore((s) => s.openMobileMenu)
   const cartCount = useCartStore((s) => s.cartCount())
   const { data: siteContent } = useSiteContent()
-  const headerLogo = siteContent?.header_logo_url || "/logo.png"
+  // Until the CMS answers there is no logo to show: a default would flash, then be replaced.
+  const headerLogo = siteContent ? siteContent.header_logo_url || "/logo.png" : null
   const logoHeight = siteContent?.header_logo_height || DEFAULT_LOGO_HEIGHT
 
   // Packages, then one menu per top-level category (its sub-categories become
@@ -396,9 +397,20 @@ export function Header() {
  * logo from the admin CMS is all it takes to switch between the two. Its height
  * comes from the CMS as well, so the bar can be tuned without a deploy.
  */
-function BrandLogo({ src, height }: { src: string; height: number }) {
-  const [isWide, setIsWide] = useState(false)
+function BrandLogo({ src, height }: { src: string | null; height: number }) {
+  // Whether the artwork is a wide lockup decides the layout; remembered per image so a returning
+  // visitor does not see the header re-flow once the picture has loaded.
+  const [isWide, setIsWide] = useState(() => {
+    try {
+      return !!src && localStorage.getItem(`rsp_logo_wide:${src}`) === "1"
+    } catch {
+      return false
+    }
+  })
   const size = clampLogoHeight(height)
+  if (!src) {
+    return <span className="shrink-0" style={{ width: size * 1.6, height: size }} aria-hidden />
+  }
 
   return (
     <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2.5 no-underline">
@@ -418,7 +430,13 @@ function BrandLogo({ src, height }: { src: string; height: number }) {
           style={{ mixBlendMode: "multiply", ...(isWide ? { height: size } : {}) }}
           onLoad={(e) => {
             const img = e.currentTarget
-            setIsWide(img.naturalHeight > 0 && img.naturalWidth / img.naturalHeight >= 1.8)
+            const wide = img.naturalHeight > 0 && img.naturalWidth / img.naturalHeight >= 1.8
+            setIsWide(wide)
+            try {
+              localStorage.setItem(`rsp_logo_wide:${src}`, wide ? "1" : "0")
+            } catch {
+              // best effort
+            }
           }}
           className={isWide ? "w-auto max-w-full object-contain" : "size-full object-contain"}
         />

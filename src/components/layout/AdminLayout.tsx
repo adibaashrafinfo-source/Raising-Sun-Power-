@@ -82,7 +82,7 @@ export function AdminLayout() {
   // The same logo the public site shows, so the panel is branded from the CMS
   // rather than from a file path baked in here.
   const { data: siteContent } = useSiteContent()
-  const logo = siteContent?.header_logo_url || "/logo.png"
+  const logo = siteContent ? siteContent.header_logo_url || "/logo.png" : null
   const navigate = useNavigate()
   const location = useLocation()
   // The sidebar offers exactly what this role may open, from the same map the
@@ -126,11 +126,11 @@ export function AdminLayout() {
         >
           {!collapsed && (
             <Link to="/" className="flex min-w-0 items-center gap-2 no-underline">
-              <img
-                src={logo}
-                alt="Rising Sun Power BD"
-                className="h-9 w-auto max-w-[150px] object-contain"
-              />
+              {logo ? (
+                <img src={logo} alt="Rising Sun Power BD" className="h-9 w-auto max-w-[150px] object-contain" />
+              ) : (
+                <span className="h-9 w-[100px]" aria-hidden />
+              )}
               <span className="font-heading text-sm font-extrabold text-text">Admin</span>
             </Link>
           )}
