@@ -451,6 +451,7 @@ async function initStore(){
     S.seeded=true;lsSave();
   }
   cloud.ready=true;render();
+  loadOverview();setInterval(function(){if(!document.hidden)loadOverview()},60000);
   loadWebProducts();setInterval(function(){if(!document.hidden)loadWebProducts()},60000);
 }
 
@@ -1131,6 +1132,14 @@ function formPanel(){
 }
 /* Pull the website's products into the catalog. Items are keyed w-<product id>, so syncing again
    updates name, rate and warranty in place and never creates duplicates or touches your own items. */
+/* Live figures from the website's own finance data (stock, suppliers, orders, ledger). */
+var ovw=null,ovwErr=false;
+async function loadOverview(){
+  var br=null;try{br=window.parent.__rspBilling}catch(e){}
+  if(!br||!br.loadOverview||!isAdmin())return;
+  try{ovw=await br.loadOverview();ovwErr=false}catch(e){ovwErr=true}
+  if(view.name==='finance')softRender();
+}
 var webRows=[];
 function webMap(p,old){
   var m=Number(p.warranty_months)||0;
@@ -1237,7 +1246,8 @@ function softRender(){
   if(view.name==='edit'||panel||view.name==='settings'||view.name==='customer'||(document.activeElement&&document.activeElement.id==='q')){renderRail();return}
   render();
 }
-function go(name){if(name==='finance'&&!isAdmin()){toast('Only the Admin can open Finance.',true);return}
+function go(name){if(name==='finance')loadOverview();
+  if(name==='finance'&&!isAdmin()){toast('Only the Admin can open Finance.',true);return}
   flt.status='all';flt.q='';flt.pcat='all';view={name:name};panel=null;sdraft=null;draft=null;dirty=false;armed=false;render();window.scrollTo(0,0)}
 function openDoc(d,isNew){draft=JSON.parse(JSON.stringify(d));if(!Array.isArray(draft.charges))draft.charges=[];draft.project=draft.project||{};dirty=!!isNew;armed=false;backArm=false;view={name:'edit'};panel=null;render();window.scrollTo(0,0)}
 
@@ -1687,6 +1697,21 @@ function perStart(){
 }
 function perLabel(){return {month:'This month',quarter:'This quarter',year:'This year',all:'All time'}[finPer]}
 function daysLate(due){if(!due)return 0;return Math.floor((Date.parse(today())-Date.parse(due))/864e5)}
+function overviewStrip(recv){
+  var now=new Date(),mk=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  var bIn=0,bOut=0;
+  S.invoices.forEach(function(d){if(d.type!=='invoice')return;(d.payments||[]).forEach(function(p){if((p.date||'').slice(0,7)===mk)bIn+=num(p.amount)})});
+  S.expenses.forEach(function(e){if((e.date||'').slice(0,7)===mk)bOut+=num(e.amount)});
+  var bNet=bIn-bOut,k=function(l,v,s,c){return '<div'+(c?' class="'+c+'"':'')+'><small>'+l+'</small><strong class="num">'+v+'</strong><em>'+s+'</em></div>'};
+  if(!ovw)return '<div class="strip">'+k('Total Stock Value','…',ovwErr?'Could not load':'Loading')+k('Total Supplier Due','…','')+k('This Month Net Cash Flow','…','')+k('Net Customer Due','…','')+'</div>';
+  var net=ovw.ledgerNet+bNet,due=ovw.ordersDue+recv;
+  return '<div class="strip">'
+   +k('Total Stock Value',money0(ovw.stockValue),'at cost, all stock')
+   +k('Total Supplier Due',money0(ovw.supplierDue),ovw.supplierDue>0?'to pay suppliers':'nothing owed',ovw.supplierDue>0?'bad':'good')
+   +k('This Month Net Cash Flow',(net<0?'− ':'')+money0(Math.abs(net)),'Shop '+money0(ovw.ledgerNet)+' + Billing '+money0(bNet),net<0?'bad':'good')
+   +k('Net Customer Due',money0(due),'Orders '+money0(ovw.ordersDue)+' + Invoices '+money0(recv),due>0?'bad':'good')
+   +'</div>';
+}
 function finHTML(){
   var start=perStart(),inv=S.invoices.filter(function(d){return d.type==='invoice'}),qs=S.invoices.filter(function(d){return d.type==='quotation'});
   var cashIn=0,billed=0,vatB=0,i;
@@ -1738,6 +1763,7 @@ function finHTML(){
   var exl=S.expenses.slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'')||(b.createdAt||0)-(a.createdAt||0)}).slice(0,25);
   var invById={};inv.forEach(function(d){invById[d.id]=d});
   return formPanel()
+   +overviewStrip(recv)
    +'<div class="fhero"><div><small>Net cash flow · '+perLabel()+'</small><strong class="num">'+(net<0?'− ':'')+money(Math.abs(net))+'</strong><em>'+money(cashIn)+' received − '+money(cashOut)+' spent</em></div>'
    +'<div class="fh2"><div><small>Billed</small><b class="num">'+money0(billed)+'</b></div><div><small>Collected</small><b class="num">'+money0(cashIn)+'</b></div><div><small>Spent</small><b class="num">'+money0(cashOut)+'</b></div><div><small>VAT billed</small><b class="num">'+money0(vatB)+'</b></div></div></div>'
    +'<div class="filters">'+chips+'</div>'
