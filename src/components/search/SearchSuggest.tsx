@@ -16,7 +16,6 @@ import { useCategories, useProducts } from "@/hooks/use-catalog"
 import { artForCategory, tintForCategory } from "@/lib/category-art"
 import { cn, formatBDT } from "@/lib/utils"
 
-const QUICK_PICKS = ["Solar panel", "Hybrid inverter", "Tubular battery", "MCCB", "DC fan"]
 const MAX_SUGGESTIONS = 6
 
 type Scope = { label: string; slug: string | null }
@@ -184,34 +183,13 @@ export function SearchSuggest({
         </div>
       </form>
 
-      {isOpen && (
+      {isOpen && isSearching && (
         <div
           id="search-suggestions"
           role="listbox"
           className="absolute inset-x-0 top-[calc(100%+8px)] z-[70] overflow-hidden rounded-2xl border border-border bg-surface shadow-[var(--shadow)]"
         >
-          {!isSearching ? (
-            <div className="p-3.5">
-              <div className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
-                Popular searches
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {QUICK_PICKS.map((pick) => (
-                  <button
-                    key={pick}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      setTerm(pick)
-                      setIsOpen(true)
-                    }}
-                    className="rounded-full border border-border bg-surface-2 px-3 py-1.5 text-[12.5px] font-semibold text-muted transition-colors hover:border-blue-500/40 hover:text-blue"
-                  >
-                    {pick}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : suggestions.length === 0 ? (
+          {suggestions.length === 0 ? (
             <div className="px-4 py-6 text-center text-sm text-muted">
               {isFetching ? "Searching…" : <>No product matches “{query}”.</>}
             </div>

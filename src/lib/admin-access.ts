@@ -88,7 +88,7 @@ export function adminLandingPath(role: string | null | undefined): string {
   // real routes, so the landing page is spelled out where that matters.
   const FIRST_PAGE: Record<string, string> = {
     "/admin/inventory": "/admin/inventory/stock",
-    "/admin/finance": "/admin/finance/dashboard",
+    "/admin/finance": "/admin/finance/expenses",
   }
   const first = allowed[0]
   return FIRST_PAGE[first] ?? first
