@@ -236,7 +236,7 @@ export function Header() {
       })
     }
     items.push(
-      { key: "calculator", label: "Calculator", to: "/solar-calculator", badge: "FREE", panel: CALCULATOR_PANEL },
+      { key: "calculator", label: "ROI Calculator", to: "/solar-roi-calculator", badge: "FREE", panel: CALCULATOR_PANEL },
       { key: "services", label: "Services", to: "/get-quotation", badge: "NEW", panel: SERVICES_PANEL },
     )
     return items
@@ -292,10 +292,10 @@ export function Header() {
             to="/solar-calculator"
             aria-label="Solar Calculator"
             title="Solar Calculator"
-            className={`${iconButton} no-underline xl:w-auto xl:gap-1.5 xl:px-3`}
+            className={`${iconButton} !bg-[#EF6D02] !text-white no-underline hover:brightness-110 xl:h-9 xl:w-auto xl:gap-1.5 xl:px-3.5`}
           >
-            <Calculator className="size-[20px] text-orange-500" />
-            <span className="hidden whitespace-nowrap text-[13px] font-bold text-text xl:inline">Solar Calculator</span>
+            <Calculator className="size-[20px] text-white" />
+            <span className="hidden whitespace-nowrap text-[13px] font-bold text-white xl:inline">Solar Calculator</span>
           </Link>
           <button onClick={toggleTheme} aria-label="Toggle theme" className={iconButton}>
             {theme === "dark" ? (
@@ -314,7 +314,7 @@ export function Header() {
           </button>
           {session ? (
             <DropdownMenu>
-              <DropdownMenuTrigger className="ml-1 hidden h-9 items-center gap-1.5 rounded-full bg-[#FFD60A] px-4 text-[13px] font-bold text-black outline-none transition-[filter] hover:brightness-95 lg:inline-flex">
+              <DropdownMenuTrigger className="ml-1 hidden h-9 items-center gap-1.5 rounded-full bg-[#EF6D02] px-4 text-[13px] font-bold text-white outline-none transition-[filter] hover:brightness-110 lg:inline-flex">
                 <User className="size-[16px]" />
                 {profile?.full_name?.split(" ")[0] ?? "Account"}
               </DropdownMenuTrigger>
@@ -357,7 +357,7 @@ export function Header() {
           ) : (
             <Link
               to="/login"
-              className="ml-1 hidden h-9 items-center gap-1.5 rounded-full bg-[#FFD60A] px-4 text-[13px] font-bold text-black no-underline transition-[filter] hover:brightness-95 lg:inline-flex"
+              className="ml-1 hidden h-9 items-center gap-1.5 rounded-full bg-[#EF6D02] px-4 text-[13px] font-bold text-white no-underline transition-[filter] hover:brightness-110 lg:inline-flex"
             >
               <LogIn className="size-[16px]" />
               Login
