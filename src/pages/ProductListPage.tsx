@@ -38,6 +38,15 @@ export default function ProductListPage() {
   const [page, setPage] = useState(1)
   const [view, setView] = useState<"grid" | "list">("grid")
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+  // Moving between /category/<slug> pages keeps this component mounted, so the
+  // chosen category has to follow the URL or the list stays on the first one.
+  const [syncedSlug, setSyncedSlug] = useState(categorySlugParam)
+  if (syncedSlug !== categorySlugParam) {
+    setSyncedSlug(categorySlugParam)
+    setCategorySlugs(categorySlugParam ? [categorySlugParam] : [])
+    setBrandSlugs([])
+    setPage(1)
+  }
   // Search term supplied by the header search bar (?search=…).
   const [searchParams] = useSearchParams()
   const search = searchParams.get("search")?.trim() || undefined
