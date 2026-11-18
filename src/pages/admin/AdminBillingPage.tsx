@@ -40,6 +40,57 @@ async function loadOverview(): Promise<FinanceOverview> {
   }
 }
 
+type WebCustomer = {
+  id: string
+  name: string
+  phone: string
+  address: string
+  joined: string
+}
+
+async function loadCustomers(): Promise<WebCustomer[]> {
+  const byPhone = new Map<string, WebCustomer>()
+  const digits = (p: string | null | undefined) => (p ?? "").replace(/\D/g, "").slice(-10)
+
+  // Registered shoppers.
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, phone, role, created_at")
+    .eq("role", "customer")
+    .limit(5000)
+  for (const p of profiles ?? []) {
+    const key = digits(p.phone) || `p-${p.id}`
+    byPhone.set(key, {
+      id: `wc-${p.id}`,
+      name: p.full_name || p.phone || "Customer",
+      phone: p.phone ?? "",
+      address: "",
+      joined: p.created_at,
+    })
+  }
+
+  // Guests who ordered without an account.
+  const { data: orders } = await supabase
+    .from("orders")
+    .select("guest_name, guest_phone, address_line, district, created_at")
+    .is("user_id", null)
+    .not("guest_phone", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(5000)
+  for (const o of orders ?? []) {
+    const key = digits(o.guest_phone)
+    if (!key || byPhone.has(key)) continue
+    byPhone.set(key, {
+      id: `wg-${key}`,
+      name: o.guest_name || o.guest_phone || "Customer",
+      phone: o.guest_phone ?? "",
+      address: [o.address_line, o.district].filter((x) => x && x !== "—").join(", "),
+      joined: o.created_at,
+    })
+  }
+  return [...byPhone.values()]
+}
+
 type BillingView = "dashboard" | "invoices" | "quotes" | "finance" | "customers" | "catalog" | "settings"
 
 declare global {
@@ -49,6 +100,8 @@ declare global {
       user: { u: string; name: string; role: "admin" | "staff" }
       /** Live figures from the main database, shown on the Finance screen. */
       loadOverview: () => Promise<FinanceOverview>
+      /** Everyone who has registered or ordered on the website, for the Customers list. */
+      loadCustomers: () => Promise<WebCustomer[]>
     }
   }
 }
@@ -68,6 +121,7 @@ export default function AdminBillingPage({ view }: { view: BillingView }) {
     window.__rspBilling = {
       supabase,
       loadOverview,
+      loadCustomers,
       user: {
         u: user?.email ?? profile.id,
         name: profile.full_name || user?.email || "Admin",

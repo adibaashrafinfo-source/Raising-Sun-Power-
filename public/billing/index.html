@@ -421,6 +421,7 @@ async function initStore(){
         var onSnap=function(snap){
           S[c]=snap.docs.map(function(d){var o=d.data();o.id=d.id;return o});
           if(c==='products')mergeWeb();
+          if(c==='customers')mergeWebCust();
           cloud.def[c]=!(snap.metadata&&snap.metadata.fromCache);
           softRender();
         };
@@ -451,6 +452,7 @@ async function initStore(){
     S.seeded=true;lsSave();
   }
   cloud.ready=true;render();
+  loadWebCustomers();setInterval(function(){if(!document.hidden)loadWebCustomers()},120000);
   loadOverview();setInterval(function(){if(!document.hidden)loadOverview()},60000);
   loadWebProducts();setInterval(function(){if(!document.hidden)loadWebProducts()},60000);
 }
@@ -703,7 +705,11 @@ async function makePdf(d){
   document.body.appendChild(host);
   try{
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
-    var canvas=await window.html2canvas(host.querySelector('.sheet'),{scale:2,backgroundColor:'#ffffff',useCORS:true});
+    var sh0=host.querySelector('.sheet'),w0=sh0.offsetWidth||794,h0=sh0.offsetHeight||1123;
+    /* render as sharp as the browser's canvas limits allow (phones allow far fewer pixels than desktops) */
+    var mob=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent),maxPx=mob?14e6:70e6,sc=Math.min(4,Math.sqrt(maxPx/(w0*h0)),(mob?8000:16000)/h0);
+    if(!(sc>=1))sc=1;
+    var canvas=await window.html2canvas(sh0,{scale:sc,backgroundColor:'#ffffff',useCORS:true});
     var sheet=host.querySelector('.sheet'),sr=sheet.getBoundingClientRect(),kf=canvas.width/sr.width;
     var keeps=[].slice.call(sheet.querySelectorAll('.sh-items tbody tr,.keep,.sh-bottom,.sh-sign')).map(function(el){var r=el.getBoundingClientRect();return [(r.top-sr.top)*kf,(r.bottom-sr.top)*kf]});
     var pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'}),pw=210,ph=297,ppm=canvas.width/pw,FOOT=12,TOP2=8,y=0,first=true;
@@ -721,7 +727,7 @@ async function makePdf(d){
       var cx=c.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,c.width,h);
       cx.drawImage(canvas,0,y,canvas.width,h,0,0,canvas.width,h);
       if(!first)pdf.addPage();
-      pdf.addImage(c.toDataURL('image/jpeg',0.93),'JPEG',0,top,pw,h/ppm);
+      pdf.addImage(c.toDataURL('image/jpeg',0.98),'JPEG',0,top,pw,h/ppm);
       first=false;y=end;
     }
     var np=pdf.getNumberOfPages(),lab=String(st.name+' - '+(d.type==='quotation'?'Quotation':'Invoice')+' '+d.number).replace(/[^\x20-\x7E]/g,'');
@@ -1140,6 +1146,25 @@ async function loadOverview(){
   try{ovw=await br.loadOverview();ovwErr=false}catch(e){ovwErr=true}
   if(view.name==='finance')softRender();
 }
+/* Everyone who registered or ordered on the website is in the Customers list too (kept in memory until edited). */
+var webCust=[];
+function mergeWebCust(){
+  webCust.forEach(function(w){
+    if(S.customers.some(function(x){return x.id===w.id}))return;
+    var ph=String(w.phone||'').replace(/\D/g,'').slice(-10);
+    if(ph&&S.customers.some(function(x){return String(x.phone||'').replace(/\D/g,'').slice(-10)===ph}))return;
+    S.customers.push({id:w.id,name:w.name,company:'',phone:w.phone||'',email:'',address:w.address||'',type:'Residential',stage:'Customer',source:'Website',notes:'',createdAt:Date.parse(w.joined)||Date.now(),virt:true});
+  });
+}
+async function loadWebCustomers(){
+  var br=null;try{br=window.parent.__rspBilling}catch(e){}
+  if(!br||!br.loadCustomers)return;
+  try{
+    webCust=await br.loadCustomers();
+    var before=S.customers.length;mergeWebCust();
+    if(S.customers.length!==before&&(view.name==='customers'))softRender();
+  }catch(e){}
+}
 var webRows=[];
 function webMap(p,old){
   var m=Number(p.warranty_months)||0;
@@ -1200,7 +1225,7 @@ function catalogHTML(){
     +'<div class="filters"><input class="in search" id="q" type="search" placeholder="Search item, brand, model or category" value="'+esc(flt.q)+'" aria-label="Search catalog"><span class="hint" style="margin:0 0 0 10px" id="pcount">Showing '+list.length+' of '+all.length+' items</span></div>':'';
   var rows=list.map(function(p){return '<tr><td><b>'+esc(p.name)+'</b>'+(p.details?'<div class="mut">'+esc(p.details)+'</div>':'')+((p.guarantee||p.warranty||p.service||p.replacement)?'<div class="mut">'+[p.guarantee&&'Guarantee: '+esc(p.guarantee),p.warranty&&'Warranty: '+esc(p.warranty),p.service&&'Service: '+esc(p.service),p.replacement&&'Replacement: '+esc(p.replacement)].filter(Boolean).join(' • ')+'</div>':'')+'</td><td>'+esc(p.cat)+'</td><td>'+esc(p.unit)+'</td><td class="r num nowrap">'+(num(p.rate)?money(p.rate):'<span class="mut">set rate</span>')+'</td>'
      +'<td class="nowrap r"><button class="btn sm" data-act="edit-prod" data-id="'+p.id+'">Edit</button> <button class="btn sm danger" data-act="del-prod" data-id="'+p.id+'" id="dp'+p.id+'">Delete</button></td></tr>'}).join('');
-  var reset=isAdmin()?'<div class="actions" style="margin:12px"><button class="btn sm danger" data-act="reset-catalog">Replace catalog with the Rising Sun price list ('+SEED.length+' items)</button></div>':'';
+  var reset='';
   return formPanel()+bar+'<div class="panel">'+(list.length?'<div class="scroll"><table class="tbl"><thead><tr><th>Item</th><th>Category</th><th>Unit</th><th class="r">Rate</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+reset
    :all.length?'<div class="empty"><h3>No items match</h3><p>Try a different word, or choose "All" above.</p></div>'+reset
    :'<div class="empty"><h3>Your catalog is empty</h3><p>Save the panels, inverters, batteries and services you sell, with your standard rates, then add them to any invoice in one tap.</p><div class="actions"><button class="btn primary" data-act="starter">Add starter list (set rates after)</button><button class="btn" data-act="sync-web">Sync website products</button><button class="btn" data-act="import-prod">Import price list</button><button class="btn" data-act="new-prod">Add one item</button></div></div>')+'</div>';
